@@ -1,0 +1,16 @@
+{
+  "name": "formsg-sdk",
+  "version": "0.1.0",
+  "description": "Node.js library for FormSG integration",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "formsg",
+    "webhook",
+    "decrypt"
+  ],
+  "author": "Open Government Products (FormSG)",
+  "license": "MIT"
+}
