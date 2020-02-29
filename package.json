@@ -1,7 +1,7 @@
 {
   "name": "@opengovsg/formsg-sdk",
   "version": "0.1.0",
-  "description": "Node.js library for FormSG integration",
+  "description": "Node.js SDK for integrating with FormSG",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
