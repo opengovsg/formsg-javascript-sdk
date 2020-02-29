@@ -5,6 +5,7 @@ const url = require('url')
 const { verify } = require('./util/signature')
 const { parseSignatureHeader } = require('../src/util/parser')
 const webhookPublicKeys = require('../resource/webhook-public-keys')
+const STAGE = require('./util/stage')
 
 /**
  * Helpfer function to construct the basestring and verify the signature of an incoming request
@@ -66,7 +67,7 @@ const authenticate = webhookPublicKey => (header, uri) => {
  * before returning the webhooks module
  */
 module.exports = function ({ mode }) {
-  const webhookPublicKey = mode === 'staging' ?
+  const webhookPublicKey = mode === STAGE.staging ?
     webhookPublicKeys.staging :
     webhookPublicKeys.production
 
