@@ -1,5 +1,5 @@
 {
-  "name": "formsg-sdk",
+  "name": "@opengovsg/formsg-sdk",
   "version": "0.1.0",
   "description": "Node.js library for FormSG integration",
   "main": "index.js",
@@ -12,5 +12,9 @@
     "decrypt"
   ],
   "author": "Open Government Products (FormSG)",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "tweetnacl": "^1.0.3",
+    "tweetnacl-util": "^0.15.1"
+  }
 }
