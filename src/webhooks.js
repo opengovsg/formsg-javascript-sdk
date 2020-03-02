@@ -4,7 +4,7 @@ const url = require('url')
 
 const { verify } = require('./util/signature')
 const { parseSignatureHeader } = require('../src/util/parser')
-const webhookPublicKeys = require('../resource/webhook-public-keys')
+const WEBHOOK_KEYS = require('../resource/webhook-keys')
 const STAGE = require('./util/stage')
 
 /**
@@ -70,11 +70,11 @@ const authenticate = webhookPublicKey => (header, uri) => {
 function getWebhookPublicKey (mode) {
   switch (mode) {
     case STAGE.staging:
-      return webhookPublicKeys.staging.publicKey
+      return WEBHOOK_KEYS.staging.publicKey
     case STAGE.test:
-      return webhookPublicKeys.test.publicKey
+      return WEBHOOK_KEYS.test.publicKey
     default:
-      return webhookPublicKeys.production.publicKey
+      return WEBHOOK_KEYS.production.publicKey
   }
 }
 
