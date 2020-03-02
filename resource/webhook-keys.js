@@ -1,9 +1,10 @@
-// webhook public keys
 module.exports = {
   staging: {
+    // staging must never contain secret keys
     publicKey: 'rjv41kYqZwcbe3r6ymMEEKQ+Vd+DPuogN+Gzq3lP2Og=',
   },
   production: {
+    // production must never contain secret keys
     publicKey: '3Tt8VduXsjjd4IrpdCd7BAkdZl/vUCstu9UvTX84FWw=',
   },
   test: {
