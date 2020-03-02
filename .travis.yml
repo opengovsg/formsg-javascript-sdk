@@ -10,3 +10,9 @@ notifications:
       - formsg@data.gov.sg
     on_success: always
     on_failure: always
+
+before_script:
+  - npm install
+
+script:
+  - npm test
