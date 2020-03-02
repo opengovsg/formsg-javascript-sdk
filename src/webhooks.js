@@ -70,9 +70,11 @@ const authenticate = webhookPublicKey => (header, uri) => {
 function getWebhookPublicKey (mode) {
   switch (mode) {
     case STAGE.staging:
-      return webhookPublicKeys.staging
+      return webhookPublicKeys.staging.publicKey
+    case STAGE.test:
+      return webhookPublicKeys.test.publicKey
     default:
-      return webhookPublicKeys.production
+      return webhookPublicKeys.production.publicKey
   }
 }
 
