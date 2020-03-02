@@ -92,8 +92,6 @@ This is achieved by concatenating the following strings with the `.` fullstop as
 https://my-domain.com/submissions.5e53ec96b10ee1010e00380b.5e4b8e3d1f61f00036c9937d.1582558358788
 ```
 
-`${url.parse(uri).href}.${submissionId}.${formId}.${epoch}`
-
 #### Step 3 - Verify the signature
 
 The signature is signed with [ed25519](http://ed25519.cr.yp.to/).
