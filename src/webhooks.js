@@ -63,13 +63,25 @@ const authenticate = webhookPublicKey => (header, uri) => {
 }
 
 /**
- * Provider function that accepts configuration
+ * Retrieves the appropriate webhook public key.
+ * Defaults to production.
+ * @param {string} [mode] One of 'staging' | 'production'
+ */
+function getWebhookPublicKey (mode) {
+  switch (mode) {
+    case STAGE.staging:
+      return webhookPublicKeys.staging
+    default:
+      return webhookPublicKeys.production
+  }
+}
+
+/**
+ * Provider that accepts configuration
  * before returning the webhooks module
  */
 module.exports = function ({ mode }) {
-  const webhookPublicKey = mode === STAGE.staging ?
-    webhookPublicKeys.staging :
-    webhookPublicKeys.production
+  const webhookPublicKey = getWebhookPublicKey(mode)
 
   return {
     authenticate: authenticate(webhookPublicKey)
