@@ -1,10 +1,10 @@
 {
   "name": "@opengovsg/formsg-sdk",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "Node.js SDK for integrating with FormSG",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jasmine"
   },
   "keywords": [
     "formsg",
@@ -16,5 +16,8 @@
   "dependencies": {
     "tweetnacl": "^1.0.3",
     "tweetnacl-util": "^0.15.1"
+  },
+  "devDependencies": {
+    "jasmine": "^3.5.0"
   }
 }
