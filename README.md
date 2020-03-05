@@ -1,6 +1,8 @@
-# FormSG Node.js SDK
+*Please note that this is an SDK for webhooks integration, and* ***not*** *the FormSG system.*
 
-The Node.js SDK provides convenient utilities for verifying FormSG webhooks for applications written in server-side JavaScript.
+# FormSG Javascript SDK
+
+This SDK provides convenient utilities for verifying FormSG webhooks for applications written in JavaScript.
 
 ## Installation
 
