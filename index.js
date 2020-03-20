@@ -1,4 +1,5 @@
-const webhooks = require('./src/webhooks.js')
+const webhooks = require('./src/webhooks')
+const crypto = require('./src/crypto')
 
 /**
  * Entrypoint into the FormSG SDK
@@ -12,6 +13,7 @@ module.exports = function ({
   webhookSecretKey,
 } = {}) {
     return {
-      webhooks: webhooks({ mode, webhookSecretKey })
+      webhooks: webhooks({ mode, webhookSecretKey }),
+      crypto: crypto(),
     }
 }
