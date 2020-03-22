@@ -86,7 +86,7 @@ function decrypt (formPrivateKey, encryptedSubmission) {
  * A cryptographic keypair
  * @typedef {Keypair}
  * @property {string} publicKey The base-64 encoded public key
- * @property {string} privateKey The base-64 encoded privateKey key
+ * @property {string} secretKey The base-64 encoded secret key
  */
 
 /**
