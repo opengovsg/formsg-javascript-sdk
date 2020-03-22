@@ -2,7 +2,7 @@
 
 # FormSG Javascript SDK
 
-This SDK provides convenient utilities for verifying FormSG webhooks for applications written in JavaScript.
+This SDK provides convenient utilities for verifying FormSG webhooks and decrypting submissions in JavaScript and Node.js.
 
 ## Installation
 
@@ -12,11 +12,21 @@ Install the package with
 npm install @opengovsg/formsg-sdk --save
 ```
 
+## Configuration
+
+```javascript
+const formsg = require('@opengovsg/formsg')({
+  mode: 'production',
+})
+```
+
+| Option | Default      | Description                                                     |
+|--------|--------------|-----------------------------------------------------------------|
+| mode   | 'production' | Set to 'staging' if integrating against FormSG staging servers. |
+
 ## Usage
 
-### Webhook authentication
-
-Protect your webhook endpoint with the FormSG SDK.
+### Webhook Authentication and Decrypting Submissions
 
 ```javascript
 // This example uses Express to receive webhooks
@@ -25,36 +35,68 @@ const app = require('express')()
 const formsg = require('@opengovsg/formsg')()
 
 // This is where your domain is hosted, and should match
-// the URI supplied in the FormSG form dashboard
+// the URI supplied to FormSGin the form dashboard
 const POST_URI = 'https://my-domain.com/submissions'
 
-app.post('/submissions', function(req, res, next) {
-  try {
-    formsg.webhooks.authenticate(req.headers['X-FormSG-Signature'], POST_URI)
-    // Continue processing the POST body
-    return next()
-  } catch (e) {
-    console.error(e)
-    return res.status(401).send({ message: 'Unauthorized' })
+// Your form's secret key downloaded from FormSG upon form creation
+const formSecretKey = process.env.FORM_SECRET_KEY
+
+app.post('/submissions',
+  // Endpoint authentication by verifying signatures
+  function (req, res, next) {
+    try {
+      formsg.webhooks.authenticate(req.headers['X-FormSG-Signature'], POST_URI)
+      // Continue processing the POST body
+      return next()
+    } catch (e) {
+      return res.status(401).send({ message: 'Unauthorized' })
+    }
+  },
+  // Decrypt the submission
+  function (req, res, next) {
+    const submission = formsg.crypto.decrypt(formSecretKey, req.body)
+    if (submission) {
+      // Continue processing the submission
+    } else {
+      // Could not decrypt the submission
+    }
   }
-})
+)
 
 app.listen(8080, () => console.log('Running on port 8080')
 ```
 
-## Configuration
+## End-to-end Encryption
 
-```javascript
-const formsg = require('@opengovsg/formsg')({
-  mode: 'staging',
-})
-```
+FormSG uses *end-to-end encryption* with *elliptic curve cryptography* to protect submission data and ensure only intended recipients are able to view form submissions. As such, FormSG servers are unable to access the data.
 
-| Option | Default      | Description                                                     |
-|--------|--------------|-----------------------------------------------------------------|
-| mode   | 'production' | Set to 'staging' if integrating against FormSG staging servers. |
+The underlying cryptosystem is `x25519-xsalsa20-poly1305` which is implemented by the [tweetnacl-js](https://github.com/dchest/tweetnacl-js) library. Its source code has been [audited](https://cure53.de/tweetnacl.pdf)) by [Cure53](https://cure53.de/).
 
-## Verifying signatures manually
+### Format of Submission Response
+
+| Key              | Type   | Description                         |
+|------------------|--------|-------------------------------------|
+| formId           | string | Unique form identifier.             |
+| submissionId     | string | Unique submission identifier.       |
+| encryptedContent | string | The encrypted submission in base64. |
+| created          | string | Creation timestamp.                 |
+
+### Format of Decrypted Submissions
+
+The `encryptedContent` field decrypts into an array of objects, with each element representing a question-answer pair.
+
+Note that due to end-to-end encryption, FormSG servers are unable to verify the data format.
+
+Developers **must** program defensively to ensure that the fields are indeed accessible.
+
+| Key       | Type   | Description                                                                                                     |
+|-----------|--------|-----------------------------------------------------------------------------------------------------------------|
+| question  | string | The question listed on the form                                                                                 |
+| answer    | string | The submitter's answer to the question on form.                                                                 |
+| fieldType | string | The type of field for the question.                                                                             |
+| _id       | string | A unique identifier of the form field. WARNING: Changes when new fields are created/removed in the form.        |
+
+## Verifying Signatures Manually
 
 You can use the following information to create a custom solution, although we recommend using this SDK.
 
@@ -110,7 +152,7 @@ Verify that the `v1` signature is valid using a library of your choice (we use [
 If the signature is valid, compute the difference between the current timestamp and the received epoch,
 and decide if the difference is within your tolerance. We use a tolerance of 5 minutes.
 
-#### Additional checks that you may undertake
+#### Additional checks
 
 - Check that request is for an expected form by verifying the form ID
 - Check that the submission ID is new, and that your system has not received it before
