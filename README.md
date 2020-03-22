@@ -152,7 +152,7 @@ Verify that the `v1` signature is valid using a library of your choice (we use [
 If the signature is valid, compute the difference between the current timestamp and the received epoch,
 and decide if the difference is within your tolerance. We use a tolerance of 5 minutes.
 
-#### Additional checks
+#### Additional Checks
 
 - Check that request is for an expected form by verifying the form ID
 - Check that the submission ID is new, and that your system has not received it before
