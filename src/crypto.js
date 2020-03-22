@@ -55,7 +55,7 @@ function encrypt (formPublicKey, responses) {
     decodeUTF8(JSON.stringify(responses)),
     nonce,
     decodeBase64(formPublicKey),
-    decodeBase64(submissionPrivateKey)
+    decodeBase64(submissionKeypair.secretKey)
   ))
   return `${submissionKeypair.publicKey};${encodeBase64(nonce)}:${encrypted}`
 }
@@ -107,11 +107,10 @@ function generate () {
  * @param {string} secretKey 
  */
 function valid (publicKey, secretKey) {
-  const text = 'testtext'
+  const plaintext = 'testtext'
   try {
-    const encrypted = encryptSubmission(publicKey, text)
-    const decrypted = decryptSubmission(secretKey, encrypted)
-    return decrypted === text
+    const ciphertext = encrypt(publicKey, plaintext)
+    return decrypt(secretKey, ciphertext) === plaintext
   } catch (err) {
     return false
   }
