@@ -10,8 +10,7 @@ const {
 
 /**
  * A field type available in FormSG as a string
- * @typedef {FieldType}
- * @type {string}
+ * @typedef {string} FieldType
  * @example
  * 'section'
  * 'radiobutton'
@@ -32,8 +31,8 @@ const {
  */
 
 /**
- * The complete Triforce, or one or more components of the Triforce.
- * @typedef {Response}
+ * Represents an answer provided to a form question.
+ * @typedef {object} Response
  * @property {string} _id - The field ID of the response
  * @property {string} question - The form question
  * @property {string} answer - The answer to the form
@@ -41,11 +40,17 @@ const {
  */
 
 /**
+ * Encrypted basestring containing the submission public key,
+ * nonce and encrypted data in base-64.
+ * @typedef {string} EncryptedContent
+ * A string in the format of <SubmissionPublicKey>;<Base64Nonce>:<Base64EncryptedData> 
+ */
+
+/**
  * Encrypts submission with a unique keypair for each submission
  * @param {String} formPublicKey base64
  * @param {Response[]} responses Array of Response objects
- * @returns encrypted basestring containing the submission public key,
- * nonce and encrypted data in base64
+ * @returns {EncryptedContent}
  * @throws error if any of the encrypt methods fail
  */
 function encrypt (formPublicKey, responses) {
@@ -63,12 +68,12 @@ function encrypt (formPublicKey, responses) {
 /**
  * Decrypts an encrypted submission.
  * @param {string} formPrivateKey base64
- * @param {string} encryptedSubmission encrypted string encoded in base64
+ * @param {EncryptedContent} encryptedContent encrypted string encoded in base64
  * @return {Object | null} Parsed JSON submission object if successful.
  */
-function decrypt (formPrivateKey, encryptedSubmission) {
+function decrypt (formPrivateKey, encryptedContent) {
   try {
-    const [ submissionPublicKey, nonceEncrypted ] = encryptedSubmission.split(';')
+    const [ submissionPublicKey, nonceEncrypted ] = encryptedContent.split(';')
     const [ nonce, encrypted ] = nonceEncrypted.split(':').map(decodeBase64)
     const decrypted = nacl.box.open(
       encrypted,
@@ -83,8 +88,8 @@ function decrypt (formPrivateKey, encryptedSubmission) {
 }
 
 /**
- * A cryptographic keypair
- * @typedef {Keypair}
+ * A base-64 encoded cryptographic keypair suitable for curve25519.
+ * @typedef {Object} Keypair
  * @property {string} publicKey The base-64 encoded public key
  * @property {string} secretKey The base-64 encoded secret key
  */
@@ -102,7 +107,7 @@ function generate () {
 }
 
 /**
- * Checks whether a public & private keypair are associated with each other
+ * Returns true if a pair of public & secret keys are associated with each other
  * @param {string} publicKey 
  * @param {string} secretKey 
  */
@@ -116,11 +121,9 @@ function valid (publicKey, secretKey) {
   }
 }
 
-module.exports = function () {
-  return {
-    encrypt,
-    decrypt,
-    generate,
-    valid,
-  }
+module.exports = {
+  encrypt,
+  decrypt,
+  generate,
+  valid,
 }
