@@ -35,7 +35,7 @@ const app = require('express')()
 const formsg = require('@opengovsg/formsg')()
 
 // This is where your domain is hosted, and should match
-// the URI supplied to FormSGin the form dashboard
+// the URI supplied to FormSG in the form dashboard
 const POST_URI = 'https://my-domain.com/submissions'
 
 // Your form's secret key downloaded from FormSG upon form creation
