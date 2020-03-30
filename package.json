@@ -4,7 +4,8 @@
   "description": "Node.js SDK for integrating with FormSG",
   "main": "index.js",
   "scripts": {
-    "test": "jasmine"
+    "test": "jasmine",
+    "build": "babel src --out-dir dist"
   },
   "keywords": [
     "formsg",
@@ -18,6 +19,9 @@
     "tweetnacl-util": "^0.15.1"
   },
   "devDependencies": {
+    "@babel/cli": "^7.8.4",
+    "@babel/core": "^7.9.0",
+    "@babel/preset-env": "^7.9.0",
     "jasmine": "^3.5.0",
     "lodash": "^4.17.15"
   }
