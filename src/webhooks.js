@@ -3,7 +3,7 @@
 const url = require('url')
 
 const { sign, verify } = require('./util/signature')
-const { parseSignatureHeader } = require('../src/util/parser')
+const { parseSignatureHeader } = require('./util/parser')
 const WEBHOOK_KEYS = require('../resource/webhook-keys')
 const STAGE = require('./util/stage')
 
