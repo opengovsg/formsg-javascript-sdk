@@ -10,13 +10,13 @@ const crypto = require('./src/crypto')
  */
 module.exports = function (options) {
   const {
-    mode = 'production',
+    mode,
     webhookSecretKey,
   } = options || {}
 
   return {
     webhooks: webhooks({
-      mode,
+      mode: mode || 'production',
       webhookSecretKey
     }),
     crypto,
