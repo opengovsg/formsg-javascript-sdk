@@ -29,10 +29,7 @@ describe('Crypto', function () {
   it('should invalidate unassociated keypairs', () => {
     const { secretKey } = formsg.crypto.generate()
     const { publicKey } = formsg.crypto.generate()
-    expect(formsg.crypto.valid(
-      publicKey,
-      secretKey,
-    )).toBe(false)
+    expect(formsg.crypto.valid(publicKey, secretKey)).toBe(false)
   })
 
   it('should decrypt the submission ciphertext from 2020-03-22 successfully', () => {

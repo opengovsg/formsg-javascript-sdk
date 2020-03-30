@@ -113,6 +113,6 @@ module.exports = function ({ mode, webhookSecretKey }) {
     authenticate: authenticate(webhookPublicKey),
     /* Signing functions */
     generateSignature: webhookSecretKey ? generateSignature(webhookSecretKey) : undefined,
-    constructHeader: webhookSecretKey ? constructHeader : undefined,
+    constructHeader: webhookSecretKey ? constructHeader : undefined
   }
 }

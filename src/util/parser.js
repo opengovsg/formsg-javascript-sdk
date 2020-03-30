@@ -22,5 +22,5 @@ function parseSignatureHeader (header) {
 }
 
 module.exports = {
-  parseSignatureHeader,
+  parseSignatureHeader
 }

@@ -39,5 +39,5 @@ function verify (message, signature, publicKey) {
 
 module.exports = {
   sign,
-  verify,
+  verify
 }

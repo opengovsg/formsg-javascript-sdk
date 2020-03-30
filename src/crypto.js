@@ -102,7 +102,7 @@ function generate () {
   const kp = nacl.box.keyPair()
   return {
     publicKey: encodeBase64(kp.publicKey),
-    secretKey: encodeBase64(kp.secretKey),
+    secretKey: encodeBase64(kp.secretKey)
   }
 }
 
@@ -125,5 +125,5 @@ module.exports = {
   encrypt,
   decrypt,
   generate,
-  valid,
+  valid
 }

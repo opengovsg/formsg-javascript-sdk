@@ -14,6 +14,6 @@ module.exports = function ({
 } = {}) {
     return {
       webhooks: webhooks({ mode, webhookSecretKey }),
-      crypto,
+      crypto
     }
 }
