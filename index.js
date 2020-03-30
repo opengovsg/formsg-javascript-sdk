@@ -8,12 +8,17 @@ const crypto = require('./src/crypto')
  * the SDK for the FormSG staging environment
  * @param {string} [options.webhookSecretKey] Optional base64 secret key for signing webhooks
  */
-module.exports = function ({
-  mode='production',
-  webhookSecretKey,
-} = {}) {
-    return {
-      webhooks: webhooks({ mode, webhookSecretKey }),
-      crypto,
-    }
+module.exports = function (options) {
+  const {
+    mode = 'production',
+    webhookSecretKey,
+  } = options || {}
+
+  return {
+    webhooks: webhooks({
+      mode,
+      webhookSecretKey
+    }),
+    crypto,
+  }
 }
