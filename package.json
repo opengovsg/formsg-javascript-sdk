@@ -2,7 +2,7 @@
   "name": "@opengovsg/formsg-sdk",
   "version": "0.3.2",
   "description": "Node.js SDK for integrating with FormSG",
-  "main": "index.js",
+  "main": "./dist/index.js",
   "scripts": {
     "test": "jasmine",
     "build": "babel src --out-dir dist"
