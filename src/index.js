@@ -1,5 +1,5 @@
-const webhooks = require('./src/webhooks')
-const crypto = require('./src/crypto')
+const webhooks = require('./webhooks')
+const crypto = require('./crypto')
 
 /**
  * Entrypoint into the FormSG SDK
