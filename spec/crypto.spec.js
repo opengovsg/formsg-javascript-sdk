@@ -1,6 +1,6 @@
 const _ = require('lodash')
 
-const formsg = require('../index')()
+const formsg = require('../src/index')()
 
 const {
   plaintext,
