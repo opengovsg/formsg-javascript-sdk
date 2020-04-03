@@ -54,7 +54,7 @@ app.post('/submissions',
   },
   // Decrypt the submission
   function (req, res, next) {
-    const submission = formsg.crypto.decrypt(formSecretKey, req.body)
+    const submission = formsg.crypto.decrypt(formSecretKey, req.body.encryptedContent)
     if (submission) {
       // Continue processing the submission
     } else {
