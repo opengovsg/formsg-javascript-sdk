@@ -6,7 +6,7 @@ const STAGE = require('./stage')
  * Defaults to production.
  * @param {string} [mode] One of 'staging' | 'production'
  */
-export function getPublicKey (mode) {
+function getPublicKey (mode) {
   switch (mode) {
     case STAGE.staging:
       return WEBHOOK_KEYS.staging.publicKey
@@ -15,4 +15,8 @@ export function getPublicKey (mode) {
     default:
       return WEBHOOK_KEYS.production.publicKey
   }
+}
+
+module.exports = {
+  getPublicKey,
 }
