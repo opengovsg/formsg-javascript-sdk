@@ -1,7 +1,7 @@
-const webhookSecretKey = require('../resource/webhook-keys').test.secretKey
+const signingSecretKey = require('../resource/signing-keys').test.secretKey
 const webhook = require('../src/webhooks')({
   mode: 'test',
-  webhookSecretKey
+  webhookSecretKey: signingSecretKey
 })
 
 describe('Webhooks', () => {

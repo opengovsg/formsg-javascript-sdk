@@ -1,4 +1,4 @@
-const WEBHOOK_KEYS = require('../../resource/webhook-keys')
+const SIGNING_KEYS = require('../../resource/signing-keys')
 const STAGE = require('./stage')
 
 /**
@@ -9,11 +9,12 @@ const STAGE = require('./stage')
 function getPublicKey (mode) {
   switch (mode) {
     case STAGE.staging:
-      return WEBHOOK_KEYS.staging.publicKey
+      return SIGNING_KEYS.staging.publicKey
+    case STAGE.development:
     case STAGE.test:
-      return WEBHOOK_KEYS.test.publicKey
+      return SIGNING_KEYS.test.publicKey
     default:
-      return WEBHOOK_KEYS.production.publicKey
+      return SIGNING_KEYS.production.publicKey
   }
 }
 

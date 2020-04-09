@@ -2,7 +2,7 @@ const _ = require('lodash')
 
 const {
   secretKey: signingSecretKey,
-} = require('../resource/webhook-keys').test;
+} = require('../resource/signing-keys').test;
 
 const formsg = require('../src/index')({ mode: 'test' })
 
