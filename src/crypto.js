@@ -60,10 +60,16 @@ function encrypt (formPublicKey, responses) {
   return _encrypt(processedResponsed, formPublicKey)
 }
 
+/**
+ * 
+ * @param {any} msg The message to encrypt, will be stringified.
+ * @param {string} encryptionPublicKey The base-64 encoded public key for encrypting.
+ * @param {*} signingPrivateKey The base-64 encoded private key for signing.
+ */
 function encrypt2 (msg, encryptionPublicKey, signingPrivateKey) {
   let processedMsg = decodeUTF8(JSON.stringify(msg))
   if (signingPrivateKey) {
-    processedMsg = nacl.sign(processedMsg, signingPrivateKey);
+    processedMsg = nacl.sign(processedMsg, decodeBase64(signingPrivateKey));
   }
 
   return _encrypt(processedMsg, encryptionPublicKey);
