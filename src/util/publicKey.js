@@ -4,13 +4,13 @@ const STAGE = require('./stage')
 /**
  * Retrieves the appropriate public key.
  * Defaults to production.
- * @param {string} [mode] One of 'staging' | 'production'
+ * @param {'staging'|'production'|'development'} mode One of 'staging' |'production' | 'development'
  */
 function getPublicKey (mode) {
   switch (mode) {
+    case STAGE.development:
     case STAGE.staging:
       return SIGNING_KEYS.staging.publicKey
-    case STAGE.development:
     case STAGE.test:
       return SIGNING_KEYS.test.publicKey
     default:
