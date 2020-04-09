@@ -1,6 +1,10 @@
 const _ = require('lodash')
 
-const formsg = require('../src/index')()
+const {
+  secretKey: signingSecretKey,
+} = require('../resource/webhook-keys').test;
+
+const formsg = require('../src/index')({ mode: 'test' })
 
 const {
   plaintext,
@@ -50,4 +54,47 @@ describe('Crypto', function () {
     const decrypted = formsg.crypto.decrypt(secretKey, ciphertext)
     expect(_.isEqual(decrypted, plaintext)).toBe(true)
   })
+
+  it("should be able to encrypt submissions without signing if signingPrivateKey is missing", () => {
+    const { publicKey, secretKey } = formsg.crypto.generate();
+    // Signing key (last parameter) is omitted.
+    const ciphertext = formsg.crypto.encrypt2(plaintext, publicKey);
+    const decrypted = formsg.crypto.decrypt(secretKey, ciphertext);
+
+    expect(_.isEqual(decrypted, plaintext)).toBe(true);
+  });
+
+  it("should be able to encrypt and sign submissions if signingPrivateKey is given", () => {
+    // Arrange
+    const { publicKey, secretKey } = formsg.crypto.generate();
+    const mockVerifiedContent = {
+      question: "SingPass Validated NRIC",
+      fieldType: "authentication",
+      isVisible: true,
+      answer: "S12345679Z",
+    };
+
+    // Act
+    // Encrypt content that is not signed.
+    const ciphertext = formsg.crypto.encrypt(publicKey, plaintext);
+    // Sign and encrypt the desired content.
+    const signedAndEncryptedText = formsg.crypto.encrypt2(
+      mockVerifiedContent,
+      publicKey,
+      signingSecretKey
+    );
+    // Decrypt encrypted content along with our signed+encrypted content.
+    const decrypted = formsg.crypto.decrypt(
+      secretKey,
+      ciphertext,
+      signedAndEncryptedText
+    );
+
+    // Assert
+    // The last object in the decrypted array should be the initial verified
+    // content.
+    expect(_.isEqual(_.last(decrypted), mockVerifiedContent)).toBe(true);
+    // The rest of the decrypted array should be the initial plaintext.
+    expect(_.isEqual(_.initial(decrypted), plaintext)).toBe(true);
+  });
 })
