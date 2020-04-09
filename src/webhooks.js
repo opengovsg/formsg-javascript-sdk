@@ -3,9 +3,8 @@
 const url = require('url')
 
 const { sign, verify } = require('./util/signature')
+const { getPublicKey } = require('./util/publicKey')
 const { parseSignatureHeader } = require('./util/parser')
-const WEBHOOK_KEYS = require('../resource/webhook-keys')
-const STAGE = require('./util/stage')
 
 /**
  * Helpfer function to construct the basestring and verify the signature of an incoming request
@@ -86,27 +85,11 @@ function constructHeader ({ epoch, submissionId, formId, signature }) {
 }
 
 /**
- * Retrieves the appropriate webhook public key.
- * Defaults to production.
- * @param {string} [mode] One of 'staging' | 'production'
- */
-function getWebhookPublicKey (mode) {
-  switch (mode) {
-    case STAGE.staging:
-      return WEBHOOK_KEYS.staging.publicKey
-    case STAGE.test:
-      return WEBHOOK_KEYS.test.publicKey
-    default:
-      return WEBHOOK_KEYS.production.publicKey
-  }
-}
-
-/**
  * Provider that accepts configuration
  * before returning the webhooks module
  */
 module.exports = function ({ mode, webhookSecretKey }) {
-  const webhookPublicKey = getWebhookPublicKey(mode)
+  const webhookPublicKey = getPublicKey(mode)
 
   return {
     /* Verification functions */
