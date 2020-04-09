@@ -19,6 +19,8 @@ module.exports = function (options) {
       mode: mode || 'production',
       webhookSecretKey
     }),
-    crypto,
+    crypto: crypto({
+      mode: mode || 'production',
+    }),
   }
 }

@@ -1,5 +1,7 @@
 'use strict'
 
+const { getPublicKey } = require('./util/publicKey')
+
 const nacl = require('tweetnacl')
 const {
   encodeBase64,
@@ -179,9 +181,17 @@ function valid (publicKey, secretKey) {
   }
 }
 
-module.exports = {
-  encrypt,
-  decrypt,
-  generate,
-  valid,
+/**
+ * Provider that accepts configuration
+ * before returning the crypto module
+ */
+module.exports = function ({ mode }) {
+  const signingPublicKey = getPublicKey(mode)
+  return {
+    encrypt,
+    encrypt2,
+    decrypt: decrypt(signingPublicKey),
+    generate,
+    valid,
+  }
 }
