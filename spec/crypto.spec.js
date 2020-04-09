@@ -58,7 +58,7 @@ describe('Crypto', function () {
   it("should be able to encrypt submissions without signing if signingPrivateKey is missing", () => {
     const { publicKey, secretKey } = formsg.crypto.generate();
     // Signing key (last parameter) is omitted.
-    const ciphertext = formsg.crypto.encrypt2(plaintext, publicKey);
+    const ciphertext = formsg.crypto.encrypt(publicKey, plaintext);
     const decrypted = formsg.crypto.decrypt(secretKey, ciphertext);
 
     expect(_.isEqual(decrypted, plaintext)).toBe(true);
@@ -78,9 +78,9 @@ describe('Crypto', function () {
     // Encrypt content that is not signed.
     const ciphertext = formsg.crypto.encrypt(publicKey, plaintext);
     // Sign and encrypt the desired content.
-    const signedAndEncryptedText = formsg.crypto.encrypt2(
-      mockVerifiedContent,
+    const signedAndEncryptedText = formsg.crypto.encrypt(
       publicKey,
+      mockVerifiedContent,
       signingSecretKey
     );
     // Decrypt encrypted content along with our signed+encrypted content.

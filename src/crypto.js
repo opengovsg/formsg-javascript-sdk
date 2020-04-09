@@ -49,24 +49,12 @@ const {
  */
 
 /**
- * Encrypts submission with a unique keypair for each submission
- * @param {String} formPublicKey base64
- * @param {Response[]} responses Array of Response objects
- * @returns {EncryptedContent}
- * @throws error if any of the encrypt methods fail
- */
-function encrypt(formPublicKey, responses) {
-  const processedResponsed = decodeUTF8(JSON.stringify(responses));
-  return _encrypt(processedResponsed, formPublicKey);
-}
-
-/**
  *
- * @param {any} msg The message to encrypt, will be stringified.
  * @param {string} encryptionPublicKey The base-64 encoded public key for encrypting.
+ * @param {any} msg The message to encrypt, will be stringified.
  * @param {string} signingPrivateKey The base-64 encoded private key for signing.
  */
-function encrypt2(msg, encryptionPublicKey, signingPrivateKey = null) {
+function encrypt(encryptionPublicKey, msg, signingPrivateKey = null) {
   let processedMsg = decodeUTF8(JSON.stringify(msg));
 
   if (signingPrivateKey) {
@@ -148,6 +136,10 @@ const decrypt = (signingPublicKey) => (
     if (verifiedContent) {
       // Decrypted message must be able to be authenticated by the public key.
       let decryptedVerifiedContent = _decrypt(formSecretKey, verifiedContent);
+      if (!decryptedVerifiedContent) {
+        // Returns null if verification for decrypt failed.
+        throw new Error('Verification failed for signature');
+      }
       decryptedVerifiedContent = _verifySignedMessage(
         decryptedVerifiedContent,
         signingPublicKey
@@ -204,7 +196,6 @@ module.exports = function ({ mode }) {
   const signingPublicKey = getPublicKey(mode);
   return {
     encrypt,
-    encrypt2,
     decrypt: decrypt(signingPublicKey),
     generate,
     valid: valid(signingPublicKey),
