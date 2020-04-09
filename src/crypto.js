@@ -54,24 +54,46 @@ const {
  * @throws error if any of the encrypt methods fail
  */
 function encrypt (formPublicKey, responses) {
-  const submissionKeypair = generate()
-  const nonce = nacl.randomBytes(24)
-  const encrypted = encodeBase64(nacl.box(
-    decodeUTF8(JSON.stringify(responses)),
-    nonce,
-    decodeBase64(formPublicKey),
-    decodeBase64(submissionKeypair.secretKey)
-  ))
+  const processedResponsed = decodeUTF8(JSON.stringify(responses));
+  return _encrypt(processedResponsed, formPublicKey)
+}
+
+function encrypt2 (msg, encryptionPublicKey, signingPrivateKey) {
+  let processedMsg = decodeUTF8(JSON.stringify(msg))
+  if (signingPrivateKey) {
+    processedMsg = nacl.sign(processedMsg, signingPrivateKey);
+  }
+
+  return _encrypt(processedMsg, encryptionPublicKey);
+}
+
+/**
+ * Helper function to encrypt input with a unique keypair for each submission.
+ * @param {Uint8Array} msg
+ * @returns {EncryptedContent}
+ * @throws error if any of the encrypt methods fail
+ */
+function _encrypt (msg, theirPublicKey) {
+  const submissionKeypair = generate();
+  const nonce = nacl.randomBytes(24);
+  const encrypted = encodeBase64(
+    nacl.box(
+      msg,
+      nonce,
+      decodeBase64(theirPublicKey),
+      decodeBase64(submissionKeypair.secretKey)
+    )
+  );
   return `${submissionKeypair.publicKey};${encodeBase64(nonce)}:${encrypted}`
 }
 
 /**
- * Decrypts an encrypted submission.
+ * Helper method to decrypt an encrypted submission.
  * @param {string} formPrivateKey base64
  * @param {EncryptedContent} encryptedContent encrypted string encoded in base64
  * @return {Object | null} Parsed JSON submission object if successful.
  */
-function decrypt (formPrivateKey, encryptedContent) {
+function _decrypt (formPrivateKey, encryptedContent) {
   try {
     const [ submissionPublicKey, nonceEncrypted ] = encryptedContent.split(';')
     const [ nonce, encrypted ] = nonceEncrypted.split(':').map(decodeBase64)
@@ -84,6 +106,42 @@ function decrypt (formPrivateKey, encryptedContent) {
     return JSON.parse(encodeUTF8(decrypted))
   } catch (err) {
     return null
+  }
+}
+
+function _verifySignedMessage (msg, publicKey) {
+  return JSON.parse(
+    encodeUTF8(
+      nacl.sign.open(
+        msg,
+        decodeBase64(publicKey)
+      )
+    )
+  );
+}
+
+/**
+ * Method to decrypt an encrypted submission.
+ * @param {string} formSecretKey base64
+ * @param {EncryptedContent} encryptedContent encrypted string encoded in base64
+ * @param {EncryptedContent?} verifiedContent (optional) encrypted and signed string encoded in base64.
+ * @return {Object | null} Parsed JSON submission object if successful.
+ */
+const decrypt = (signingPublicKey) => (formSecretKey, encryptedContent, verifiedContent) => {
+  try {
+    const decryptedContent = _decrypt(formSecretKey, encryptedContent);
+
+    if (verifiedContent) {
+      // Decrypted message must be able to be opened by the public key.
+      const signedDecryptedVerified = _decrypt(formSecretKey, verifiedContent);
+      const verifiedVerifiedContent = _verifySignedMessage(signedDecryptedVerified, signingPublicKey)
+      
+      decryptedContent.push(verifiedVerifiedContent);
+    }
+
+    return decryptedContent;
+  } catch (err) {
+    return null;
   }
 }
 
