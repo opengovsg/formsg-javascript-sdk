@@ -171,11 +171,11 @@ function generate () {
  * @param {string} publicKey 
  * @param {string} secretKey 
  */
-function valid (publicKey, secretKey) {
+const valid = (signingPublicKey) => (publicKey, secretKey) => {
   const plaintext = 'testtext'
   try {
     const ciphertext = encrypt(publicKey, plaintext)
-    return decrypt(secretKey, ciphertext) === plaintext
+    return decrypt(signingPublicKey)(secretKey, ciphertext) === plaintext
   } catch (err) {
     return false
   }
@@ -192,6 +192,6 @@ module.exports = function ({ mode }) {
     encrypt2,
     decrypt: decrypt(signingPublicKey),
     generate,
-    valid,
+    valid: valid(signingPublicKey),
   }
 }
