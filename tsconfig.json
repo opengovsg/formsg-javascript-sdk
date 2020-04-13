@@ -2,11 +2,14 @@
   "compilerOptions": {
     "target": "es5",
     "module": "commonjs",
+    "moduleResolution": "node",
     "declaration": true,
-    "outDir": "./lib",
+    "outDir": "./dist",
     "strict": true,
-    "types": ["jest", "node"]
+    "types": ["jest", "node"],
+    "esModuleInterop": true,
+    "rootDir": "src"
   },
   "include": ["src"],
-  "exclude": ["node_modules", "**/*.spec.ts"]
+  "exclude": ["node_modules", "**/*.spec.ts, dist"]
 }

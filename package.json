@@ -2,13 +2,13 @@
   "name": "@opengovsg/formsg-sdk",
   "version": "0.4.1",
   "description": "Node.js SDK for integrating with FormSG",
-  "main": "./src/index.js",
-  "types": "./src/types/index.d.ts",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "scripts": {
     "test": "jest",
     "test:watch": "jest --watch",
-    "build": "babel src --out-dir dist",
-    "prepublish": "npm run build"
+    "build": "tsc",
+    "prepare": "npm run build"
   },
   "keywords": [
     "formsg",
