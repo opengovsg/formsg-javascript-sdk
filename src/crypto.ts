@@ -1,11 +1,13 @@
 import * as nacl from "tweetnacl";
-import { getPublicKey } from "./util/publicKey";
 import {
   encodeBase64,
   decodeBase64,
   encodeUTF8,
   decodeUTF8,
 } from "tweetnacl-util";
+
+import { getPublicKey } from "./util/publicKey";
+import { determineIsDecryptedResponses } from "./util/guard";
 
 /**
  * Encrypt input with a unique keypair for each submission
@@ -105,7 +107,7 @@ function decrypt(signingPublicKey: string) {
     formSecretKey: string,
     encryptedContent: EncryptedContent,
     verifiedContent?: EncryptedContent
-  ): DecryptedResponse[] | null {
+  ): any {
     try {
       // Do not return the transformed object in `_decrypt` function as a signed
       // object is not encoded in UTF8 and is encoded in Base-64 instead.
@@ -115,11 +117,12 @@ function decrypt(signingPublicKey: string) {
       }
       const decryptedObject: Object = JSON.parse(encodeUTF8(decryptedContent));
 
-      if (!determineIsDecryptedResponses(decryptedObject)) {
-        throw new Error("Decrypted object does not fit expected shape");
-      }
-
       if (verifiedContent) {
+        // Only care if it is the correct shape if verifiedContent exists, since
+        // we need to append it to the end.
+        if (!determineIsDecryptedResponses(decryptedObject)) {
+          throw new Error("Decrypted object does not fit expected shape");
+        }
         // Decrypted message must be able to be authenticated by the public key.
         const decryptedVerifiedContent = _decrypt(
           formSecretKey,
@@ -164,7 +167,7 @@ function valid(signingPublicKey: string) {
    * @param secretKey The private key to verify against.
    */
   function _internalValid(publicKey: string, secretKey: string) {
-    const testResponse = ("testtext" as unknown) as DecryptedResponse[];
+    const testResponse = "testtext";
     try {
       const cipherResponse = encrypt(publicKey, testResponse);
       return (
