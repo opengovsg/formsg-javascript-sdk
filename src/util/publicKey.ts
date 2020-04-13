@@ -1,4 +1,4 @@
-import { SIGNING_KEYS } from "../../resource/signing-keys";
+import { SIGNING_KEYS } from "../resource/signing-keys";
 import STAGE from "./stage";
 
 /**

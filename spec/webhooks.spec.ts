@@ -1,5 +1,5 @@
 import webhookPackage from "../src/webhooks";
-import { SIGNING_KEYS } from "../resource/signing-keys";
+import { SIGNING_KEYS } from "../src/resource/signing-keys";
 
 const signingSecretKey = SIGNING_KEYS.test.secretKey;
 
