@@ -1,5 +1,3 @@
-import * as _ from "lodash";
-
 import { SIGNING_KEYS } from "../resource/signing-keys";
 import formsgPackage from "../src/index";
 import {
@@ -88,8 +86,9 @@ describe("Crypto", function () {
     // Assert
     // The last object in the decrypted array should be the initial verified
     // content.
-    expect(mockVerifiedContent).toEqual(_.last(decrypted));
-    // The rest of the decrypted array should be the initial plaintext.
-    expect(_.initial(decrypted)).toEqual(plaintext);
+    expect(mockVerifiedContent).toEqual(decrypted.pop());
+    // After popping, the rest of the decrypted array should be the initial
+    // plaintext.
+    expect(decrypted).toEqual(plaintext);
   });
 });
