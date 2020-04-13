@@ -36,7 +36,7 @@ describe("Crypto", function () {
 
   it("should decrypt the submission ciphertext from 2020-03-22 successfully", () => {
     const decryptedPlaintext = formsg.crypto.decrypt(formSecretKey, ciphertext);
-    expect(_.isEqual(decryptedPlaintext, plaintext)).toBe(true);
+    expect(decryptedPlaintext).toEqual(plaintext);
   });
 
   it("should return null on unsuccessful decryption", () => {
@@ -47,7 +47,7 @@ describe("Crypto", function () {
     const { publicKey, secretKey } = formsg.crypto.generate();
     const ciphertext = formsg.crypto.encrypt(publicKey, plaintext);
     const decrypted = formsg.crypto.decrypt(secretKey, ciphertext);
-    expect(_.isEqual(decrypted, plaintext)).toBe(true);
+    expect(decrypted).toEqual(plaintext);
   });
 
   it("should be able to encrypt submissions without signing if signingPrivateKey is missing", () => {
@@ -56,7 +56,7 @@ describe("Crypto", function () {
     const ciphertext = formsg.crypto.encrypt(publicKey, plaintext);
     const decrypted = formsg.crypto.decrypt(secretKey, ciphertext);
 
-    expect(_.isEqual(decrypted, plaintext)).toBe(true);
+    expect(decrypted).toEqual(plaintext);
   });
 
   it("should be able to encrypt and sign submissions if signingPrivateKey is given", () => {
@@ -88,8 +88,8 @@ describe("Crypto", function () {
     // Assert
     // The last object in the decrypted array should be the initial verified
     // content.
-    expect(_.isEqual(_.last(decrypted), mockVerifiedContent)).toBe(true);
+    expect(mockVerifiedContent).toEqual(_.last(decrypted));
     // The rest of the decrypted array should be the initial plaintext.
-    expect(_.isEqual(_.initial(decrypted), plaintext)).toBe(true);
+    expect(_.initial(decrypted)).toEqual(plaintext);
   });
 });

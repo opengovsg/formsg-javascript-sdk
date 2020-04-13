@@ -26,7 +26,9 @@ type FieldType =
 type DecryptedResponse = {
   _id?: string;
   question: string;
-  answer: string;
+  answer?: string;
+  answerArray?: string[];
+  isHeader?: boolean;
   fieldType: FieldType;
 };
 
