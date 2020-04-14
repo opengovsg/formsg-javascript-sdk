@@ -1,8 +1,18 @@
 declare const _default: (options?: PackageInitParams) => {
     webhooks: {
         authenticate: (header: string, uri: string) => void;
-        generateSignature: Function;
-        constructHeader: Function;
+        generateSignature: (({ uri, submissionId, formId, epoch, }: {
+            uri: string;
+            submissionId: Object;
+            formId: string;
+            epoch: number;
+        }) => string) | (() => void);
+        constructHeader: (({ epoch, submissionId, formId, signature, }: {
+            epoch: number;
+            submissionId: string;
+            formId: string;
+            signature: string;
+        }) => string) | (() => void);
     };
     crypto: {
         encrypt: (encryptionPublicKey: string, msg: any, signingPrivateKey?: string | undefined) => string;

@@ -104,9 +104,10 @@ module.exports = function (params) {
         /* Verification functions */
         authenticate: authenticate(webhookPublicKey),
         /* Signing functions */
+        /* Return noop if a webhookSecretKey is not provided. */
         generateSignature: webhookSecretKey
             ? generateSignature(webhookSecretKey)
-            : Function(),
-        constructHeader: webhookSecretKey ? constructHeader : Function(),
+            : function () { },
+        constructHeader: webhookSecretKey ? constructHeader : function () { },
     };
 };
