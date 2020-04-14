@@ -47,6 +47,22 @@ describe("Crypto", function () {
     expect(formsg.crypto.decrypt("random", ciphertext)).toBe(null);
   });
 
+   it('should return null when successfully decrypted content does not fit FormField type shape', () => {
+     // Arrange
+     const { publicKey, secretKey } = formsg.crypto.generate();
+     const malformedContent =
+       'just a string, not an object with FormField shape';
+     const malformedEncrypt = formsg.crypto.encrypt(
+       publicKey,
+       malformedContent,
+     );
+
+     // Assert
+     // Using correct secret key, but the decrypted object should not fit the
+     // expected shape and thus return null.
+     expect(formsg.crypto.decrypt(secretKey, malformedEncrypt)).toBe(null);
+   });
+
   it("should be able to encrypt and decrypt submissions from 2020-03-22 end-to-end successfully", () => {
     // Arrange
     const { publicKey, secretKey } = formsg.crypto.generate();
