@@ -8,7 +8,7 @@ import crypto from './crypto'
  * the SDK for the FormSG staging environment
  * @param {string} [options.webhookSecretKey] Optional base64 secret key for signing webhooks
  */
-export default function (options: PackageInitParams = {}) {
+export = function (options: PackageInitParams = {}) {
   const { mode, webhookSecretKey } = options
 
   return {

@@ -192,9 +192,7 @@ function valid(signingPublicKey: string) {
 /**
  * Provider that accepts configuration before returning the crypto module to init.
  */
-export default function ({
-  mode,
-}: Omit<PackageInitParams, 'webhookSecretKey'>) {
+export = function ({ mode }: Omit<PackageInitParams, 'webhookSecretKey'>) {
   const signingPublicKey = getPublicKey(mode)
   return {
     encrypt,

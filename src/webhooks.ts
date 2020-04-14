@@ -148,7 +148,7 @@ function constructHeader({
  * Provider that accepts configuration
  * before returning the webhooks module
  */
-export default function (params: PackageInitParams = {}) {
+export = function (params: PackageInitParams = {}) {
   const { mode, webhookSecretKey } = params
   const webhookPublicKey = getPublicKey(mode)
 
