@@ -1,9 +1,9 @@
 type Signature = {
-  v1: string;
-  t: string;
-  s: string;
-  f: string;
-};
+  v1: string
+  t: string
+  s: string
+  f: string
+}
 
 /**
  * The constituents of the X-FormSG-Signature
@@ -20,14 +20,14 @@ type Signature = {
  */
 function parseSignatureHeader(header: string): Signature {
   const parsedSignature = header
-    .split(",")
+    .split(',')
     .map((kv) => kv.split(/=(.*)/))
     .reduce((acc, [k, v]) => {
-      acc[k] = v;
-      return acc;
-    }, {} as Record<string, any>);
+      acc[k] = v
+      return acc
+    }, {} as Record<string, any>)
 
-  return parsedSignature as Signature;
+  return parsedSignature as Signature
 }
 
-export { parseSignatureHeader };
+export { parseSignatureHeader }

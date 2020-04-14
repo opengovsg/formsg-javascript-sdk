@@ -1,7 +1,7 @@
 function determineIsFormFields(tbd: any): tbd is FormField[] {
   // Not array, early return.
   if (!Array.isArray(tbd)) {
-    return false;
+    return false
   }
 
   // If there exists even a single internal response that does not fit the
@@ -14,9 +14,9 @@ function determineIsFormFields(tbd: any): tbd is FormField[] {
         internal.isHeader) &&
       internal.fieldType &&
       internal.question
-  );
+  )
 
-  return filter.length === tbd.length;
+  return filter.length === tbd.length
 }
 
-export { determineIsFormFields };
+export { determineIsFormFields }

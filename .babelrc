@@ -1,9 +1,12 @@
 {
   "presets": [
-    ["@babel/preset-env", {
-      "targets": {
-        "browsers": ["defaults", "IE 11"]
+    [
+      "@babel/preset-env",
+      {
+        "targets": {
+          "browsers": ["defaults", "IE 11"]
+        }
       }
-    }]
+    ]
   ]
 }

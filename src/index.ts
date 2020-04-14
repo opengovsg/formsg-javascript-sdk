@@ -1,5 +1,5 @@
-import webhooks from "./webhooks";
-import crypto from "./crypto";
+import webhooks from './webhooks'
+import crypto from './crypto'
 
 /**
  * Entrypoint into the FormSG SDK
@@ -9,15 +9,15 @@ import crypto from "./crypto";
  * @param {string} [options.webhookSecretKey] Optional base64 secret key for signing webhooks
  */
 export default function (options: PackageInitParams = {}) {
-  const { mode, webhookSecretKey } = options;
+  const { mode, webhookSecretKey } = options
 
   return {
     webhooks: webhooks({
-      mode: mode || "production",
+      mode: mode || 'production',
       webhookSecretKey,
     }),
     crypto: crypto({
-      mode: mode || "production",
+      mode: mode || 'production',
     }),
-  };
+  }
 }

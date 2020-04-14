@@ -1,8 +1,8 @@
 const STAGE: { [stage in PackageMode]: stage } = {
-  staging: "staging",
-  production: "production",
-  development: "development",
-  test: "test",
-};
+  staging: 'staging',
+  production: 'production',
+  development: 'development',
+  test: 'test',
+}
 
-export default STAGE;
+export default STAGE

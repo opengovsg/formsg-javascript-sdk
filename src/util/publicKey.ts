@@ -1,5 +1,5 @@
-import { SIGNING_KEYS } from "../resource/signing-keys";
-import STAGE from "./stage";
+import { SIGNING_KEYS } from '../resource/signing-keys'
+import STAGE from './stage'
 
 /**
  * Retrieves the appropriate public key.
@@ -10,12 +10,12 @@ function getPublicKey(mode?: PackageMode) {
   switch (mode) {
     case STAGE.development:
     case STAGE.staging:
-      return SIGNING_KEYS.staging.publicKey;
+      return SIGNING_KEYS.staging.publicKey
     case STAGE.test:
-      return SIGNING_KEYS.test.publicKey;
+      return SIGNING_KEYS.test.publicKey
     default:
-      return SIGNING_KEYS.production.publicKey;
+      return SIGNING_KEYS.production.publicKey
   }
 }
 
-export { getPublicKey };
+export { getPublicKey }

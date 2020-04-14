@@ -1,5 +1,5 @@
-import * as tweetnacl from "tweetnacl";
-import { decodeUTF8, encodeBase64, decodeBase64 } from "tweetnacl-util";
+import * as tweetnacl from 'tweetnacl'
+import { decodeUTF8, encodeBase64, decodeBase64 } from 'tweetnacl-util'
 
 /**
  * Returns a signature from a basestring and secret key
@@ -10,7 +10,7 @@ import { decodeUTF8, encodeBase64, decodeBase64 } from "tweetnacl-util";
 function sign(basestring: string, secretKey: string): string {
   return encodeBase64(
     tweetnacl.sign.detached(decodeUTF8(basestring), decodeBase64(secretKey))
-  );
+  )
 }
 
 /**
@@ -29,7 +29,7 @@ function verify(
     decodeUTF8(message),
     decodeBase64(signature),
     decodeBase64(publicKey)
-  );
+  )
 }
 
-export { sign, verify };
+export { sign, verify }

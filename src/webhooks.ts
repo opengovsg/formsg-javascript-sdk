@@ -1,8 +1,8 @@
-import * as url from "url";
+import * as url from 'url'
 
-import { sign, verify } from "./util/signature";
-import { getPublicKey } from "./util/publicKey";
-import { parseSignatureHeader } from "./util/parser";
+import { sign, verify } from './util/signature'
+import { getPublicKey } from './util/publicKey'
+import { parseSignatureHeader } from './util/parser'
 
 /**
  * Helpfer function to construct the basestring and verify the signature of an incoming request
@@ -21,10 +21,8 @@ function verifySignature(
   signature: string,
   webhookPublicKey: string
 ) {
-  const baseString = `${
-    url.parse(uri).href
-  }.${submissionId}.${formId}.${epoch}`;
-  return verify(baseString, signature, webhookPublicKey);
+  const baseString = `${url.parse(uri).href}.${submissionId}.${formId}.${epoch}`
+  return verify(baseString, signature, webhookPublicKey)
 }
 
 /**
@@ -34,8 +32,8 @@ function verifySignature(
  * @param expiry Duration of expiry. The default is 5 minutes.
  */
 function verifyEpoch(epoch: number, expiry: number = 300000) {
-  const difference = Date.now() - epoch;
-  return difference > 0 && difference < expiry;
+  const difference = Date.now() - epoch
+  return difference > 0 && difference < expiry
 }
 
 /**
@@ -56,11 +54,11 @@ function authenticate(webhookPublicKey: string) {
       t,
       s: submissionId,
       f: formId,
-    } = parseSignatureHeader(header);
-    const epoch = Number(t);
+    } = parseSignatureHeader(header)
+    const epoch = Number(t)
 
     if (!epoch || !signature || !submissionId || !formId) {
-      throw new Error("X-FormSG-Signature header is invalid");
+      throw new Error('X-FormSG-Signature header is invalid')
     }
 
     // Verify signature authenticity
@@ -76,18 +74,18 @@ function authenticate(webhookPublicKey: string) {
     ) {
       throw new Error(
         `Signature could not be verified for uri=${uri} submissionId=${submissionId} formId=${formId} epoch=${epoch} signature=${signature}`
-      );
+      )
     }
 
     // Verify epoch recency
     if (!verifyEpoch(epoch)) {
       throw new Error(
         `Signature is not recent for uri=${uri} submissionId=${submissionId} formId=${formId} epoch=${epoch} signature=${signature}`
-      );
+      )
     }
   }
 
-  return _internalAuthenticate;
+  return _internalAuthenticate
 }
 
 /**
@@ -109,18 +107,18 @@ function generateSignature(webhookSecretKey: string) {
     formId,
     epoch,
   }: {
-    uri: string;
-    submissionId: Object;
-    formId: string;
-    epoch: number;
+    uri: string
+    submissionId: Object
+    formId: string
+    epoch: number
   }) {
     const baseString = `${
       url.parse(uri).href
-    }.${submissionId}.${formId}.${epoch}`;
-    return sign(baseString, webhookSecretKey);
+    }.${submissionId}.${formId}.${epoch}`
+    return sign(baseString, webhookSecretKey)
   }
 
-  return _internalGenerateSignature;
+  return _internalGenerateSignature
 }
 
 /**
@@ -138,12 +136,12 @@ function constructHeader({
   formId,
   signature,
 }: {
-  epoch: number;
-  submissionId: string;
-  formId: string;
-  signature: string;
+  epoch: number
+  submissionId: string
+  formId: string
+  signature: string
 }) {
-  return `t=${epoch},s=${submissionId},f=${formId},v1=${signature}`;
+  return `t=${epoch},s=${submissionId},f=${formId},v1=${signature}`
 }
 
 /**
@@ -151,8 +149,8 @@ function constructHeader({
  * before returning the webhooks module
  */
 export default function (params: PackageInitParams = {}) {
-  const { mode, webhookSecretKey } = params;
-  const webhookPublicKey = getPublicKey(mode);
+  const { mode, webhookSecretKey } = params
+  const webhookPublicKey = getPublicKey(mode)
 
   return {
     /* Verification functions */
@@ -162,5 +160,5 @@ export default function (params: PackageInitParams = {}) {
       ? generateSignature(webhookSecretKey)
       : Function(),
     constructHeader: webhookSecretKey ? constructHeader : Function(),
-  };
+  }
 }
