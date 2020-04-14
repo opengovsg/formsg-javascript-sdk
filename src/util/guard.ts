@@ -1,4 +1,4 @@
-function determineIsDecryptedResponses(tbd: any): tbd is DecryptedResponse[] {
+function determineIsFormFields(tbd: any): tbd is FormField[] {
   // Not array, early return.
   if (!Array.isArray(tbd)) {
     return false;
@@ -19,4 +19,4 @@ function determineIsDecryptedResponses(tbd: any): tbd is DecryptedResponse[] {
   return filter.length === tbd.length;
 }
 
-export { determineIsDecryptedResponses };
+export { determineIsFormFields };

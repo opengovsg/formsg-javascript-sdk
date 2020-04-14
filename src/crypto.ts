@@ -1,13 +1,13 @@
-import * as nacl from "tweetnacl";
+import * as nacl from 'tweetnacl';
 import {
   encodeBase64,
   decodeBase64,
   encodeUTF8,
   decodeUTF8,
-} from "tweetnacl-util";
+} from 'tweetnacl-util';
 
-import { getPublicKey } from "./util/publicKey";
-import { determineIsDecryptedResponses } from "./util/guard";
+import { getPublicKey } from './util/publicKey';
+import { determineIsFormFields } from './util/guard';
 
 /**
  * Encrypt input with a unique keypair for each submission
@@ -19,7 +19,7 @@ import { determineIsDecryptedResponses } from "./util/guard";
 function encrypt(
   encryptionPublicKey: string,
   msg: any,
-  signingPrivateKey?: string
+  signingPrivateKey?: string,
 ): EncryptedContent {
   let processedMsg = decodeUTF8(JSON.stringify(msg));
 
@@ -45,8 +45,8 @@ function _encrypt(msg: Uint8Array, theirPublicKey: string): EncryptedContent {
       msg,
       nonce,
       decodeBase64(theirPublicKey),
-      decodeBase64(submissionKeypair.secretKey)
-    )
+      decodeBase64(submissionKeypair.secretKey),
+    ),
   );
   return `${submissionKeypair.publicKey};${encodeBase64(nonce)}:${encrypted}`;
 }
@@ -59,16 +59,16 @@ function _encrypt(msg: Uint8Array, theirPublicKey: string): EncryptedContent {
  */
 function _decrypt(
   formPrivateKey: string,
-  encryptedContent: EncryptedContent
+  encryptedContent: EncryptedContent,
 ): Uint8Array | null {
   try {
-    const [submissionPublicKey, nonceEncrypted] = encryptedContent.split(";");
-    const [nonce, encrypted] = nonceEncrypted.split(":").map(decodeBase64);
+    const [submissionPublicKey, nonceEncrypted] = encryptedContent.split(';');
+    const [nonce, encrypted] = nonceEncrypted.split(':').map(decodeBase64);
     return nacl.box.open(
       encrypted,
       nonce,
       decodeBase64(submissionPublicKey),
-      decodeBase64(formPrivateKey)
+      decodeBase64(formPrivateKey),
     );
   } catch (err) {
     return null;
@@ -83,11 +83,11 @@ function _decrypt(
  */
 function _verifySignedMessage(
   msg: Uint8Array,
-  publicKey: string
-): DecryptedResponse {
+  publicKey: string,
+): Record<string, any> {
   const openedMessage = nacl.sign.open(msg, decodeBase64(publicKey));
   if (!openedMessage)
-    throw new Error("Failed to open signed message with given public key");
+    throw new Error('Failed to open signed message with given public key');
   return JSON.parse(encodeUTF8(openedMessage));
 }
 
@@ -106,41 +106,45 @@ function decrypt(signingPublicKey: string) {
   function internalDecrypt(
     formSecretKey: string,
     encryptedContent: EncryptedContent,
-    verifiedContent?: EncryptedContent
-  ): any {
+    verifiedContent?: EncryptedContent,
+  ): DecryptedContent | null {
     try {
       // Do not return the transformed object in `_decrypt` function as a signed
       // object is not encoded in UTF8 and is encoded in Base-64 instead.
       const decryptedContent = _decrypt(formSecretKey, encryptedContent);
       if (!decryptedContent) {
-        throw new Error("Failed to decrypt content");
+        throw new Error('Failed to decrypt content');
       }
       const decryptedObject: Object = JSON.parse(encodeUTF8(decryptedContent));
+      if (!determineIsFormFields(decryptedObject)) {
+        throw new Error('Decrypted object does not fit expected shape');
+      }
+
+      let returnedObject: DecryptedContent = {
+        responses: decryptedObject,
+      };
 
       if (verifiedContent) {
         // Only care if it is the correct shape if verifiedContent exists, since
         // we need to append it to the end.
-        if (!determineIsDecryptedResponses(decryptedObject)) {
-          throw new Error("Decrypted object does not fit expected shape");
-        }
         // Decrypted message must be able to be authenticated by the public key.
         const decryptedVerifiedContent = _decrypt(
           formSecretKey,
-          verifiedContent
+          verifiedContent,
         );
         if (!decryptedVerifiedContent) {
           // Returns null if verification for decrypt failed.
-          throw new Error("Verification failed for signature");
+          throw new Error('Verification failed for signature');
         }
         const decryptedVerifiedObject = _verifySignedMessage(
           decryptedVerifiedContent,
-          signingPublicKey
+          signingPublicKey,
         );
 
-        decryptedObject.push(decryptedVerifiedObject);
+        returnedObject.verified = decryptedVerifiedObject;
       }
 
-      return decryptedObject;
+      return returnedObject;
     } catch (err) {
       return null;
     }
@@ -167,11 +171,16 @@ function valid(signingPublicKey: string) {
    * @param secretKey The private key to verify against.
    */
   function _internalValid(publicKey: string, secretKey: string) {
-    const testResponse = "testtext";
+    const testResponse: FormField[] = [];
     try {
       const cipherResponse = encrypt(publicKey, testResponse);
+      // Use toString here since the return should be an empty array.
       return (
-        decrypt(signingPublicKey)(secretKey, cipherResponse) === testResponse
+        testResponse.toString() ===
+        decrypt(signingPublicKey)(
+          secretKey,
+          cipherResponse,
+        )?.responses.toString()
       );
     } catch (err) {
       return false;
@@ -185,7 +194,7 @@ function valid(signingPublicKey: string) {
  */
 export default function ({
   mode,
-}: Omit<PackageInitParams, "webhookSecretKey">) {
+}: Omit<PackageInitParams, 'webhookSecretKey'>) {
   const signingPublicKey = getPublicKey(mode);
   return {
     encrypt,

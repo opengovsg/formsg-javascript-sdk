@@ -22,8 +22,8 @@ type FieldType =
   | "date"
   | "mobile";
 
-// Represents an answer provided to a form question after it has been decrypted.
-type DecryptedResponse = {
+// Represents form field responses in a form.
+type FormField = {
   _id?: string;
   question: string;
   answer?: string;
@@ -37,6 +37,11 @@ type DecryptedResponse = {
 // A string in the format of
 // <SubmissionPublicKey>;<Base64Nonce>:<Base64EncryptedData>
 type EncryptedContent = string;
+
+type DecryptedContent = {
+  responses: FormField[],
+  verified?: Record<string, any>,
+}
 
 // A base-64 encoded cryptographic keypair suitable for curve25519.
 type Keypair = {

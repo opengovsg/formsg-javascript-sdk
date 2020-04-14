@@ -27,14 +27,20 @@ describe("Crypto", function () {
   });
 
   it("should invalidate unassociated keypairs", () => {
+    // Act
     const { secretKey } = formsg.crypto.generate();
     const { publicKey } = formsg.crypto.generate();
+
+    // Assert
     expect(formsg.crypto.valid(publicKey, secretKey)).toBe(false);
   });
 
   it("should decrypt the submission ciphertext from 2020-03-22 successfully", () => {
-    const decryptedPlaintext = formsg.crypto.decrypt(formSecretKey, ciphertext);
-    expect(decryptedPlaintext).toEqual(plaintext);
+    // Act
+    const decrypted = formsg.crypto.decrypt(formSecretKey, ciphertext);
+
+    // Assert
+    expect(decrypted).toHaveProperty('responses', plaintext)
   });
 
   it("should return null on unsuccessful decryption", () => {
@@ -42,19 +48,27 @@ describe("Crypto", function () {
   });
 
   it("should be able to encrypt and decrypt submissions from 2020-03-22 end-to-end successfully", () => {
+    // Arrange
     const { publicKey, secretKey } = formsg.crypto.generate();
+
+    // Act
     const ciphertext = formsg.crypto.encrypt(publicKey, plaintext);
     const decrypted = formsg.crypto.decrypt(secretKey, ciphertext);
-    expect(decrypted).toEqual(plaintext);
+    // Assert
+    expect(decrypted).toHaveProperty('responses', plaintext)
   });
 
   it("should be able to encrypt submissions without signing if signingPrivateKey is missing", () => {
+    // Arrange
     const { publicKey, secretKey } = formsg.crypto.generate();
+
+    // Act
     // Signing key (last parameter) is omitted.
     const ciphertext = formsg.crypto.encrypt(publicKey, plaintext);
     const decrypted = formsg.crypto.decrypt(secretKey, ciphertext);
 
-    expect(decrypted).toEqual(plaintext);
+    // Assert
+    expect(decrypted).toHaveProperty('responses', plaintext)
   });
 
   it("should be able to encrypt and sign submissions if signingPrivateKey is given", () => {
@@ -84,11 +98,7 @@ describe("Crypto", function () {
     );
 
     // Assert
-    // The last object in the decrypted array should be the initial verified
-    // content.
-    expect(mockVerifiedContent).toEqual(decrypted.pop());
-    // After popping, the rest of the decrypted array should be the initial
-    // plaintext.
-    expect(decrypted).toEqual(plaintext);
+    expect(decrypted).toHaveProperty('verified', mockVerifiedContent)
+    expect(decrypted).toHaveProperty('responses', plaintext)
   });
 });
