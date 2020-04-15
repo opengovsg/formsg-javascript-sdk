@@ -51,7 +51,7 @@ describe('Crypto', function () {
     // Arrange
     const { publicKey, secretKey } = formsg.crypto.generate()
     const malformedContent = 'just a string, not an object with FormField shape'
-    const malformedEncrypt = formsg.crypto.encrypt(publicKey, malformedContent)
+    const malformedEncrypt = formsg.crypto.encrypt(malformedContent, publicKey)
 
     // Assert
     // Using correct secret key, but the decrypted object should not fit the
@@ -64,7 +64,7 @@ describe('Crypto', function () {
     const { publicKey, secretKey } = formsg.crypto.generate()
 
     // Act
-    const ciphertext = formsg.crypto.encrypt(publicKey, plaintext)
+    const ciphertext = formsg.crypto.encrypt(plaintext, publicKey)
     const decrypted = formsg.crypto.decrypt(secretKey, ciphertext)
     // Assert
     expect(decrypted).toHaveProperty('responses', plaintext)
@@ -76,7 +76,7 @@ describe('Crypto', function () {
 
     // Act
     // Signing key (last parameter) is omitted.
-    const ciphertext = formsg.crypto.encrypt(publicKey, plaintext)
+    const ciphertext = formsg.crypto.encrypt(plaintext, publicKey)
     const decrypted = formsg.crypto.decrypt(secretKey, ciphertext)
 
     // Assert
@@ -95,11 +95,11 @@ describe('Crypto', function () {
 
     // Act
     // Encrypt content that is not signed.
-    const ciphertext = formsg.crypto.encrypt(publicKey, plaintext)
+    const ciphertext = formsg.crypto.encrypt(plaintext, publicKey)
     // Sign and encrypt the desired content.
     const signedAndEncryptedText = formsg.crypto.encrypt(
-      publicKey,
       mockVerifiedContent,
+      publicKey,
       signingSecretKey
     )
     // Decrypt encrypted content along with our signed+encrypted content.

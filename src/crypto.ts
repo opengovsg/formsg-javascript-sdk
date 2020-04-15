@@ -17,8 +17,8 @@ import { determineIsFormFields } from './util/guard'
  * @returns The encrypted basestring.
  */
 function encrypt(
-  encryptionPublicKey: string,
   msg: any,
+  encryptionPublicKey: string,
   signingPrivateKey?: string
 ): EncryptedContent {
   let processedMsg = decodeUTF8(JSON.stringify(msg))
@@ -173,7 +173,7 @@ function valid(signingPublicKey: string) {
   function _internalValid(publicKey: string, secretKey: string) {
     const testResponse: FormField[] = []
     try {
-      const cipherResponse = encrypt(publicKey, testResponse)
+      const cipherResponse = encrypt(testResponse, publicKey)
       // Use toString here since the return should be an empty array.
       return (
         testResponse.toString() ===
