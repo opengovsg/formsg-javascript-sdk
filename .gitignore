@@ -80,7 +80,6 @@ web_modules/
 
 # Nuxt.js build / generate output
 .nuxt
-# TODO: Remove after publishing
 dist
 
 # Gatsby files
