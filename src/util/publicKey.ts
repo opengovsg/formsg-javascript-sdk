@@ -1,12 +1,12 @@
-const SIGNING_KEYS = require('../../resource/signing-keys')
-const STAGE = require('./stage')
+import { SIGNING_KEYS } from '../resource/signing-keys'
+import STAGE from './stage'
 
 /**
  * Retrieves the appropriate public key.
  * Defaults to production.
- * @param {'staging'|'production'|'development'} mode One of 'staging' |'production' | 'development'
+ * @param mode The package mode to retrieve the public key for.
  */
-function getPublicKey (mode) {
+function getPublicKey(mode?: PackageMode) {
   switch (mode) {
     case STAGE.development:
     case STAGE.staging:
@@ -18,6 +18,4 @@ function getPublicKey (mode) {
   }
 }
 
-module.exports = {
-  getPublicKey,
-}
+export { getPublicKey }

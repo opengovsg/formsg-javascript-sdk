@@ -1,4 +1,4 @@
-module.exports = {
+export const SIGNING_KEYS = {
   staging: {
     // staging must never contain secret keys
     publicKey: 'rjv41kYqZwcbe3r6ymMEEKQ+Vd+DPuogN+Gzq3lP2Og=',
@@ -13,6 +13,7 @@ module.exports = {
   },
   test: {
     publicKey: 'KUY1XT30ar+XreVjsS1w/c3EpDs2oASbF6G3evvaUJM=',
-    secretKey: '/u+LP57Ib9y5Ytpud56FzuitSC9O6lJ4EOLOFHpsHlYpRjVdPfRqv5et5WOxLXD9zcSkOzagBJsXobd6+9pQkw==',
-  }
+    secretKey:
+      '/u+LP57Ib9y5Ytpud56FzuitSC9O6lJ4EOLOFHpsHlYpRjVdPfRqv5et5WOxLXD9zcSkOzagBJsXobd6+9pQkw==',
+  },
 }
