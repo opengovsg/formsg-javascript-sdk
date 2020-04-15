@@ -15,7 +15,7 @@ declare const _default: (options?: PackageInitParams) => {
         }) => string) | (() => void);
     };
     crypto: {
-        encrypt: (encryptionPublicKey: string, msg: any, signingPrivateKey?: string | undefined) => string;
+        encrypt: (msg: any, encryptionPublicKey: string, signingPrivateKey?: string | undefined) => string;
         decrypt: (formSecretKey: string, encryptedContent: string, verifiedContent?: string | undefined) => DecryptedContent | null;
         generate: () => Keypair;
         valid: (publicKey: string, secretKey: string) => boolean;

@@ -17,7 +17,7 @@ var guard_1 = require("./util/guard");
  * @param signingPrivateKey Optional. Must be a base-64 encoded private key,  will be used to signing the given msg param prior to encrypting.
  * @returns The encrypted basestring.
  */
-function encrypt(encryptionPublicKey, msg, signingPrivateKey) {
+function encrypt(msg, encryptionPublicKey, signingPrivateKey) {
     var processedMsg = tweetnacl_util_1.decodeUTF8(JSON.stringify(msg));
     if (signingPrivateKey) {
         processedMsg = nacl.sign(processedMsg, tweetnacl_util_1.decodeBase64(signingPrivateKey));
@@ -133,7 +133,7 @@ function valid(signingPublicKey) {
         var _a;
         var testResponse = [];
         try {
-            var cipherResponse = encrypt(publicKey, testResponse);
+            var cipherResponse = encrypt(testResponse, publicKey);
             // Use toString here since the return should be an empty array.
             return (testResponse.toString() === ((_a = decrypt(signingPublicKey)(secretKey, cipherResponse)) === null || _a === void 0 ? void 0 : _a.responses.toString()));
         }

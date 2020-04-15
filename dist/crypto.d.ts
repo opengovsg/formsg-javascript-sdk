@@ -5,7 +5,7 @@
  * @param signingPrivateKey Optional. Must be a base-64 encoded private key,  will be used to signing the given msg param prior to encrypting.
  * @returns The encrypted basestring.
  */
-declare function encrypt(encryptionPublicKey: string, msg: any, signingPrivateKey?: string): EncryptedContent;
+declare function encrypt(msg: any, encryptionPublicKey: string, signingPrivateKey?: string): EncryptedContent;
 /**
  * Generates a new keypair for encryption.
  * @returns The generated keypair.
