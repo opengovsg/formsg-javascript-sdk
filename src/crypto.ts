@@ -7,7 +7,7 @@ import {
 } from 'tweetnacl-util'
 
 import { getPublicKey } from './util/publicKey'
-import { determineIsFormFields } from './util/guard'
+import { determineIsFormFields } from './util/validate'
 
 /**
  * Encrypt input with a unique keypair for each submission

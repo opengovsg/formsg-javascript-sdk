@@ -24,13 +24,18 @@ type FieldType =
 
 // Represents form field responses in a form.
 type FormField = {
-  _id?: string
+  _id: string
   question: string
-  answer?: string
-  answerArray?: string[]
-  isHeader?: boolean
   fieldType: FieldType
-}
+  filename: string
+  content?: BinaryType
+  isHeader?: boolean
+  myInfo?: Object
+  signature: string
+} & (
+  | { answer: string; answerArray?: never }
+  | { answer?: never; answerArray: string[] }
+)
 
 // Encrypted basestring containing the submission public key,
 // nonce and encrypted data in base-64.
