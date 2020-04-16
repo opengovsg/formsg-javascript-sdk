@@ -118,6 +118,7 @@ function decrypt(signingPublicKey: string) {
       }
       const decryptedObject: Object = JSON.parse(encodeUTF8(decryptedContent))
       if (!determineIsFormFields(decryptedObject)) {
+        console.log(decryptedObject)
         throw new Error('Decrypted object does not fit expected shape')
       }
 

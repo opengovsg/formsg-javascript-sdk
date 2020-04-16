@@ -84,6 +84,7 @@ function decrypt(signingPublicKey) {
             }
             var decryptedObject = JSON.parse(tweetnacl_util_1.encodeUTF8(decryptedContent));
             if (!validate_1.determineIsFormFields(decryptedObject)) {
+                console.log(decryptedObject);
                 throw new Error('Decrypted object does not fit expected shape');
             }
             var returnedObject = {
