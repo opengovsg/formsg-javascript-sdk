@@ -1,4 +1,4 @@
-import * as nacl from 'tweetnacl'
+import nacl from 'tweetnacl'
 import {
   encodeBase64,
   decodeBase64,
@@ -92,18 +92,19 @@ function _verifySignedMessage(
 }
 
 /**
- * Method to decrypt an encrypted submission.
+ * Higher order function returning a function to decrypt an encrypted
+ * submission.
  * @param signingPublicKey The public key to open verified objects that was signed with the private key passed to this library.
  */
 function decrypt(signingPublicKey: string) {
   /**
-   * The real method to decrypt an encrypted submission.
+   * Decrypts an encrypted submission and returns it.
    * @param formSecretKey The base-64 secret key of the form to decrypt with.
    * @param encryptedContent The encrypted content encoded with base-64.
    * @param verifiedContent Optional. The encrypted and signed verified content. If given, the signingPublicKey will be used to attempt to open the signed message.
    * @returns The decrypted content if successful. Else, null will be returned.
    */
-  function internalDecrypt(
+  function _internalDecrypt(
     formSecretKey: string,
     encryptedContent: EncryptedContent,
     verifiedContent?: EncryptedContent
@@ -149,7 +150,7 @@ function decrypt(signingPublicKey: string) {
       return null
     }
   }
-  return internalDecrypt
+  return _internalDecrypt
 }
 
 /**
@@ -190,7 +191,8 @@ function valid(signingPublicKey: string) {
 }
 
 /**
- * Provider that accepts configuration before returning the crypto module to init.
+ * Provider that accepts configuration before returning the crypto module to
+ * init.
  */
 export = function ({ mode }: Omit<PackageInitParams, 'webhookSecretKey'>) {
   const signingPublicKey = getPublicKey(mode)

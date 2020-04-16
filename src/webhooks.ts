@@ -5,7 +5,8 @@ import { getPublicKey } from './util/publicKey'
 import { parseSignatureHeader } from './util/parser'
 
 /**
- * Helpfer function to construct the basestring and verify the signature of an incoming request
+ * Helper function to construct the basestring and verify the signature of an
+ * incoming request
  * @param uri String
  * @param submissionId MongoDB submission ObjectId
  * @param formId MongoDB submission ObjectId
@@ -42,7 +43,7 @@ function verifyEpoch(epoch: number, expiry: number = 300000) {
  */
 function authenticate(webhookPublicKey: string) {
   /**
-   * Internal function that injects the webhook public key for authentication
+   * Injects the webhook public key for authentication
    * @param header X-FormSG-Signature header
    * @param uri The endpoint that FormSG is POSTing to
    * @throws {Error} If the signature or uri cannot be verified
