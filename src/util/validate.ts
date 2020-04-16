@@ -15,8 +15,10 @@ const FORM_FIELDS_SCHEMA = Joi.array()
         myInfo: Joi.object(),
         signature: Joi.string().allow(''),
       })
-      .xor('answer', 'answerArray') // only answer or answerArray can be present at once
-      .with('filename', 'content') // if filename is present, content must be present
+      // only answer or answerArray can be present at once
+      .xor('answer', 'answerArray')
+      // if filename is present, content must be present
+      .with('filename', 'content')
   )
   .required()
 
