@@ -112,7 +112,7 @@ The underlying cryptosystem is `x25519-xsalsa20-poly1305` which is implemented b
 
 The `encryptedContent` field decrypts into an array of `FormField` objects, which will be assigned to the `responses` key of the returned object.
 
-Furthermore, if `verifiedContent` is passed as the third parameter of the `decrypt` function, the function will decrypt and open the signed decrypted content with the package's own `signingPublicKey` in [`signing-keys.ts`](https://github.com/opengovsg/formsg-javascript-sdk/master/src/resource/signing-keys.ts). 
+Furthermore, if `verifiedContent` is passed as the third parameter of the `decrypt` function, the function will decrypt and open the signed decrypted content with the package's own `signingPublicKey` in [`signing-keys.ts`](https://github.com/opengovsg/formsg-javascript-sdk/tree/master/src/resource/signing-keys.ts). 
 
 > **NOTE** <br>
 > If any errors occur, either from the failure to decrypt either `encryptedContent` or `verifiedContent`,  or the failure to authenticate the decrypted signed message in `verifiedContent`, `null` will be returned.
@@ -129,7 +129,7 @@ However, the `decrypt` function exposed by this library uses [`joi`](https://hap
 | fieldType | string | The type of field for the question.                              |
 | _id       | string | A unique identifier of the form field. WARNING: Changes when new fields are created/removed in the form.        |
 
-The full schema can be viewed in [`validate.ts`](https://github.com/opengovsg/formsg-javascript-sdk/master/src/util/validate.ts).
+The full schema can be viewed in [`validate.ts`](https://github.com/opengovsg/formsg-javascript-sdk/tree/master/src/util/validate.ts).
 
 ## Verifying Signatures Manually
 
