@@ -56,14 +56,18 @@ app.post('/submissions',
   },
   // Decrypt the submission
   function (req, res, next) {
-  	 // As the third parameter `verifiedContent` is not provided, only responses will
-  	 // be returned in the response object.
-  	 /** @type {{responses: FormField[]}} */
+    // As the third parameter `verifiedContent` is not provided, only 
+    // responses will be returned in the response object.
+    /** @type {{responses: FormField[]}} */
     const submission = formsg.crypto.decrypt(formSecretKey, req.body.encryptedContent)
     
     // If a third parameter is provided, the return object will include a verified 
     // key.
-  	 /** @type {{responses: FormField[], verified: Record<string, any>}} */
+    /** @type {{
+     *    responses: FormField[], 
+     *    verified: Record<string, any>
+     *  }} 
+     */
     const submission = formsg.crypto.decrypt(
         formSecretKey, req.body.encryptedContent, req.body.verifiedContent)
         
