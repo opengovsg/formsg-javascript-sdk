@@ -27,11 +27,8 @@ type FormField = {
   _id: string
   question: string
   fieldType: FieldType
-  filename: string
-  content?: BinaryType
   isHeader?: boolean
-  myInfo?: Object
-  signature: string
+  signature?: string
 } & (
   | { answer: string; answerArray?: never }
   | { answer?: never; answerArray: string[] }

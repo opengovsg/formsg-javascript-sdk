@@ -147,6 +147,7 @@ function decrypt(signingPublicKey: string) {
 
       return returnedObject
     } catch (err) {
+      console.error(err)
       return null
     }
   }
