@@ -87,10 +87,8 @@ describe('Crypto', function () {
     // Arrange
     const { publicKey, secretKey } = formsg.crypto.generate()
     const mockVerifiedContent = {
-      question: 'SingPass Validated NRIC',
-      fieldType: 'authentication',
-      isVisible: true,
-      answer: 'S12345679Z',
+      uinFin: 'S12345679Z',
+      somethingElse: 99,
     }
 
     // Act
