@@ -1,12 +1,14 @@
 {
   "name": "@opengovsg/formsg-sdk",
-  "version": "0.4.1",
+  "version": "0.5.0",
   "description": "Node.js SDK for integrating with FormSG",
   "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "scripts": {
-    "test": "jasmine",
-    "build": "babel src --out-dir dist",
-    "prepublish": "npm run build"
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "build": "tsc",
+    "prepare": "npm run build"
   },
   "keywords": [
     "formsg",
@@ -16,6 +18,7 @@
   "author": "Open Government Products (FormSG)",
   "license": "MIT",
   "dependencies": {
+    "@hapi/joi": "^17.1.1",
     "tweetnacl": "^1.0.3",
     "tweetnacl-util": "^0.15.1"
   },
@@ -23,7 +26,11 @@
     "@babel/cli": "^7.8.4",
     "@babel/core": "^7.9.0",
     "@babel/preset-env": "^7.9.0",
-    "jasmine": "^3.5.0",
-    "lodash": "^4.17.15"
+    "@types/hapi__joi": "^16.0.12",
+    "@types/jest": "^25.2.1",
+    "@types/node": "^13.11.1",
+    "jest": "^25.3.0",
+    "ts-jest": "^25.3.1",
+    "typescript": "^3.8.3"
   }
 }

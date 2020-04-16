@@ -1,5 +1,7 @@
+import formsg from '../src/index'
+
 describe('FormSG SDK', () => {
   it('should be able to initialise without arguments', () => {
-    expect(() => require('../src/index')()).not.toThrow()
+    expect(() => formsg()).not.toThrow()
   })
 })

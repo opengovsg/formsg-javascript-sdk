@@ -1,3 +1,10 @@
+type Signature = {
+  v1: string
+  t: string
+  s: string
+  f: string
+}
+
 /**
  * The constituents of the X-FormSG-Signature
  * @typedef {Object} Signature
@@ -9,18 +16,18 @@
 /**
  * Parses the X-FormSG-Signature header into its constitutents
  * @param {string} header The X-FormSG-Signature header
- * @returns {Signature}
+ * @returns the signature header
  */
-function parseSignatureHeader (header) {
-  return header
+function parseSignatureHeader(header: string): Signature {
+  const parsedSignature = header
     .split(',')
-    .map(kv => kv.split(/=(.*)/))
+    .map((kv) => kv.split(/=(.*)/))
     .reduce((acc, [k, v]) => {
       acc[k] = v
       return acc
-    }, {})
+    }, {} as Record<string, any>)
+
+  return parsedSignature as Signature
 }
 
-module.exports = {
-  parseSignatureHeader,
-}
+export { parseSignatureHeader }
