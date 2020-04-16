@@ -104,6 +104,7 @@ function decrypt(signingPublicKey) {
             return returnedObject;
         }
         catch (err) {
+            console.error(err);
             return null;
         }
     }

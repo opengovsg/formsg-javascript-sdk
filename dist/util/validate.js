@@ -1,24 +1,20 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-var joi_1 = __importDefault(require("@hapi/joi"));
-var FORM_FIELDS_SCHEMA = joi_1.default.array()
-    .items(joi_1.default.object()
-    .keys({
-    _id: joi_1.default.string().required(),
-    question: joi_1.default.string().required(),
-    fieldType: joi_1.default.string().required(),
-    answer: joi_1.default.string().allow(''),
-    answerArray: joi_1.default.array(),
-    isHeader: joi_1.default.boolean(),
-    signature: joi_1.default.string().allow(''),
-})
-    // only answer or answerArray can be present at once
-    .xor('answer', 'answerArray'))
-    .required();
 function determineIsFormFields(tbd) {
-    return FORM_FIELDS_SCHEMA.validate(tbd).error === undefined;
+    if (!Array.isArray(tbd)) {
+        return false;
+    }
+    // If there exists even a single internal response that does not fit the
+    // shape, the object is not created properly.
+    var filter = tbd.filter(function (internal) {
+        // Have either answer or answerArray or is isHeader
+        return (internal.answer ||
+            Array.isArray(internal.answerArray) ||
+            internal.isHeader) &&
+            internal._id &&
+            internal.fieldType &&
+            internal.question;
+    });
+    return filter.length === tbd.length;
 }
 exports.determineIsFormFields = determineIsFormFields;
