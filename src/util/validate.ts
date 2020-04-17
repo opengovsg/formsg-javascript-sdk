@@ -8,7 +8,8 @@ function determineIsFormFields(tbd: any): tbd is FormField[] {
   const filter = tbd.filter(
     (internal) =>
       // Have either answer or answerArray or is isHeader
-      (internal.answer ||
+      // Since empty strings are allowed, check using typeof.
+      (typeof internal.answer === 'string' ||
         Array.isArray(internal.answerArray) ||
         internal.isHeader) &&
       internal._id &&

@@ -23,8 +23,7 @@
   "license": "MIT",
   "dependencies": {
     "tweetnacl": "^1.0.3",
-    "tweetnacl-util": "^0.15.1",
-    "validate.js": "^0.13.1"
+    "tweetnacl-util": "^0.15.1"
   },
   "devDependencies": {
     "@babel/cli": "^7.8.4",

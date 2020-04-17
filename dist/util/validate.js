@@ -8,7 +8,8 @@ function determineIsFormFields(tbd) {
     // shape, the object is not created properly.
     var filter = tbd.filter(function (internal) {
         // Have either answer or answerArray or is isHeader
-        return (internal.answer ||
+        // Since empty strings are allowed, check using typeof.
+        return (typeof internal.answer === 'string' ||
             Array.isArray(internal.answerArray) ||
             internal.isHeader) &&
             internal._id &&
