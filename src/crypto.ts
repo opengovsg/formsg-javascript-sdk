@@ -191,6 +191,49 @@ function valid(signingPublicKey: string) {
 }
 
 /**
+ * Helper function to encrypt file with a unique keypair for each submission.
+ * @param blob The file to encrypt
+ * @param formPublicKey The base-64 encoded public key
+ * @returns Promise holding the encrypted file
+ * @throws error if any of the encrypt methods fail
+ */
+async function encryptFile (blob: Blob, formPublicKey: string): Promise<EncryptedFileContent> {
+  const binary = new Uint8Array(await blob.arrayBuffer())
+  const submissionKeypair = generate()
+  const nonce = nacl.randomBytes(24)
+  return {
+    submissionPublicKey: submissionKeypair.publicKey,
+    nonce: encodeBase64(nonce),
+    blob: new Blob([nacl.box(
+      binary,
+      nonce,
+      decodeBase64(formPublicKey),
+      decodeBase64(submissionKeypair.secretKey)
+    )])
+  }
+}
+
+/**
+ * Helper function to decrypt a file
+ * @param formSecretKey Secret key as a base-64 string
+ * @param encrypted Object returned from encryptFile function
+ * @param encrypted.submissionPublicKey The submission public key as a base-64 string
+ * @param encrypted.nonce The nonce as a base-64 string
+ * @param blob The encrypted file as a Blob object
+ */
+async function decryptFile (formSecretKey: string, { submissionPublicKey, nonce, blob }: EncryptedFileContent ): Promise<Blob> {
+  const encryptedBinary = new Uint8Array(await blob.arrayBuffer())
+  const decryptedBinary = nacl.box.open(
+    encryptedBinary,
+    decodeBase64(nonce),
+    decodeBase64(submissionPublicKey),
+    decodeBase64(formSecretKey),
+  )
+  if (decryptedBinary) return new Blob([decryptedBinary])
+  else throw new Error('Decryption Error')
+}
+
+/**
  * Provider that accepts configuration before returning the crypto module to
  * init.
  */
@@ -201,5 +244,7 @@ export = function ({ mode }: Omit<PackageInitParams, 'webhookSecretKey'>) {
     decrypt: decrypt(signingPublicKey),
     generate,
     valid: valid(signingPublicKey),
+    encryptFile,
+    decryptFile,
   }
 }
