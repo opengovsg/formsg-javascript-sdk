@@ -115,7 +115,7 @@ describe('Crypto', function () {
   })
 
   it('should be able to encrypt and decrypt files end-to-end', async () => {
-    const plaintext = new Blob(['some','file'])
+    const plaintext = new Blob(['some','file'], { type: 'text/plain' })
     const { publicKey, secretKey } = formsg.crypto.generate()
 
     // Encrypt
