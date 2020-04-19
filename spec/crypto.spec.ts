@@ -1,3 +1,5 @@
+const { Blob } = require('blob-polyfill')
+
 import { SIGNING_KEYS } from '../src/resource/signing-keys'
 import formsgPackage from '../src/index'
 import {
@@ -110,5 +112,29 @@ describe('Crypto', function () {
     // Assert
     expect(decrypted).toHaveProperty('verified', mockVerifiedContent)
     expect(decrypted).toHaveProperty('responses', plaintext)
+  })
+
+  it('should be able to encrypt and decrypt files end-to-end', async () => {
+    const plaintext = new Blob(['some','file'])
+    const { publicKey, secretKey } = formsg.crypto.generate()
+
+    // Encrypt
+    const encrypted = await formsg.crypto.encryptFile(plaintext, publicKey)
+    expect(encrypted).toHaveProperty('submissionPublicKey')
+    expect(encrypted).toHaveProperty('nonce')
+    expect(encrypted).toHaveProperty('blob')
+
+    // Decrypt
+    const decrypted = await formsg.crypto.decryptFile(secretKey, encrypted)
+
+    // Compare
+    const plaintextArray = new Uint8Array(await plaintext.arrayBuffer())
+    const decryptedArray = new Uint8Array(await decrypted.arrayBuffer())
+
+    expect(plaintextArray.byteLength).toEqual(decryptedArray.byteLength)
+
+    for (let i = 0; i < plaintextArray.byteLength; i++) {
+      expect(plaintextArray[i]).toEqual(decryptedArray[i])
+    }
   })
 })

@@ -1,3 +1,5 @@
+const { Blob } = require('blob-polyfill')
+
 import nacl from 'tweetnacl'
 import {
   encodeBase64,
