@@ -133,11 +133,7 @@ describe('Crypto', function () {
     }
 
     // Compare
-    expect(testFileBuffer.byteLength).toEqual(decrypted.byteLength)
-
-    for (let i = 0; i < testFileBuffer.byteLength; i++) {
-      expect(testFileBuffer[i]).toEqual(decrypted[i])
-    }
+    expect(testFileBuffer).toEqual(decrypted)
   })
 
   it('should return null if file could not be decrypted', async () => {
