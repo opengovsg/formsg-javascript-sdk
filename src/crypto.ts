@@ -223,7 +223,7 @@ async function encryptFile (blob: Blob, formPublicKey: string): Promise<Encrypte
  * @param encrypted.nonce The nonce as a base-64 string
  * @param encrypted.blob The encrypted file as a Blob object
  */
-async function decryptFile (formSecretKey: string, { submissionPublicKey, nonce, blob }: EncryptedFileContent ): Promise<Blob> {
+async function decryptFile (formSecretKey: string, { submissionPublicKey, nonce, blob }: EncryptedFileContent ): Promise<Blob | null> {
   const encryptedBinary = new Uint8Array(await blob.arrayBuffer())
   const decryptedBinary = nacl.box.open(
     encryptedBinary,
@@ -232,7 +232,7 @@ async function decryptFile (formSecretKey: string, { submissionPublicKey, nonce,
     decodeBase64(formSecretKey),
   )
   if (decryptedBinary) return new Blob([decryptedBinary])
-  else throw new Error('Decryption Error')
+  else return null
 }
 
 /**

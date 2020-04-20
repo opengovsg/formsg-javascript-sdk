@@ -127,6 +127,8 @@ describe('Crypto', function () {
     // Decrypt
     const decrypted = await formsg.crypto.decryptFile(secretKey, encrypted)
 
+    if (!decrypted) { throw new Error('File should be able to decrypt successfully.')}
+
     // Compare
     const plaintextArray = new Uint8Array(await plaintext.arrayBuffer())
     const decryptedArray = new Uint8Array(await decrypted.arrayBuffer())
@@ -136,5 +138,17 @@ describe('Crypto', function () {
     for (let i = 0; i < plaintextArray.byteLength; i++) {
       expect(plaintextArray[i]).toEqual(decryptedArray[i])
     }
+  })
+
+  it('should return null if file could not be decrypted', async () => {
+    const plaintext = new Blob(['some','file'], { type: 'text/plain' })
+    const { publicKey, secretKey } = formsg.crypto.generate()
+
+    const encrypted = await formsg.crypto.encryptFile(plaintext, publicKey)
+    encrypted.blob = new Blob(['random'], { type: 'text/plain' })
+
+    const decrypted = await formsg.crypto.decryptFile(secretKey, encrypted)
+
+    expect(decrypted).toBeNull()
   })
 })
