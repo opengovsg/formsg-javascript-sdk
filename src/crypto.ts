@@ -221,7 +221,7 @@ async function encryptFile (blob: Blob, formPublicKey: string): Promise<Encrypte
  * @param encrypted Object returned from encryptFile function
  * @param encrypted.submissionPublicKey The submission public key as a base-64 string
  * @param encrypted.nonce The nonce as a base-64 string
- * @param blob The encrypted file as a Blob object
+ * @param encrypted.blob The encrypted file as a Blob object
  */
 async function decryptFile (formSecretKey: string, { submissionPublicKey, nonce, blob }: EncryptedFileContent ): Promise<Blob> {
   const encryptedBinary = new Uint8Array(await blob.arrayBuffer())
