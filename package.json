@@ -1,6 +1,6 @@
 {
   "name": "@opengovsg/formsg-sdk",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "repository": {
     "type": "git",
     "url": "https://github.com/opengovsg/formsg-javascript-sdk.git"
@@ -23,8 +23,7 @@
   "license": "MIT",
   "dependencies": {
     "tweetnacl": "^1.0.3",
-    "tweetnacl-util": "^0.15.1",
-    "blob-polyfill": "^4.0.20190430"
+    "tweetnacl-util": "^0.15.1"
   },
   "devDependencies": {
     "@babel/cli": "^7.8.4",

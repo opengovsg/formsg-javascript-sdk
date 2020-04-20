@@ -1,5 +1,3 @@
-const { Blob } = require('blob-polyfill')
-
 import nacl from 'tweetnacl'
 import {
   encodeBase64,
@@ -194,24 +192,26 @@ function valid(signingPublicKey: string) {
 
 /**
  * Helper function to encrypt file with a unique keypair for each submission.
- * @param blob The file to encrypt
+ * @param binary The file to encrypt, should be a blob that is converted to { @type Uint8Array} binary
  * @param formPublicKey The base-64 encoded public key
  * @returns Promise holding the encrypted file
  * @throws error if any of the encrypt methods fail
  */
-async function encryptFile (blob: Blob, formPublicKey: string): Promise<EncryptedFileContent> {
-  const binary = new Uint8Array(await blob.arrayBuffer())
+async function encryptFile(
+  binary: Uint8Array,
+  formPublicKey: string
+): Promise<EncryptedFileContent> {
   const submissionKeypair = generate()
   const nonce = nacl.randomBytes(24)
   return {
     submissionPublicKey: submissionKeypair.publicKey,
     nonce: encodeBase64(nonce),
-    blob: new Blob([nacl.box(
+    binary: nacl.box(
       binary,
       nonce,
       decodeBase64(formPublicKey),
       decodeBase64(submissionKeypair.secretKey)
-    )])
+    ),
   }
 }
 
@@ -223,16 +223,16 @@ async function encryptFile (blob: Blob, formPublicKey: string): Promise<Encrypte
  * @param encrypted.nonce The nonce as a base-64 string
  * @param encrypted.blob The encrypted file as a Blob object
  */
-async function decryptFile (formSecretKey: string, { submissionPublicKey, nonce, blob }: EncryptedFileContent ): Promise<Blob | null> {
-  const encryptedBinary = new Uint8Array(await blob.arrayBuffer())
-  const decryptedBinary = nacl.box.open(
+async function decryptFile(
+  formSecretKey: string,
+  { submissionPublicKey, nonce, binary: encryptedBinary }: EncryptedFileContent
+): Promise<Uint8Array | null> {
+  return nacl.box.open(
     encryptedBinary,
     decodeBase64(nonce),
     decodeBase64(submissionPublicKey),
-    decodeBase64(formSecretKey),
+    decodeBase64(formSecretKey)
   )
-  if (decryptedBinary) return new Blob([decryptedBinary])
-  else return null
 }
 
 /**
