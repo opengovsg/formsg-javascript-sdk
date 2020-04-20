@@ -23,8 +23,7 @@
   "license": "MIT",
   "dependencies": {
     "tweetnacl": "^1.0.3",
-    "tweetnacl-util": "^0.15.1",
-    "blob-polyfill": "^4.0.20190430"
+    "tweetnacl-util": "^0.15.1"
   },
   "devDependencies": {
     "@babel/cli": "^7.8.4",
