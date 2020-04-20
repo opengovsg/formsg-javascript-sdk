@@ -211,7 +211,7 @@ function encryptFile(blob, formPublicKey) {
  * @param encrypted Object returned from encryptFile function
  * @param encrypted.submissionPublicKey The submission public key as a base-64 string
  * @param encrypted.nonce The nonce as a base-64 string
- * @param blob The encrypted file as a Blob object
+ * @param encrypted.blob The encrypted file as a Blob object
  */
 function decryptFile(formSecretKey, _a) {
     var submissionPublicKey = _a.submissionPublicKey, nonce = _a.nonce, blob = _a.blob;
@@ -228,7 +228,7 @@ function decryptFile(formSecretKey, _a) {
                     if (decryptedBinary)
                         return [2 /*return*/, new Blob([decryptedBinary])];
                     else
-                        throw new Error('Decryption Error');
+                        return [2 /*return*/, null];
                     return [2 /*return*/];
             }
         });

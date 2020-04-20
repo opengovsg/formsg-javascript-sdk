@@ -25,9 +25,9 @@ declare function encryptFile(blob: Blob, formPublicKey: string): Promise<Encrypt
  * @param encrypted Object returned from encryptFile function
  * @param encrypted.submissionPublicKey The submission public key as a base-64 string
  * @param encrypted.nonce The nonce as a base-64 string
- * @param blob The encrypted file as a Blob object
+ * @param encrypted.blob The encrypted file as a Blob object
  */
-declare function decryptFile(formSecretKey: string, { submissionPublicKey, nonce, blob }: EncryptedFileContent): Promise<Blob>;
+declare function decryptFile(formSecretKey: string, { submissionPublicKey, nonce, blob }: EncryptedFileContent): Promise<Blob | null>;
 declare const _default: ({ mode }: Pick<PackageInitParams, "mode">) => {
     encrypt: typeof encrypt;
     decrypt: (formSecretKey: string, encryptedContent: string, verifiedContent?: string | undefined) => DecryptedContent | null;

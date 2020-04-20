@@ -20,7 +20,7 @@ declare const _default: (options?: PackageInitParams) => {
         generate: () => Keypair;
         valid: (publicKey: string, secretKey: string) => boolean;
         encryptFile: (blob: Blob, formPublicKey: string) => Promise<EncryptedFileContent>;
-        decryptFile: (formSecretKey: string, { submissionPublicKey, nonce, blob }: EncryptedFileContent) => Promise<Blob>;
+        decryptFile: (formSecretKey: string, { submissionPublicKey, nonce, blob }: EncryptedFileContent) => Promise<Blob | null>;
     };
 };
 /**
