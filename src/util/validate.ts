@@ -1,29 +1,23 @@
-import Joi from '@hapi/joi'
-
-const FORM_FIELDS_SCHEMA = Joi.array()
-  .items(
-    Joi.object()
-      .keys({
-        _id: Joi.string().required(),
-        question: Joi.string().required(),
-        fieldType: Joi.string().required(),
-        answer: Joi.string().allow(''),
-        answerArray: Joi.array(),
-        filename: Joi.string(),
-        content: Joi.binary(),
-        isHeader: Joi.boolean(),
-        myInfo: Joi.object(),
-        signature: Joi.string().allow(''),
-      })
-      // only answer or answerArray can be present at once
-      .xor('answer', 'answerArray')
-      // if filename is present, content must be present
-      .with('filename', 'content')
-  )
-  .required()
-
 function determineIsFormFields(tbd: any): tbd is FormField[] {
-  return !FORM_FIELDS_SCHEMA.validate(tbd).error
+  if (!Array.isArray(tbd)) {
+    return false
+  }
+
+  // If there exists even a single internal response that does not fit the
+  // shape, the object is not created properly.
+  const filter = tbd.filter(
+    (internal) =>
+      // Have either answer or answerArray or is isHeader
+      // Since empty strings are allowed, check using typeof.
+      (typeof internal.answer === 'string' ||
+        Array.isArray(internal.answerArray) ||
+        internal.isHeader) &&
+      internal._id &&
+      internal.fieldType &&
+      internal.question
+  )
+
+  return filter.length === tbd.length
 }
 
 export { determineIsFormFields }
