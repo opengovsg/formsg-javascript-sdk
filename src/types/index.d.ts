@@ -46,9 +46,9 @@ type DecryptedContent = {
 }
 
 type EncryptedFileContent = {
-  submissionPublicKey: string,
-  nonce: string,
-  blob: Blob,
+  submissionPublicKey: string
+  nonce: string
+  binary: Uint8Array
 }
 
 // A base-64 encoded cryptographic keypair suitable for curve25519.

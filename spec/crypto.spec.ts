@@ -8,9 +8,11 @@ import {
 } from './resources/crypto-data-20200322'
 
 const formsg = formsgPackage({ mode: 'test' })
-const signingSecretKey = SIGNING_KEYS.test.secretKey
 
 describe('Crypto', function () {
+  const signingSecretKey = SIGNING_KEYS.test.secretKey
+  const testFileBuffer = new Uint8Array(Buffer.from('./resources/ogp.svg'))
+
   it('should generate a keypair', () => {
     const keypair = formsg.crypto.generate()
     expect(Object.keys(keypair)).toContain('secretKey')
@@ -112,41 +114,41 @@ describe('Crypto', function () {
     expect(decrypted).toHaveProperty('responses', plaintext)
   })
 
-  // it('should be able to encrypt and decrypt files end-to-end', async () => {
-  //   const plaintext = new Blob(['some','file'], { type: 'text/plain' })
-  //   const { publicKey, secretKey } = formsg.crypto.generate()
+  it('should be able to encrypt and decrypt files end-to-end', async () => {
+    // Arrange
+    const { publicKey, secretKey } = formsg.crypto.generate()
 
-  //   // Encrypt
-  //   const encrypted = await formsg.crypto.encryptFile(plaintext, publicKey)
-  //   expect(encrypted).toHaveProperty('submissionPublicKey')
-  //   expect(encrypted).toHaveProperty('nonce')
-  //   expect(encrypted).toHaveProperty('blob')
+    // Act
+    // Encrypt
+    const encrypted = await formsg.crypto.encryptFile(testFileBuffer, publicKey)
+    expect(encrypted).toHaveProperty('submissionPublicKey')
+    expect(encrypted).toHaveProperty('nonce')
+    expect(encrypted).toHaveProperty('binary')
 
-  //   // Decrypt
-  //   const decrypted = await formsg.crypto.decryptFile(secretKey, encrypted)
+    // Decrypt
+    const decrypted = await formsg.crypto.decryptFile(secretKey, encrypted)
 
-  //   if (!decrypted) { throw new Error('File should be able to decrypt successfully.')}
+    if (!decrypted) {
+      throw new Error('File should be able to decrypt successfully.')
+    }
 
-  //   // Compare
-  //   const plaintextArray = new Uint8Array(await plaintext.arrayBuffer())
-  //   const decryptedArray = new Uint8Array(await decrypted.arrayBuffer())
+    // Compare
+    expect(testFileBuffer.byteLength).toEqual(decrypted.byteLength)
 
-  //   expect(plaintextArray.byteLength).toEqual(decryptedArray.byteLength)
+    for (let i = 0; i < testFileBuffer.byteLength; i++) {
+      expect(testFileBuffer[i]).toEqual(decrypted[i])
+    }
+  })
 
-  //   for (let i = 0; i < plaintextArray.byteLength; i++) {
-  //     expect(plaintextArray[i]).toEqual(decryptedArray[i])
-  //   }
-  // })
+  it('should return null if file could not be decrypted', async () => {
+    const { publicKey, secretKey } = formsg.crypto.generate()
 
-  // it('should return null if file could not be decrypted', async () => {
-  //   const plaintext = new Blob(['some','file'], { type: 'text/plain' })
-  //   const { publicKey, secretKey } = formsg.crypto.generate()
+    const encrypted = await formsg.crypto.encryptFile(testFileBuffer, publicKey)
+    // Rewrite binary with invalid Uint8Array.
+    encrypted.binary = new Uint8Array([1, 2])
 
-  //   const encrypted = await formsg.crypto.encryptFile(plaintext, publicKey)
-  //   encrypted.blob = new Blob(['random'], { type: 'text/plain' })
+    const decrypted = await formsg.crypto.decryptFile(secretKey, encrypted)
 
-  //   const decrypted = await formsg.crypto.decryptFile(secretKey, encrypted)
-
-  //   expect(decrypted).toBeNull()
-  // })
+    expect(decrypted).toBeNull()
+  })
 })
