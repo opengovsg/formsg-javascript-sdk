@@ -45,6 +45,12 @@ type DecryptedContent = {
   verified?: Record<string, any>
 }
 
+type EncryptedFileContent = {
+  submissionPublicKey: string,
+  nonce: string,
+  blob: Blob,
+}
+
 // A base-64 encoded cryptographic keypair suitable for curve25519.
 type Keypair = {
   publicKey: string
