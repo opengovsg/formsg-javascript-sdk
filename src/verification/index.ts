@@ -32,8 +32,8 @@ export = function (params: PackageInitParams = {}) {
     }
   }
   return {
-    authenticate: function (){},
-    generateSignature: function (){},
+    authenticate: function (){ throw new Error('Provide verificationOptions when initializing the formsg sdk to use this function.') },
+    generateSignature: function (){ throw new Error('Provide verificationOptions when initializing the formsg sdk to use this function.')  },
   } 
 }
   
