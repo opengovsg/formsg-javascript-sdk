@@ -1,6 +1,10 @@
 type PackageInitParams = {
   mode?: PackageMode
   webhookSecretKey?: string
+  verificationOptions?: {
+    secretKey: string,
+    transactionExpiry: number
+  }
 }
 
 // A field type available in FormSG as a string
