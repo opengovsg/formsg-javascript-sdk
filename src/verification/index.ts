@@ -14,26 +14,17 @@ import getPublicKey from './get-public-key'
 export = function (params: PackageInitParams = {}) {
   const { mode, verificationOptions } = params
   if(verificationOptions !== undefined){
-    const { secretKey: verificationSecretKey, transactionExpiry } = verificationOptions
-    if(verificationSecretKey === undefined || transactionExpiry === undefined){
-      throw new Error('Both secretKey and transactionExpiry must be specified for verification of otp form fields')
-    }
-
     const verificationPublicKey = getPublicKey(mode)
-      
-    return {
-      /* Verification functions */
-      authenticate: authenticate(verificationPublicKey, transactionExpiry),
-      /* Signing functions */
-      /* Return noop if a verificationSecretKey is not provided. */
-      generateSignature: verificationSecretKey
-        ? generateSignature(verificationSecretKey)
-        : function () {},
+    const { secretKey: verificationSecretKey, transactionExpiry } = verificationOptions
+    return { 
+      authenticate: transactionExpiry !== undefined ? 
+        authenticate(verificationPublicKey, transactionExpiry)
+        : function (){ throw new Error('Provide transactionExpiry when initializing the formsg sdk to use this function.') },
+      generateSignature: verificationSecretKey !== undefined ?
+        generateSignature(verificationSecretKey)
+        : function (){ throw new Error('Provide verificationSecretKey when initializing the formsg sdk to use this function.')  },
     }
   }
-  return {
-    authenticate: function (){ throw new Error('Provide verificationOptions when initializing the formsg sdk to use this function.') },
-    generateSignature: function (){ throw new Error('Provide verificationOptions when initializing the formsg sdk to use this function.')  },
-  } 
+  return {}
 }
   
