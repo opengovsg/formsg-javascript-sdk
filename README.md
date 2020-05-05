@@ -47,7 +47,7 @@ app.post('/submissions',
   // Endpoint authentication by verifying signatures
   function (req, res, next) {
     try {
-      formsg.webhooks.authenticate(req.headers['X-FormSG-Signature'], POST_URI)
+      formsg.webhooks.authenticate(req.headers['x-formsg-signature'], POST_URI)
       // Continue processing the POST body
       return next()
     } catch (e) {
