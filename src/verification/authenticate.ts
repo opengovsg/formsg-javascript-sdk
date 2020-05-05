@@ -1,6 +1,6 @@
 import nacl from 'tweetnacl'
 import { decodeUTF8, decodeBase64 } from 'tweetnacl-util'
-import constructHeader from './construct-header'
+import basestring from './basestring'
 
 export default function ( publicKey: string, transactionExpirySeconds: number ): Function {
   /*
@@ -36,7 +36,7 @@ export default function ( publicKey: string, transactionExpirySeconds: number ):
     
       const signatureDate = +time
       if (isSignatureTimeValid(signatureDate, submissionCreatedAt)) {
-        const data = constructHeader({ transactionId, formId, fieldId, answer, time: signatureDate })
+        const data = basestring({ transactionId, formId, fieldId, answer, time: signatureDate })
         return nacl.sign.detached.verify(
           decodeUTF8(data),
           decodeBase64(signature),
