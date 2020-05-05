@@ -3,8 +3,7 @@
  * Formats given data into a string for signing
  */
 function basestring(
-  { transactionId, formId, fieldId, answer, time }: 
-    { transactionId: string; formId: string; fieldId: string; answer: string; time: number }
+  { transactionId, formId, fieldId, answer, time }: VerificationBasestringOptions
 ): string {
   return `${transactionId}.${formId}.${fieldId}.${answer}.${time}`
 }

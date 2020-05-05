@@ -3,9 +3,7 @@ import { decodeUTF8, decodeBase64, encodeBase64 } from 'tweetnacl-util'
 import basestring from './basestring'
 export default function (privateKey: string){
     
-  function generateSignature({ transactionId, formId, fieldId, answer }: {
-        transactionId: string; formId: string; fieldId: string; answer: string;
-    }): string {
+  function generateSignature({ transactionId, formId, fieldId, answer }: VerificationSignatureOptions): string {
     const time = Date.now()
     const data = basestring({ transactionId, formId, fieldId, answer, time })
     const signature = nacl.sign.detached(

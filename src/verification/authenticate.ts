@@ -23,8 +23,7 @@ export default function ( publicKey: string, transactionExpirySeconds: number ):
      * @param {string} data.answer
      * @param {string} data.publicKey
      */
-  function authenticate({ signatureString, submissionCreatedAt, fieldId, answer }:
-        { signatureString: string; submissionCreatedAt: number; fieldId: string; answer: string }) {
+  function authenticate({ signatureString, submissionCreatedAt, fieldId, answer }: VerificationAuthenticateOptions) {
     try {
       const { v: transactionId, t: time, f: formId, s: signature } = signatureString
         .split(',')
