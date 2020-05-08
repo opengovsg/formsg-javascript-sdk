@@ -65,24 +65,23 @@ type VerificationOptions = {
   transactionExpiry?: number
 }
 
-type VerificationBasestringOptions = {
-  transactionId: string; 
-  formId: string; 
-  fieldId: string; 
-  answer: string; 
-  time: number 
-}
-
-type VerificationSignatureOptions = {
-  transactionId: string; 
-  formId: string; 
+// A verified answer contains a field ID and answer
+type VerifiedAnswer = {
   fieldId: string; 
   answer: string;
 }
 
-type VerificationAuthenticateOptions = { 
+// Add the transaction ID and form ID to a VerifiedAnswer to obtain a signature
+type VerificationSignatureOptions = VerifiedAnswer & {
+  transactionId: string; 
+  formId: string; 
+}
+
+// Creating a basestring requires the epoch in addition to signature requirements
+type VerificationBasestringOptions = VerificationSignatureOptions & { time: number }
+
+// Authenticate a VerifiedAnswer with a signatureString and epoch
+type VerificationAuthenticateOptions = VerifiedAnswer & { 
   signatureString: string; 
   submissionCreatedAt: number; 
-  fieldId: string;
-  answer: string 
 }
