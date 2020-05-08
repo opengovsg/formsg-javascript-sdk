@@ -1,6 +1,7 @@
 type PackageInitParams = {
   mode?: PackageMode
   webhookSecretKey?: string
+  verificationOptions?: VerificationOptions
 }
 
 // A field type available in FormSG as a string
@@ -58,3 +59,29 @@ type Keypair = {
 }
 
 type PackageMode = 'staging' | 'production' | 'development' | 'test'
+
+type VerificationOptions = {
+  secretKey?: string;
+  transactionExpiry?: number
+}
+
+// A verified answer contains a field ID and answer
+type VerifiedAnswer = {
+  fieldId: string; 
+  answer: string;
+}
+
+// Add the transaction ID and form ID to a VerifiedAnswer to obtain a signature
+type VerificationSignatureOptions = VerifiedAnswer & {
+  transactionId: string; 
+  formId: string; 
+}
+
+// Creating a basestring requires the epoch in addition to signature requirements
+type VerificationBasestringOptions = VerificationSignatureOptions & { time: number }
+
+// Authenticate a VerifiedAnswer with a signatureString and epoch
+type VerificationAuthenticateOptions = VerifiedAnswer & { 
+  signatureString: string; 
+  submissionCreatedAt: number; 
+}
