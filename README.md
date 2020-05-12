@@ -103,12 +103,12 @@ The underlying cryptosystem is `x25519-xsalsa20-poly1305` which is implemented b
 
 `formsg.crypto.decrypt` returns an an object with the shape
 
-```
+<pre>
 {
-  responses: FormField[]
-  verified?: Record<string, any>
+  responses: <a href="https://github.com/opengovsg/formsg-javascript-sdk/blob/master/src/types/index.d.ts#L27">FormField[]</a>
+  verified?: <a href="https://www.typescriptlang.org/docs/handbook/utility-types.html#recordkt">Record&lt;string, any&gt;</a>
 }
-```
+</pre>
 
 The `encryptedContent` field decrypts into an array of `FormField` objects, which will be assigned to the `responses` key of the returned object.
 
@@ -119,17 +119,27 @@ Furthermore, if `verifiedContent` is passed as the third parameter of the `decry
 
 Note that due to end-to-end encryption, FormSG servers are unable to verify the data format.
 
-However, the `decrypt` function exposed by this library uses [`joi`](https://hapi.dev/module/joi/) to validate the decrypted content and will **return `null` if the decrypted content does not fit the schema displayed below.**
+However, the `decrypt` function exposed by this library [validates](https://github.com/opengovsg/formsg-javascript-sdk/blob/master/src/util/validate.ts) the decrypted content and will **return `null` if the
+decrypted content does not fit the schema displayed below.**
 
-| Key       | Type   | Description                                                                                                     |
-|-----------|--------|-----------------------------------------------------------------------------------------------------------------|
+|Key|Type| Description|
+|-|-|-|
 | question  | string | The question listed on the form                                                                                 |
 | answer    | string | The submitter's answer to the question on form. Either this key or `answerArray` must exist.
 | answerArray    | string[] | The submitter's answer to the question on form. Either this key or `answer` must exist.
 | fieldType | string | The type of field for the question.                              |
 | _id       | string | A unique identifier of the form field. WARNING: Changes when new fields are created/removed in the form.        |
 
-The full schema can be viewed in [`validate.ts`](https://github.com/opengovsg/formsg-javascript-sdk/tree/master/src/util/validate.ts).
+The full schema can be viewed in
+[`validate.ts`](https://github.com/opengovsg/formsg-javascript-sdk/tree/master/src/util/validate.ts).
+
+If the decrypted content is the correct shape, then:
+1. the decrypted content will be set as the value of the `responses` key.
+2. if `verifiedContent` is passed as the third parameter, then an attempt to
+   decrypted the verified content will be called, and  the result set as the
+   value of `verified` key. There is no shape validation for the decrypted
+   verified content. **If the verification fails, `null` is returned, even if
+   `decryptedContent` was successfully decrypted.**
 
 ## Verifying Signatures Manually
 
