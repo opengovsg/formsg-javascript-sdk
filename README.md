@@ -1,4 +1,4 @@
-*Please note that this is an SDK for webhooks integration, and* ***not*** *the FormSG system.*
+_Please note that this is an SDK for webhooks integration, and_ **_not_** _the FormSG system._
 
 # FormSG Javascript SDK
 
@@ -21,7 +21,7 @@ const formsg = require('@opengovsg/formsg')({
 ```
 
 | Option | Default      | Description                                                     |
-|--------|--------------|-----------------------------------------------------------------|
+| ------ | ------------ | --------------------------------------------------------------- |
 | mode   | 'production' | Set to 'staging' if integrating against FormSG staging servers. |
 
 ## Usage
@@ -43,7 +43,8 @@ const POST_URI = 'https://my-domain.com/submissions'
 // Your form's secret key downloaded from FormSG upon form creation
 const formSecretKey = process.env.FORM_SECRET_KEY
 
-app.post('/submissions',
+app.post(
+  '/submissions',
   // Endpoint authentication by verifying signatures
   function (req, res, next) {
     try {
@@ -56,21 +57,27 @@ app.post('/submissions',
   },
   // Decrypt the submission
   function (req, res, next) {
-    // As the third parameter `verifiedContent` is not provided, only 
+    // As the third parameter `verifiedContent` is not provided, only
     // responses will be returned in the response object.
     /** @type {{responses: FormField[]}} */
-    const submission = formsg.crypto.decrypt(formSecretKey, req.body.encryptedContent)
-    
-    // If a third parameter is provided, the return object will include a verified 
+    const submission = formsg.crypto.decrypt(
+      formSecretKey,
+      req.body.encryptedContent
+    )
+
+    // If a third parameter is provided, the return object will include a verified
     // key.
     /** @type {{
-     *    responses: FormField[], 
+     *    responses: FormField[],
      *    verified: Record<string, any>
-     *  }} 
+     *  }}
      */
     const submission = formsg.crypto.decrypt(
-        formSecretKey, req.body.encryptedContent, req.body.verifiedContent)
-        
+      formSecretKey,
+      req.body.encryptedContent,
+      req.body.verifiedContent
+    )
+
     // If the decryption failed, submission will be `null`.
     if (submission) {
       // Continue processing the submission
@@ -80,19 +87,19 @@ app.post('/submissions',
   }
 )
 
-app.listen(8080, () => console.log('Running on port 8080')
+app.listen(8080, () => console.log('Running on port 8080'))
 ```
 
 ## End-to-end Encryption
 
-FormSG uses *end-to-end encryption* with *elliptic curve cryptography* to protect submission data and ensure only intended recipients are able to view form submissions. As such, FormSG servers are unable to access the data.
+FormSG uses _end-to-end encryption_ with _elliptic curve cryptography_ to protect submission data and ensure only intended recipients are able to view form submissions. As such, FormSG servers are unable to access the data.
 
 The underlying cryptosystem is `x25519-xsalsa20-poly1305` which is implemented by the [tweetnacl-js](https://github.com/dchest/tweetnacl-js) library. Its source code has been [audited](https://cure53.de/tweetnacl.pdf)) by [Cure53](https://cure53.de/).
 
 ### Format of Submission Response
 
 | Key              | Type   | Description                         |
-|------------------|--------|-------------------------------------|
+| ---------------- | ------ | ----------------------------------- |
 | formId           | string | Unique form identifier.             |
 | submissionId     | string | Unique submission identifier.       |
 | encryptedContent | string | The encrypted submission in base64. |
@@ -100,36 +107,46 @@ The underlying cryptosystem is `x25519-xsalsa20-poly1305` which is implemented b
 
 ### Format of Decrypted Submissions
 
-
 `formsg.crypto.decrypt` returns an an object with the shape
 
-```
+<pre>
 {
-  responses: FormField[]
-  verified?: Record<string, any>
+  responses: <a href="https://github.com/opengovsg/formsg-javascript-sdk/blob/master/src/types/index.d.ts#L27">FormField[]</a>
+  verified?: <a href="https://www.typescriptlang.org/docs/handbook/utility-types.html#recordkt">Record&lt;string, any&gt;</a>
 }
-```
+</pre>
 
 The `encryptedContent` field decrypts into an array of `FormField` objects, which will be assigned to the `responses` key of the returned object.
 
-Furthermore, if `verifiedContent` is passed as the third parameter of the `decrypt` function, the function will decrypt and open the signed decrypted content with the package's own `signingPublicKey` in [`signing-keys.ts`](https://github.com/opengovsg/formsg-javascript-sdk/tree/master/src/resource/signing-keys.ts). 
+Furthermore, if `verifiedContent` is passed as the third parameter of the `decrypt` function, the function will decrypt and open the signed decrypted content with the package's own `signingPublicKey` in [`signing-keys.ts`](https://github.com/opengovsg/formsg-javascript-sdk/tree/master/src/resource/signing-keys.ts).
 
 > **NOTE** <br>
-> If any errors occur, either from the failure to decrypt either `encryptedContent` or `verifiedContent`,  or the failure to authenticate the decrypted signed message in `verifiedContent`, `null` will be returned.
+> If any errors occur, either from the failure to decrypt either `encryptedContent` or `verifiedContent`, or the failure to authenticate the decrypted signed message in `verifiedContent`, `null` will be returned.
 
 Note that due to end-to-end encryption, FormSG servers are unable to verify the data format.
 
-However, the `decrypt` function exposed by this library uses [`joi`](https://hapi.dev/module/joi/) to validate the decrypted content and will **return `null` if the decrypted content does not fit the schema displayed below.**
+However, the `decrypt` function exposed by this library [validates](https://github.com/opengovsg/formsg-javascript-sdk/blob/master/src/util/validate.ts) the decrypted content and will **return `null` if the
+decrypted content does not fit the schema displayed below.**
 
-| Key       | Type   | Description                                                                                                     |
-|-----------|--------|-----------------------------------------------------------------------------------------------------------------|
-| question  | string | The question listed on the form                                                                                 |
-| answer    | string | The submitter's answer to the question on form. Either this key or `answerArray` must exist.
-| answerArray    | string[] | The submitter's answer to the question on form. Either this key or `answer` must exist.
-| fieldType | string | The type of field for the question.                              |
-| _id       | string | A unique identifier of the form field. WARNING: Changes when new fields are created/removed in the form.        |
+| Key         | Type     | Description                                                                                              |
+| ----------- | -------- | -------------------------------------------------------------------------------------------------------- |
+| question    | string   | The question listed on the form                                                                          |
+| answer      | string   | The submitter's answer to the question on form. Either this key or `answerArray` must exist.             |
+| answerArray | string[] | The submitter's answer to the question on form. Either this key or `answer` must exist.                  |
+| fieldType   | string   | The type of field for the question.                                                                      |
+| \_id        | string   | A unique identifier of the form field. WARNING: Changes when new fields are created/removed in the form. |
 
-The full schema can be viewed in [`validate.ts`](https://github.com/opengovsg/formsg-javascript-sdk/tree/master/src/util/validate.ts).
+The full schema can be viewed in
+[`validate.ts`](https://github.com/opengovsg/formsg-javascript-sdk/tree/master/src/util/validate.ts).
+
+If the decrypted content is the correct shape, then:
+
+1. the decrypted content will be set as the value of the `responses` key.
+2. if `verifiedContent` is passed as the third parameter, then an attempt to
+   decrypted the verified content will be called, and the result set as the
+   value of `verified` key. There is no shape validation for the decrypted
+   verified content. **If the verification fails, `null` is returned, even if
+   `decryptedContent` was successfully decrypted.**
 
 ## Verifying Signatures Manually
 
@@ -178,7 +195,7 @@ The signature is signed with [ed25519](http://ed25519.cr.yp.to/).
 Verify that the `v1` signature is valid using a library of your choice (we use [tweetnacl-js](https://github.com/dchest/tweetnacl-js)).
 
 | FormSG environment | Public Key in base64                           |
-|--------------------|------------------------------------------------|
+| ------------------ | ---------------------------------------------- |
 | production         | '3Tt8VduXsjjd4IrpdCd7BAkdZl/vUCstu9UvTX84FWw=' |
 | staging            | 'rjv41kYqZwcbe3r6ymMEEKQ+Vd+DPuogN+Gzq3lP2Og=' |
 
