@@ -9,37 +9,8 @@ import {
 import { getPublicKey } from './util/publicKey'
 import { determineIsFormFields } from './util/validate'
 
-type DecryptParams = {
-  encryptedContent: EncryptedContent
-  version: number
-  verifiedContent?: EncryptedContent
-}
-
-// Encrypted basestring containing the submission public key,
-// nonce and encrypted data in base-64.
-// A string in the format of
-// <SubmissionPublicKey>;<Base64Nonce>:<Base64EncryptedData>
-type EncryptedContent = string
-
-type DecryptedContent = {
-  responses: FormField[]
-  verified?: Record<string, any>
-}
-
-type EncryptedFileContent = {
-  submissionPublicKey: string
-  nonce: string
-  binary: Uint8Array
-}
-
-// A base-64 encoded cryptographic keypair suitable for curve25519.
-type Keypair = {
-  publicKey: string
-  secretKey: string
-}
-
 // Validation version used in `isValid` function.
-const INTERNAL_VALIDATION_VERSION = 1
+const INTERNAL_VALIDATION_VERSION = -1
 
 /**
  * Encrypt input with a unique keypair for each submission
