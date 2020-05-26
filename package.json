@@ -8,7 +8,6 @@
   "description": "Node.js SDK for integrating with FormSG",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "typings": "dist/index",
   "scripts": {
     "test": "jest",
     "test:watch": "jest --watch",
