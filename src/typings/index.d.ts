@@ -41,7 +41,7 @@ type FormField = {
 // <SubmissionPublicKey>;<Base64Nonce>:<Base64EncryptedData>
 type EncryptedContent = string
 
-type DecryptParams = {
+interface DecryptParams {
   encryptedContent: EncryptedContent
   version: number
   verifiedContent?: EncryptedContent
