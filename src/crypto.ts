@@ -9,6 +9,38 @@ import {
 import { getPublicKey } from './util/publicKey'
 import { determineIsFormFields } from './util/validate'
 
+type DecryptParams = {
+  encryptedContent: EncryptedContent
+  version: number
+  verifiedContent?: EncryptedContent
+}
+
+// Encrypted basestring containing the submission public key,
+// nonce and encrypted data in base-64.
+// A string in the format of
+// <SubmissionPublicKey>;<Base64Nonce>:<Base64EncryptedData>
+type EncryptedContent = string
+
+type DecryptedContent = {
+  responses: FormField[]
+  verified?: Record<string, any>
+}
+
+type EncryptedFileContent = {
+  submissionPublicKey: string
+  nonce: string
+  binary: Uint8Array
+}
+
+// A base-64 encoded cryptographic keypair suitable for curve25519.
+type Keypair = {
+  publicKey: string
+  secretKey: string
+}
+
+// Validation version used in `isValid` function.
+const INTERNAL_VALIDATION_VERSION = 1
+
 /**
  * Encrypt input with a unique keypair for each submission
  * @param encryptionPublicKey The base-64 encoded public key for encrypting.
@@ -100,16 +132,19 @@ function decrypt(signingPublicKey: string) {
   /**
    * Decrypts an encrypted submission and returns it.
    * @param formSecretKey The base-64 secret key of the form to decrypt with.
-   * @param encryptedContent The encrypted content encoded with base-64.
-   * @param verifiedContent Optional. The encrypted and signed verified content. If given, the signingPublicKey will be used to attempt to open the signed message.
+   * @param decryptParams The params containing encrypted content and information.
+   * @param decryptParams.encryptedContent The encrypted content encoded with base-64.
+   * @param decryptParams.version The version of the payload. Used to determine the decryption process to decrypt the content with.
+   * @param decryptParams.verifiedContent Optional. The encrypted and signed verified content. If given, the signingPublicKey will be used to attempt to open the signed message.
    * @returns The decrypted content if successful. Else, null will be returned.
    */
   function _internalDecrypt(
     formSecretKey: string,
-    encryptedContent: EncryptedContent,
-    verifiedContent?: EncryptedContent
+    decryptParams: DecryptParams
   ): DecryptedContent | null {
     try {
+      const { encryptedContent, verifiedContent, version } = decryptParams
+
       // Do not return the transformed object in `_decrypt` function as a signed
       // object is not encoded in UTF8 and is encoded in Base-64 instead.
       const decryptedContent = _decrypt(formSecretKey, encryptedContent)
@@ -178,10 +213,10 @@ function valid(signingPublicKey: string) {
       // Use toString here since the return should be an empty array.
       return (
         testResponse.toString() ===
-        decrypt(signingPublicKey)(
-          secretKey,
-          cipherResponse
-        )?.responses.toString()
+        decrypt(signingPublicKey)(secretKey, {
+          encryptedContent: cipherResponse,
+          version: INTERNAL_VALIDATION_VERSION,
+        })?.responses.toString()
       )
     } catch (err) {
       return false

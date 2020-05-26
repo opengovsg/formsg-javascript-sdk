@@ -9,6 +9,8 @@ import {
 
 const formsg = formsgPackage({ mode: 'test' })
 
+const INTERNAL_TEST_VERSION = 1
+
 describe('Crypto', function () {
   const signingSecretKey = SIGNING_KEYS.test.secretKey
   const testFileBuffer = new Uint8Array(Buffer.from('./resources/ogp.svg'))
@@ -39,14 +41,22 @@ describe('Crypto', function () {
 
   it('should decrypt the submission ciphertext from 2020-03-22 successfully', () => {
     // Act
-    const decrypted = formsg.crypto.decrypt(formSecretKey, ciphertext)
+    const decrypted = formsg.crypto.decrypt(formSecretKey, {
+      encryptedContent: ciphertext,
+      version: INTERNAL_TEST_VERSION,
+    })
 
     // Assert
     expect(decrypted).toHaveProperty('responses', plaintext)
   })
 
   it('should return null on unsuccessful decryption', () => {
-    expect(formsg.crypto.decrypt('random', ciphertext)).toBe(null)
+    expect(
+      formsg.crypto.decrypt('random', {
+        encryptedContent: ciphertext,
+        version: INTERNAL_TEST_VERSION,
+      })
+    ).toBe(null)
   })
 
   it('should return null when successfully decrypted content does not fit FormField type shape', () => {
@@ -58,7 +68,12 @@ describe('Crypto', function () {
     // Assert
     // Using correct secret key, but the decrypted object should not fit the
     // expected shape and thus return null.
-    expect(formsg.crypto.decrypt(secretKey, malformedEncrypt)).toBe(null)
+    expect(
+      formsg.crypto.decrypt(secretKey, {
+        encryptedContent: malformedEncrypt,
+        version: INTERNAL_TEST_VERSION,
+      })
+    ).toBe(null)
   })
 
   it('should be able to encrypt and decrypt submissions from 2020-03-22 end-to-end successfully', () => {
@@ -67,7 +82,10 @@ describe('Crypto', function () {
 
     // Act
     const ciphertext = formsg.crypto.encrypt(plaintext, publicKey)
-    const decrypted = formsg.crypto.decrypt(secretKey, ciphertext)
+    const decrypted = formsg.crypto.decrypt(secretKey, {
+      encryptedContent: ciphertext,
+      version: INTERNAL_TEST_VERSION,
+    })
     // Assert
     expect(decrypted).toHaveProperty('responses', plaintext)
   })
@@ -79,7 +97,10 @@ describe('Crypto', function () {
     // Act
     // Signing key (last parameter) is omitted.
     const ciphertext = formsg.crypto.encrypt(plaintext, publicKey)
-    const decrypted = formsg.crypto.decrypt(secretKey, ciphertext)
+    const decrypted = formsg.crypto.decrypt(secretKey, {
+      encryptedContent: ciphertext,
+      version: INTERNAL_TEST_VERSION,
+    })
 
     // Assert
     expect(decrypted).toHaveProperty('responses', plaintext)
@@ -103,11 +124,11 @@ describe('Crypto', function () {
       signingSecretKey
     )
     // Decrypt encrypted content along with our signed+encrypted content.
-    const decrypted = formsg.crypto.decrypt(
-      secretKey,
-      ciphertext,
-      signedAndEncryptedText
-    )
+    const decrypted = formsg.crypto.decrypt(secretKey, {
+      encryptedContent: ciphertext,
+      verifiedContent: signedAndEncryptedText,
+      version: INTERNAL_TEST_VERSION,
+    })
 
     // Assert
     expect(decrypted).toHaveProperty('verified', mockVerifiedContent)
