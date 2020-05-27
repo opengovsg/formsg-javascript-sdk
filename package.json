@@ -9,7 +9,7 @@
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "scripts": {
-    "test": "jest",
+    "test": "jest --coverage && coveralls < coverage/lcov.info && rm -rf ./coverage",
     "test:watch": "jest --watch",
     "build": "tsc",
     "prepare": "npm run build"
@@ -31,6 +31,7 @@
     "@babel/preset-env": "^7.9.0",
     "@types/jest": "^25.2.1",
     "@types/node": "^13.11.1",
+    "coveralls": "^3.1.0",
     "jest": "^25.3.0",
     "ts-jest": "^25.3.1",
     "typescript": "^3.8.3"
