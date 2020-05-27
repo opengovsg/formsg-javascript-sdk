@@ -9,9 +9,6 @@ import {
 import { getPublicKey } from './util/publicKey'
 import { determineIsFormFields } from './util/validate'
 
-// Validation version used in `isValid` function.
-const INTERNAL_VALIDATION_VERSION = -1
-
 /**
  * Encrypt input with a unique keypair for each submission
  * @param encryptionPublicKey The base-64 encoded public key for encrypting.
@@ -179,6 +176,8 @@ function valid(signingPublicKey: string) {
    */
   function _internalValid(publicKey: string, secretKey: string) {
     const testResponse: FormField[] = []
+    const internalValidationVersion = 1
+
     try {
       const cipherResponse = encrypt(testResponse, publicKey)
       // Use toString here since the return should be an empty array.
@@ -186,7 +185,7 @@ function valid(signingPublicKey: string) {
         testResponse.toString() ===
         decrypt(signingPublicKey)(secretKey, {
           encryptedContent: cipherResponse,
-          version: INTERNAL_VALIDATION_VERSION,
+          version: internalValidationVersion,
         })?.responses.toString()
       )
     } catch (err) {
