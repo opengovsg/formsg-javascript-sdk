@@ -41,6 +41,12 @@ type FormField = {
 // <SubmissionPublicKey>;<Base64Nonce>:<Base64EncryptedData>
 type EncryptedContent = string
 
+interface DecryptParams {
+  encryptedContent: EncryptedContent
+  version: number
+  verifiedContent?: EncryptedContent
+}
+
 type DecryptedContent = {
   responses: FormField[]
   verified?: Record<string, any>
@@ -61,27 +67,29 @@ type Keypair = {
 type PackageMode = 'staging' | 'production' | 'development' | 'test'
 
 type VerificationOptions = {
-  secretKey?: string;
+  secretKey?: string
   transactionExpiry?: number
 }
 
 // A verified answer contains a field ID and answer
 type VerifiedAnswer = {
-  fieldId: string; 
-  answer: string;
+  fieldId: string
+  answer: string
 }
 
 // Add the transaction ID and form ID to a VerifiedAnswer to obtain a signature
 type VerificationSignatureOptions = VerifiedAnswer & {
-  transactionId: string; 
-  formId: string; 
+  transactionId: string
+  formId: string
 }
 
 // Creating a basestring requires the epoch in addition to signature requirements
-type VerificationBasestringOptions = VerificationSignatureOptions & { time: number }
+type VerificationBasestringOptions = VerificationSignatureOptions & {
+  time: number
+}
 
 // Authenticate a VerifiedAnswer with a signatureString and epoch
-type VerificationAuthenticateOptions = VerifiedAnswer & { 
-  signatureString: string; 
-  submissionCreatedAt: number; 
+type VerificationAuthenticateOptions = VerifiedAnswer & {
+  signatureString: string
+  submissionCreatedAt: number
 }

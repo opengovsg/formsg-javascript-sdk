@@ -1,7 +1,6 @@
 import webhooks from './webhooks'
 import crypto from './crypto'
 import verification from './verification'
-
 /**
  * Entrypoint into the FormSG SDK
  * @param {Object} options
@@ -22,7 +21,7 @@ export = function (options: PackageInitParams = {}) {
     }),
     verification: verification({
       mode: mode || 'production',
-      verificationOptions
-    })
+      verificationOptions,
+    }),
   }
 }

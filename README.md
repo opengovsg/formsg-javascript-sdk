@@ -60,25 +60,18 @@ app.post(
   },
   // Decrypt the submission
   function (req, res, next) {
-    // As the third parameter `verifiedContent` is not provided, only
-    // responses will be returned in the response object.
-    /** @type {{responses: FormField[]}} */
+    // `req.body.data` must be an object fulfilling the DecryptParams interface.
+    // interface DecryptParams {
+    //   encryptedContent: EncryptedContent
+    //   version: number
+    //   verifiedContent?: EncryptedContent
+    // }
+    /** @type {{responses: FormField[], verified?: Record<string, any>}} */
     const submission = formsg.crypto.decrypt(
       formSecretKey,
-      req.body.encryptedContent
-    )
-
-    // If a third parameter is provided, the return object will include a verified
-    // key.
-    /** @type {{
-     *    responses: FormField[],
-     *    verified: Record<string, any>
-     *  }}
-     */
-    const submission = formsg.crypto.decrypt(
-      formSecretKey,
-      req.body.encryptedContent,
-      req.body.verifiedContent
+      // If `verifiedContent` is provided in `req.body.data`, the return object
+      // will include a verified key.
+      req.body.data
     )
 
     // If the decryption failed, submission will be `null`.
@@ -110,7 +103,9 @@ The underlying cryptosystem is `x25519-xsalsa20-poly1305` which is implemented b
 
 ### Format of Decrypted Submissions
 
-`formsg.crypto.decrypt` returns an an object with the shape
+`formsg.crypto.decrypt(formSecretKey: string, decryptParams: DecryptParams)`
+takes in `decryptParams` as the second argument, and returns an an object with
+the shape
 
 <pre>
 {
@@ -119,9 +114,18 @@ The underlying cryptosystem is `x25519-xsalsa20-poly1305` which is implemented b
 }
 </pre>
 
-The `encryptedContent` field decrypts into an array of `FormField` objects, which will be assigned to the `responses` key of the returned object.
+encryptedContent: EncryptedContent
+version: number
+verifiedContent?: EncryptedContent
 
-Furthermore, if `verifiedContent` is passed as the third parameter of the `decrypt` function, the function will decrypt and open the signed decrypted content with the package's own `signingPublicKey` in [`signing-keys.ts`](https://github.com/opengovsg/formsg-javascript-sdk/tree/master/src/resource/signing-keys.ts).
+The `decryptParams.encryptedContent` field decrypts into an array of `FormField` objects, which will be assigned to the `responses` key of the returned object.
+
+Furthermore, if `decryptParams.verifiedContent` exists, the function will
+decrypt and open the signed decrypted content with the package's own
+`signingPublicKey` in
+[`signing-keys.ts`](https://github.com/opengovsg/formsg-javascript-sdk/tree/master/src/resource/signing-keys.ts).
+The resulting decrypted verifiedContent will be assigned to the `verified` key
+of the returned object.
 
 > **NOTE** <br>
 > If any errors occur, either from the failure to decrypt either `encryptedContent` or `verifiedContent`, or the failure to authenticate the decrypted signed message in `verifiedContent`, `null` will be returned.
@@ -144,12 +148,12 @@ The full schema can be viewed in
 
 If the decrypted content is the correct shape, then:
 
-1. the decrypted content will be set as the value of the `responses` key.
-2. if `verifiedContent` is passed as the third parameter, then an attempt to
+1. the decrypted content (from `decryptParams.encryptedContent`) will be set as the value of the `responses` key.
+2. if `decryptParams.verifiedContent` exists, then an attempt to
    decrypted the verified content will be called, and the result set as the
    value of `verified` key. There is no shape validation for the decrypted
    verified content. **If the verification fails, `null` is returned, even if
-   `decryptedContent` was successfully decrypted.**
+   `decryptParams.encryptedContent` was successfully decrypted.**
 
 ## Verifying Signatures Manually
 
