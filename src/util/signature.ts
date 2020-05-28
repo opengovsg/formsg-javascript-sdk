@@ -1,5 +1,5 @@
 import * as tweetnacl from 'tweetnacl'
-import { decodeUTF8 } from 'tweetnacl-util'
+import { encode as encodeUTF8 } from '@stablelib/utf8'
 import { encode as encodeBase64, decode as decodeBase64 } from '@stablelib/base64'
 
 /**
@@ -10,7 +10,7 @@ import { encode as encodeBase64, decode as decodeBase64 } from '@stablelib/base6
  */
 function sign(basestring: string, secretKey: string): string {
   return encodeBase64(
-    tweetnacl.sign.detached(decodeUTF8(basestring), decodeBase64(secretKey))
+    tweetnacl.sign.detached(encodeUTF8(basestring), decodeBase64(secretKey))
   )
 }
 
@@ -27,7 +27,7 @@ function verify(
   publicKey: string
 ): boolean {
   return tweetnacl.sign.detached.verify(
-    decodeUTF8(message),
+    encodeUTF8(message),
     decodeBase64(signature),
     decodeBase64(publicKey)
   )
