@@ -1,11 +1,9 @@
 import nacl from 'tweetnacl'
 import {
-  encodeBase64,
-  decodeBase64,
   encodeUTF8,
   decodeUTF8,
 } from 'tweetnacl-util'
-
+import { encode as encodeBase64, decode as decodeBase64 } from '@stablelib/base64'
 import { getPublicKey } from './util/publicKey'
 import { determineIsFormFields } from './util/validate'
 

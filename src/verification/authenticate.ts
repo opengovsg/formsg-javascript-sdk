@@ -1,5 +1,6 @@
 import nacl from 'tweetnacl'
-import { decodeUTF8, decodeBase64 } from 'tweetnacl-util'
+import { decodeUTF8 } from 'tweetnacl-util'
+import { decode as decodeBase64 } from '@stablelib/base64'
 import basestring from './basestring'
 
 export default function ( publicKey: string, transactionExpirySeconds: number ): Function {
