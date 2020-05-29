@@ -1,5 +1,6 @@
 import nacl from 'tweetnacl'
-import { decodeUTF8, decodeBase64 } from 'tweetnacl-util'
+import { encode as encodeUTF8 } from '@stablelib/utf8'
+import { decode as decodeBase64 } from '@stablelib/base64'
 import basestring from './basestring'
 
 export default function ( publicKey: string, transactionExpirySeconds: number ): Function {
@@ -37,7 +38,7 @@ export default function ( publicKey: string, transactionExpirySeconds: number ):
       if (isSignatureTimeValid(signatureDate, submissionCreatedAt)) {
         const data = basestring({ transactionId, formId, fieldId, answer, time: signatureDate })
         return nacl.sign.detached.verify(
-          decodeUTF8(data),
+          encodeUTF8(data),
           decodeBase64(signature),
           decodeBase64(publicKey)
         )

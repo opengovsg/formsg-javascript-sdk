@@ -1,11 +1,6 @@
 import nacl from 'tweetnacl'
-import {
-  encodeBase64,
-  decodeBase64,
-  encodeUTF8,
-  decodeUTF8,
-} from 'tweetnacl-util'
-
+import { encode as encodeBase64, decode as decodeBase64 } from '@stablelib/base64'
+import { encode as encodeUTF8, decode as decodeUTF8 } from '@stablelib/utf8'
 import { getPublicKey } from './util/publicKey'
 import { determineIsFormFields } from './util/validate'
 
@@ -21,7 +16,7 @@ function encrypt(
   encryptionPublicKey: string,
   signingPrivateKey?: string
 ): EncryptedContent {
-  let processedMsg = decodeUTF8(JSON.stringify(msg))
+  let processedMsg = encodeUTF8(JSON.stringify(msg))
 
   if (signingPrivateKey) {
     processedMsg = nacl.sign(processedMsg, decodeBase64(signingPrivateKey))
@@ -88,7 +83,7 @@ function _verifySignedMessage(
   const openedMessage = nacl.sign.open(msg, decodeBase64(publicKey))
   if (!openedMessage)
     throw new Error('Failed to open signed message with given public key')
-  return JSON.parse(encodeUTF8(openedMessage))
+  return JSON.parse(decodeUTF8(openedMessage))
 }
 
 /**
@@ -119,7 +114,7 @@ function decrypt(signingPublicKey: string) {
       if (!decryptedContent) {
         throw new Error('Failed to decrypt content')
       }
-      const decryptedObject: Object = JSON.parse(encodeUTF8(decryptedContent))
+      const decryptedObject: Object = JSON.parse(decodeUTF8(decryptedContent))
       if (!determineIsFormFields(decryptedObject)) {
         throw new Error('Decrypted object does not fit expected shape')
       }
