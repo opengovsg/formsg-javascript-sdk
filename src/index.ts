@@ -1,6 +1,7 @@
-import webhooks from './webhooks'
 import crypto from './crypto'
+import { PackageInitParams } from './types'
 import verification from './verification'
+import webhooks from './webhooks'
 /**
  * Entrypoint into the FormSG SDK
  * @param {Object} options

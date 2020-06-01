@@ -1,11 +1,11 @@
-type PackageInitParams = {
+export type PackageInitParams = {
   mode?: PackageMode
   webhookSecretKey?: string
   verificationOptions?: VerificationOptions
 }
 
 // A field type available in FormSG as a string
-type FieldType =
+export type FieldType =
   | 'section'
   | 'radiobutton'
   | 'dropdown'
@@ -24,7 +24,7 @@ type FieldType =
   | 'mobile'
 
 // Represents form field responses in a form.
-type FormField = {
+export type FormField = {
   _id: string
   question: string
   fieldType: FieldType
@@ -39,57 +39,57 @@ type FormField = {
 // nonce and encrypted data in base-64.
 // A string in the format of
 // <SubmissionPublicKey>;<Base64Nonce>:<Base64EncryptedData>
-type EncryptedContent = string
+export type EncryptedContent = string
 
-interface DecryptParams {
+export interface DecryptParams {
   encryptedContent: EncryptedContent
   version: number
   verifiedContent?: EncryptedContent
 }
 
-type DecryptedContent = {
+export type DecryptedContent = {
   responses: FormField[]
   verified?: Record<string, any>
 }
 
-type EncryptedFileContent = {
+export type EncryptedFileContent = {
   submissionPublicKey: string
   nonce: string
   binary: Uint8Array
 }
 
 // A base-64 encoded cryptographic keypair suitable for curve25519.
-type Keypair = {
+export type Keypair = {
   publicKey: string
   secretKey: string
 }
 
-type PackageMode = 'staging' | 'production' | 'development' | 'test'
+export type PackageMode = 'staging' | 'production' | 'development' | 'test'
 
-type VerificationOptions = {
+export type VerificationOptions = {
   secretKey?: string
   transactionExpiry?: number
 }
 
 // A verified answer contains a field ID and answer
-type VerifiedAnswer = {
+export type VerifiedAnswer = {
   fieldId: string
   answer: string
 }
 
 // Add the transaction ID and form ID to a VerifiedAnswer to obtain a signature
-type VerificationSignatureOptions = VerifiedAnswer & {
+export type VerificationSignatureOptions = VerifiedAnswer & {
   transactionId: string
   formId: string
 }
 
 // Creating a basestring requires the epoch in addition to signature requirements
-type VerificationBasestringOptions = VerificationSignatureOptions & {
+export type VerificationBasestringOptions = VerificationSignatureOptions & {
   time: number
 }
 
 // Authenticate a VerifiedAnswer with a signatureString and epoch
-type VerificationAuthenticateOptions = VerifiedAnswer & {
+export type VerificationAuthenticateOptions = VerifiedAnswer & {
   signatureString: string
   submissionCreatedAt: number
 }

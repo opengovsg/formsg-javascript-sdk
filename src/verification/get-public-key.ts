@@ -1,4 +1,5 @@
 import { VERIFICATION_KEYS } from '../resource/verification-keys'
+import { PackageMode } from '../types'
 import STAGE from '../util/stage'
 
 /**
@@ -8,13 +9,13 @@ import STAGE from '../util/stage'
  */
 function getPublicKey(mode?: PackageMode) {
   switch (mode) {
-  case STAGE.development:
-  case STAGE.staging:
-    return VERIFICATION_KEYS.staging.publicKey
-  case STAGE.test:
-    return VERIFICATION_KEYS.test.publicKey
-  default:
-    return VERIFICATION_KEYS.production.publicKey
+    case STAGE.development:
+    case STAGE.staging:
+      return VERIFICATION_KEYS.staging.publicKey
+    case STAGE.test:
+      return VERIFICATION_KEYS.test.publicKey
+    default:
+      return VERIFICATION_KEYS.production.publicKey
   }
 }
 

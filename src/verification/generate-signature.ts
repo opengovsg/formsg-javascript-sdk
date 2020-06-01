@@ -1,6 +1,11 @@
 import nacl from 'tweetnacl'
 import { encode as encodeUTF8 } from '@stablelib/utf8'
-import { encode as encodeBase64, decode as decodeBase64 } from '@stablelib/base64'
+import {
+  encode as encodeBase64,
+  decode as decodeBase64,
+} from '@stablelib/base64'
+
+import { VerificationSignatureOptions } from '../types'
 import basestring from './basestring'
 
 export default function (privateKey: string) {
