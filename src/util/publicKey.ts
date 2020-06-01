@@ -1,4 +1,6 @@
 import { SIGNING_KEYS } from '../resource/signing-keys'
+import { PackageMode } from '../types'
+
 import STAGE from './stage'
 
 /**

@@ -1,5 +1,6 @@
 import * as url from 'url'
 
+import { PackageInitParams } from './types'
 import { sign, verify } from './util/signature'
 import { getPublicKey } from './util/publicKey'
 import { parseSignatureHeader } from './util/parser'
