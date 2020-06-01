@@ -1,6 +1,6 @@
 {
   "name": "@opengovsg/formsg-sdk",
-  "version": "0.8.0",
+  "version": "0.8.1",
   "repository": {
     "type": "git",
     "url": "https://github.com/opengovsg/formsg-javascript-sdk.git"
