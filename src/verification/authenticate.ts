@@ -1,8 +1,7 @@
 import nacl from 'tweetnacl'
-import { encode as encodeUTF8 } from '@stablelib/utf8'
-import { decode as decodeBase64 } from '@stablelib/base64'
 
 import { VerificationAuthenticateOptions } from '../types'
+import { decodeUTF8, decodeBase64 } from 'tweetnacl-util'
 import basestring from './basestring'
 
 export default function (
@@ -62,7 +61,7 @@ export default function (
           time: signatureDate,
         })
         return nacl.sign.detached.verify(
-          encodeUTF8(data),
+          decodeUTF8(data),
           decodeBase64(signature),
           decodeBase64(publicKey)
         )

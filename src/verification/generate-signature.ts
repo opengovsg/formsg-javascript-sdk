@@ -1,11 +1,6 @@
 import nacl from 'tweetnacl'
-import { encode as encodeUTF8 } from '@stablelib/utf8'
-import {
-  encode as encodeBase64,
-  decode as decodeBase64,
-} from '@stablelib/base64'
-
 import { VerificationSignatureOptions } from '../types'
+import { decodeUTF8, decodeBase64, encodeBase64 } from 'tweetnacl-util'
 import basestring from './basestring'
 
 export default function (privateKey: string) {
@@ -18,7 +13,7 @@ export default function (privateKey: string) {
     const time = Date.now()
     const data = basestring({ transactionId, formId, fieldId, answer, time })
     const signature = nacl.sign.detached(
-      encodeUTF8(data),
+      decodeUTF8(data),
       decodeBase64(privateKey)
     )
     return `f=${formId},v=${transactionId},t=${time},s=${encodeBase64(
