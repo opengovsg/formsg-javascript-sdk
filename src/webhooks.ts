@@ -3,7 +3,7 @@ import * as url from 'url'
 import { sign } from './util/signature'
 import { parseSignatureHeader } from './util/parser'
 import { isSignatureHeaderValid, hasEpochExpired } from './util/webhooks'
-import { MissingSecretKeyError } from './errors'
+import { MissingSecretKeyError, WebhookAuthenticateError } from './errors'
 
 export default class Webhooks {
   publicKey: string
@@ -38,19 +38,19 @@ export default class Webhooks {
     } = signatureHeader
 
     if (!epoch || !signature || !submissionId || !formId) {
-      throw new Error('X-FormSG-Signature header is invalid')
+      throw new WebhookAuthenticateError('X-FormSG-Signature header is invalid')
     }
 
     // Verify signature authenticity
     if (!isSignatureHeaderValid(uri, signatureHeader, this.publicKey)) {
-      throw new Error(
+      throw new WebhookAuthenticateError(
         `Signature could not be verified for uri=${uri} submissionId=${submissionId} formId=${formId} epoch=${epoch} signature=${signature}`
       )
     }
 
     // Verify epoch recency
     if (hasEpochExpired(epoch)) {
-      throw new Error(
+      throw new WebhookAuthenticateError(
         `Signature is not recent for uri=${uri} submissionId=${submissionId} formId=${formId} epoch=${epoch} signature=${signature}`
       )
     }
