@@ -1,5 +1,6 @@
 import Webhooks from '../src/webhooks'
 import { SIGNING_KEYS } from '../src/resource/signing-keys'
+import { MissingSecretKeyError, WebhookAuthenticateError } from '../src/errors'
 
 const webhooksPublicKey = SIGNING_KEYS.test.publicKey
 const signingSecretKey = SIGNING_KEYS.test.secretKey
@@ -12,6 +13,10 @@ describe('Webhooks', () => {
   const webhooks = new Webhooks({
     publicKey: webhooksPublicKey,
     secretKey: signingSecretKey,
+  })
+
+  const webhooksNoSecret = new Webhooks({
+    publicKey: webhooksPublicKey,
   })
 
   /**
@@ -66,6 +71,56 @@ describe('Webhooks', () => {
     const signature = generateTestSignature(epoch)
     const header = constructTestHeader(epoch, signature)
 
-    expect(() => webhooks.authenticate(header, uri)).toThrow()
+    expect(() => webhooks.authenticate(header, uri)).toThrow(
+      WebhookAuthenticateError
+    )
+  })
+
+  it('should reject invalid signature headers', () => {
+    const invalidHeader = 'invalidHeader'
+    expect(() => webhooks.authenticate(invalidHeader, uri)).toThrow(
+      WebhookAuthenticateError
+    )
+  })
+
+  it('should reject if signature header cannot be verified', () => {
+    // Create valid header
+    const epoch = Date.now()
+    const signature = generateTestSignature(epoch)
+    const header = constructTestHeader(epoch, signature)
+
+    // Create a new Webhook class with a different publicKey
+    const webhooksAlt = new Webhooks({
+      publicKey: 'ReObXacwevg7CaNtg5QwvtW32S0V6md15up4szRdWUY=',
+    })
+
+    expect(() => webhooksAlt.authenticate(header, uri)).toThrow(
+      WebhookAuthenticateError
+    )
+  })
+
+  it('should throw error if generateSignature is called without a secret key in class instantiation', () => {
+    expect(() =>
+      webhooksNoSecret.generateSignature({
+        uri,
+        submissionId,
+        formId,
+        epoch: Date.now(),
+      })
+    ).toThrow(MissingSecretKeyError)
+  })
+
+  it('should throw error if constructHeader is called without a secret key in class instantiation', () => {
+    const testEpoch = Date.now()
+    const validSignature = generateTestSignature(testEpoch)
+
+    expect(() =>
+      webhooksNoSecret.constructHeader({
+        formId,
+        submissionId,
+        epoch: testEpoch,
+        signature: validSignature,
+      })
+    ).toThrow(MissingSecretKeyError)
   })
 })
