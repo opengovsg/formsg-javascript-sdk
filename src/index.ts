@@ -10,19 +10,9 @@ import webhooks from './webhooks'
  * @param {string?} [config.webhookSecretKey] Optional base64 secret key for signing webhooks
  */
 export = function (config: PackageInitParams = {}) {
-  const { mode, publicKey, webhookSecretKey, verificationOptions } = config
-
   return {
-    webhooks: webhooks({
-      mode: mode || 'production',
-      webhookSecretKey,
-    }),
-    crypto: crypto({
-      mode: mode || 'production',
-    }),
-    verification: verification({
-      mode: mode || 'production',
-      verificationOptions,
-    }),
+    webhooks: webhooks(config),
+    crypto: crypto(config),
+    verification: verification(config),
   }
 }

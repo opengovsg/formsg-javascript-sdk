@@ -255,8 +255,8 @@ async function decryptFile(
  * Provider that accepts configuration before returning the crypto module to
  * init.
  */
-export = function ({ mode }: Omit<PackageInitParams, 'webhookSecretKey'>) {
-  const signingPublicKey = getPublicKey(mode)
+export = function ({ mode, publicKey }: PackageInitParams) {
+  const signingPublicKey = publicKey || getPublicKey(mode || 'production')
   return {
     encrypt,
     decrypt: decrypt(signingPublicKey),
