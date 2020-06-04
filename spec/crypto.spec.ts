@@ -7,6 +7,8 @@ import {
   formPublicKey,
 } from './resources/crypto-data-20200322'
 
+import { plaintextMultiLang } from './resources/crypto-data-20200604'
+
 const formsg = formsgPackage({ mode: 'test' })
 
 const INTERNAL_TEST_VERSION = 1
@@ -88,6 +90,20 @@ describe('Crypto', function () {
     })
     // Assert
     expect(decrypted).toHaveProperty('responses', plaintext)
+  })
+
+  it('should be able to encrypt and decrypt multi-language submission from 2020-06-04 end-to-end successfully', () => {
+    // Arrange
+    const { publicKey, secretKey } = formsg.crypto.generate()
+
+    // Act
+    const ciphertext = formsg.crypto.encrypt(plaintextMultiLang, publicKey)
+    const decrypted = formsg.crypto.decrypt(secretKey, {
+      encryptedContent: ciphertext,
+      version: INTERNAL_TEST_VERSION,
+    })
+    // Assert
+    expect(decrypted).toHaveProperty('responses', plaintextMultiLang)
   })
 
   it('should be able to encrypt submissions without signing if signingPrivateKey is missing', () => {
