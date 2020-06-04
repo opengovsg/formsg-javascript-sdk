@@ -1,8 +1,10 @@
 export type PackageInitParams = {
-  mode?: PackageMode
   webhookSecretKey?: string
   verificationOptions?: VerificationOptions
-}
+} & (
+  | { publicKey?: string; mode?: never }
+  | { publicKey?: never; mode?: PackageMode }
+)
 
 // A field type available in FormSG as a string
 export type FieldType =
