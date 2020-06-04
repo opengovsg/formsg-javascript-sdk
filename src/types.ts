@@ -24,6 +24,7 @@ export type FieldType =
   | 'attachment'
   | 'date'
   | 'mobile'
+  | 'homeno'
 
 // Represents form field responses in a form.
 export type FormField = {
