@@ -9,6 +9,7 @@
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "scripts": {
+    "test": "jest",
     "test-ci": "jest --coverage && coveralls < coverage/lcov.info && rm -rf ./coverage",
     "test:watch": "jest --watch",
     "build": "tsc",
