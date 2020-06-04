@@ -1,6 +1,7 @@
-import webhookPackage from '../src/webhooks'
+import Webhooks from '../src/webhooks'
 import { SIGNING_KEYS } from '../src/resource/signing-keys'
 
+const webhooksPublicKey = SIGNING_KEYS.test.publicKey
 const signingSecretKey = SIGNING_KEYS.test.secretKey
 
 describe('Webhooks', () => {
@@ -8,9 +9,9 @@ describe('Webhooks', () => {
   const submissionId = 'someSubmissionId'
   const formId = 'someFormId'
 
-  const webhook = webhookPackage({
-    mode: 'test',
-    webhookSecretKey: signingSecretKey,
+  const webhook = new Webhooks({
+    publicKey: webhooksPublicKey,
+    secretKey: signingSecretKey,
   })
 
   it('should be signing the signature and generating the X-FormSG-Signature header with the correct format', () => {
