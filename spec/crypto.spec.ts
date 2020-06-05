@@ -226,7 +226,6 @@ describe('Crypto', function () {
     // Act + Assert
     const decryptResult = crypto.decrypt(secretKey, {
       encryptedContent: ciphertext,
-      // Verified content is signed with a different public signing key.
       verifiedContent: rubbishVerifiedContent,
       version: INTERNAL_TEST_VERSION,
     })
