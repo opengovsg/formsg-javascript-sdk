@@ -12,10 +12,14 @@ import getPublicKey from './get-public-key'
  * Provider that accepts configuration
  * before returning the webhooks module
  */
-export = function (params: PackageInitParams = {}) {
-  const { mode, verificationOptions } = params
+export = function ({
+  mode,
+  verificationOptions,
+  publicKey,
+}: PackageInitParams) {
   if (verificationOptions !== undefined) {
-    const verificationPublicKey = getPublicKey(mode)
+    const verificationPublicKey =
+      publicKey || getPublicKey(mode || 'production')
     const {
       secretKey: verificationSecretKey,
       transactionExpiry,
