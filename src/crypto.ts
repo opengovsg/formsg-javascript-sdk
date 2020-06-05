@@ -25,9 +25,10 @@ import {
 } from './util/crypto'
 
 export default class Crypto {
-  publicKey: string
-  constructor({ publicKey }: { publicKey: string }) {
-    this.publicKey = publicKey
+  publicSigningKey?: string
+
+  constructor({ publicSigningKey }: { publicSigningKey?: string }) {
+    this.publicSigningKey = publicSigningKey
   }
 
   /**
@@ -84,8 +85,10 @@ export default class Crypto {
       }
 
       if (verifiedContent) {
-        if (!this.publicKey) {
-          throw new MissingPublicKeyError()
+        if (!this.publicSigningKey) {
+          throw new MissingPublicKeyError(
+            'Public signing key must be provided when instantiating the Crypto class in order to verify verified content'
+          )
         }
         // Only care if it is the correct shape if verifiedContent exists, since
         // we need to append it to the end.
@@ -100,7 +103,7 @@ export default class Crypto {
         }
         const decryptedVerifiedObject = verifySignedMessage(
           decryptedVerifiedContent,
-          this.publicKey
+          this.publicSigningKey
         )
 
         returnedObject.verified = decryptedVerifiedObject

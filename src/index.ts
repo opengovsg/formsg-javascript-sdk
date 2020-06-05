@@ -20,7 +20,7 @@ export = function (config: PackageInitParams = {}) {
       publicKey: encryptionPublicKey,
       secretKey: webhookSecretKey,
     }),
-    crypto: new Crypto({ publicKey: encryptionPublicKey }),
+    crypto: new Crypto({ publicSigningKey: encryptionPublicKey }),
     verification: verification(config),
   }
 }
