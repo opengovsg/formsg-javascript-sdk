@@ -18,7 +18,7 @@ npm install @opengovsg/formsg-sdk --save
 ## Configuration
 
 ```javascript
-const formsg = require('@opengovsg/formsg')({
+const formsg = require('@opengovsg/formsg-sdk')({
   mode: 'production',
 })
 ```
@@ -37,7 +37,7 @@ const app = require('express')()
 
 // Instantiating formsg-sdk without parameters default to using the package's
 // production public signing key.
-const formsg = require('@opengovsg/formsg')()
+const formsg = require('@opengovsg/formsg-sdk')()
 
 // This is where your domain is hosted, and should match
 // the URI supplied to FormSG in the form dashboard
