@@ -1,9 +1,11 @@
-import crypto from './crypto'
 import { PackageInitParams } from './types'
+
+import { getPublicKey } from './util/publicKey'
+
 import verification from './verification'
 import Webhooks from './webhooks'
-import { getPublicKey } from './util/publicKey'
 import Crypto from './crypto'
+
 /**
  * Entrypoint into the FormSG SDK
  * @param {PackageInitParams} config Package initialization config parameters
