@@ -16,7 +16,7 @@ const signingSecretKey = SIGNING_KEYS.test.secretKey
 const testFileBuffer = new Uint8Array(Buffer.from('./resources/ogp.svg'))
 
 describe('Crypto', function () {
-  const crypto = new Crypto({ publicKey: encryptionPublicKey })
+  const crypto = new Crypto({ publicSigningKey: encryptionPublicKey })
 
   it('should generate a keypair', () => {
     const keypair = crypto.generate()
