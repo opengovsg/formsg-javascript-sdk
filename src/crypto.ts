@@ -27,7 +27,7 @@ import {
 export default class Crypto {
   publicSigningKey?: string
 
-  constructor({ publicSigningKey }: { publicSigningKey?: string }) {
+  constructor({ publicSigningKey }: { publicSigningKey?: string } = {}) {
     this.publicSigningKey = publicSigningKey
   }
 
