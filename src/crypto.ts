@@ -98,8 +98,8 @@ export default class Crypto {
           verifiedContent
         )
         if (!decryptedVerifiedContent) {
-          // Returns null if verification for decrypt failed.
-          throw new Error('Verification failed for signature')
+          // Returns null if decrypting verified content failed.
+          throw new Error('Failed to decrypt verified content')
         }
         const decryptedVerifiedObject = verifySignedMessage(
           decryptedVerifiedContent,

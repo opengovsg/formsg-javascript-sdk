@@ -8,6 +8,7 @@ import {
   formPublicKey,
 } from './resources/crypto-data-20200322'
 import { plaintextMultiLang } from './resources/crypto-data-20200604'
+import { MissingPublicKeyError } from '../src/errors'
 
 const INTERNAL_TEST_VERSION = 1
 
@@ -17,6 +18,11 @@ const testFileBuffer = new Uint8Array(Buffer.from('./resources/ogp.svg'))
 
 describe('Crypto', function () {
   const crypto = new Crypto({ publicSigningKey: encryptionPublicKey })
+
+  const mockVerifiedContent = {
+    uinFin: 'S12345679Z',
+    somethingElse: 99,
+  }
 
   it('should generate a keypair', () => {
     const keypair = crypto.generate()
@@ -126,10 +132,6 @@ describe('Crypto', function () {
   it('should be able to encrypt and sign submissions if signingPrivateKey is given', () => {
     // Arrange
     const { publicKey, secretKey } = crypto.generate()
-    const mockVerifiedContent = {
-      uinFin: 'S12345679Z',
-      somethingElse: 99,
-    }
 
     // Act
     // Encrypt content that is not signed.
@@ -184,5 +186,50 @@ describe('Crypto', function () {
     const decrypted = await crypto.decryptFile(secretKey, encrypted)
 
     expect(decrypted).toBeNull()
+  })
+
+  it('should throw error if class was not instantiated with a public signing key while verifying decrypted content ', () => {
+    // Arrange
+    const cryptoNoKey = new Crypto()
+    const { publicKey, secretKey } = cryptoNoKey.generate()
+
+    // Act
+    // Encrypt content that is not signed.
+    const ciphertext = cryptoNoKey.encrypt(plaintext, publicKey)
+    // Sign and encrypt the desired content.
+    const signedAndEncryptedText = cryptoNoKey.encrypt(
+      mockVerifiedContent,
+      publicKey,
+      signingSecretKey
+    )
+
+    // Assert
+    // Attempt to decrypt encrypted content along with our signed+encrypted
+    // content should throw an error
+    expect(() =>
+      cryptoNoKey.decrypt(secretKey, {
+        encryptedContent: ciphertext,
+        verifiedContent: signedAndEncryptedText,
+        version: INTERNAL_TEST_VERSION,
+      })
+    ).toThrow(MissingPublicKeyError)
+  })
+
+  it('should return null if decrypting encrypted verified content failed', () => {
+    // Arrange
+    const { publicKey, secretKey } = crypto.generate()
+    // Encrypt content that is not signed.
+    const ciphertext = crypto.encrypt(plaintext, publicKey)
+    // Create rubbish verified content
+    const rubbishVerifiedContent = 'abcdefg'
+
+    // Act + Assert
+    const decryptResult = crypto.decrypt(secretKey, {
+      encryptedContent: ciphertext,
+      // Verified content is signed with a different public signing key.
+      verifiedContent: rubbishVerifiedContent,
+      version: INTERNAL_TEST_VERSION,
+    })
+    expect(decryptResult).toBeNull()
   })
 })
