@@ -1,6 +1,6 @@
 import * as url from 'url'
 
-import { Signature } from './parser'
+import { HeaderSignature } from './parser'
 import { verify } from './signature'
 import { WebhookAuthenticateError } from '../errors'
 
@@ -14,7 +14,7 @@ import { WebhookAuthenticateError } from '../errors'
  */
 const isSignatureHeaderValid = (
   uri: string,
-  signatureHeader: Signature,
+  signatureHeader: HeaderSignature,
   publicKey: string
 ) => {
   const {
