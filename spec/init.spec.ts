@@ -74,26 +74,14 @@ describe('FormSG SDK', () => {
 
   it('should be able to initialise with given publicKey init param', () => {
     // Arrange
-    // Expected inner class public keys
-    const expectedWebhookPublicKey = new Webhooks({
-      publicKey: TEST_PUBLIC_KEY,
-    }).publicKey
-    const expectedCryptoPublicKey = new Crypto({
-      publicSigningKey: TEST_PUBLIC_KEY,
-    }).publicSigningKey
-    const expectedVerificationPublicKey = new Verification({
-      verificationPublicKey: TEST_PUBLIC_KEY,
-    }).verificationPublicKey
 
     // Act
     // Create SDK with a public key
     const sdk = formsg({ publicKey: TEST_PUBLIC_KEY })
 
     // Assert
-    expect(sdk.crypto.publicSigningKey).toEqual(expectedCryptoPublicKey)
-    expect(sdk.verification.verificationPublicKey).toEqual(
-      expectedVerificationPublicKey
-    )
-    expect(sdk.webhooks.publicKey).toEqual(expectedWebhookPublicKey)
+    expect(sdk.crypto.publicSigningKey).toEqual(TEST_PUBLIC_KEY)
+    expect(sdk.verification.verificationPublicKey).toEqual(TEST_PUBLIC_KEY)
+    expect(sdk.webhooks.publicKey).toEqual(TEST_PUBLIC_KEY)
   })
 })
