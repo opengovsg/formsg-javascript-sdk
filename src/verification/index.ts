@@ -67,6 +67,10 @@ export default class Verification {
         s: signature,
       } = parseVerificationSignature(signatureString)
 
+      if (!time) {
+        throw new Error('Malformed signature string was passed into function')
+      }
+
       if (
         isSignatureTimeValid(time, submissionCreatedAt, this.transactionExpiry)
       ) {
