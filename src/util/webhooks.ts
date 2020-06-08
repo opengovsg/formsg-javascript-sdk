@@ -1,6 +1,6 @@
 import * as url from 'url'
 
-import { Signature } from './parser'
+import { HeaderSignature } from './parser'
 import { verify } from './signature'
 
 /**
@@ -12,7 +12,7 @@ import { verify } from './signature'
  */
 const isSignatureHeaderValid = (
   uri: string,
-  signatureHeader: Signature,
+  signatureHeader: HeaderSignature,
   publicKey: string
 ) => {
   const {
