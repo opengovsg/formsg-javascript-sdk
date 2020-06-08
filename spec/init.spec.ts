@@ -73,15 +73,15 @@ describe('FormSG SDK', () => {
   })
 
   it('should be able to initialise with given publicKey init param', () => {
-    // Arrange
-
     // Act
-    // Create SDK with a public key
-    const sdk = formsg({ publicKey: TEST_PUBLIC_KEY })
+    const userSpecifiedKey = TEST_PUBLIC_KEY
+    // Create SDK with a specified public key
+    const sdk = formsg({ publicKey: userSpecifiedKey })
 
     // Assert
-    expect(sdk.crypto.publicSigningKey).toEqual(TEST_PUBLIC_KEY)
-    expect(sdk.verification.verificationPublicKey).toEqual(TEST_PUBLIC_KEY)
-    expect(sdk.webhooks.publicKey).toEqual(TEST_PUBLIC_KEY)
+    // All various keys used by subpackages should be the given public key.
+    expect(sdk.crypto.publicSigningKey).toEqual(userSpecifiedKey)
+    expect(sdk.verification.verificationPublicKey).toEqual(userSpecifiedKey)
+    expect(sdk.webhooks.publicKey).toEqual(userSpecifiedKey)
   })
 })
