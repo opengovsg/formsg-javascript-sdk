@@ -1,6 +1,6 @@
 import { VERIFICATION_KEYS } from '../../src/resource/verification-keys'
 import Verification from '../../src/verification'
-import { MissingSecretKeyError } from '../../src/errors'
+import { MissingSecretKeyError, MissingPublicKeyError } from '../../src/errors'
 
 const publicKey = VERIFICATION_KEYS.test.publicKey
 const secretKey = VERIFICATION_KEYS.test.secretKey
@@ -15,6 +15,7 @@ const TEST_PARAMS = {
 const TIME = 1588658696255
 const VALID_SIGNATURE = `f=formId,v=transactionId,t=${TIME},s=XLF1V4RDu8dEJLq1yK3UN92TwiekVoif7PX4V8cXr5ERfIQXlOcO+ZOFAawawKWhFSqScg5z1Ro+Y+bMeNmRAg==`
 const INVALID_SIGNATURE = `f=formId,v=transactionId,t=${TIME},s=InvalidSignatureyK3UN92TwiekVoif7PX4V8cXr5ERfIQXlOcO+ZOFAawawKWhFSqScg5z1Ro+Y+bMeNmRAg==`
+const DEFORMED_SIGNATURE = `abcdefg`
 
 const VALID_AUTH_PAYLOAD = {
   signatureString: VALID_SIGNATURE,
@@ -35,6 +36,18 @@ describe('Verification', () => {
       // Act
       expect(() => verification.generateSignature(TEST_PARAMS)).toThrow(
         MissingSecretKeyError
+      )
+    })
+
+    it('should not authenticate if public key is not provided', () => {
+      const verification = new Verification({
+        // No public key provided.
+        transactionExpiry: TEST_TRANSACTION_EXPIRY,
+        verificationSecretKey: secretKey,
+      })
+
+      expect(() => verification.authenticate(VALID_AUTH_PAYLOAD)).toThrow(
+        MissingPublicKeyError
       )
     })
 
@@ -91,6 +104,16 @@ describe('Verification', () => {
     it('should fail to authenticate an invalid signature', () => {
       const payload = {
         signatureString: INVALID_SIGNATURE,
+        submissionCreatedAt: TIME + 1,
+        fieldId: TEST_PARAMS.fieldId,
+        answer: TEST_PARAMS.answer,
+      }
+      expect(verification.authenticate(payload)).toBe(false)
+    })
+
+    it('should fail to authenticate a deformed signature', () => {
+      const payload = {
+        signatureString: DEFORMED_SIGNATURE,
         submissionCreatedAt: TIME + 1,
         fieldId: TEST_PARAMS.fieldId,
         answer: TEST_PARAMS.answer,
