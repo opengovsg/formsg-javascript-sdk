@@ -15,7 +15,8 @@ import Crypto from './crypto'
  */
 export = function (config: PackageInitParams = {}) {
   const { publicKey, webhookSecretKey, mode } = config
-  const encryptionPublicKey = publicKey || getPublicKey(mode || 'production')
+  const encryptionPublicKey =
+    publicKey || getSigningPublicKey(mode || 'production')
 
   return {
     webhooks: new Webhooks({
