@@ -2,6 +2,7 @@ import * as url from 'url'
 
 import { Signature } from './parser'
 import { verify } from './signature'
+import { WebhookAuthenticateError } from '../errors'
 
 /**
  * Helper function to construct the basestring and verify the signature of an
@@ -9,6 +10,7 @@ import { verify } from './signature'
  * @param uri incoming request to verify
  * @param signatureHeader the X-FormSG-Signature header to verify against
  * @returns true if verification succeeds, false otherwise
+ * @throws {WebhookAuthenticateError} if given signature header is malformed.
  */
 const isSignatureHeaderValid = (
   uri: string,
@@ -21,6 +23,10 @@ const isSignatureHeaderValid = (
     s: submissionId,
     f: formId,
   } = signatureHeader
+
+  if (!epoch || !signature || !submissionId || !formId) {
+    throw new WebhookAuthenticateError('X-FormSG-Signature header is invalid')
+  }
 
   const baseString = `${url.parse(uri).href}.${submissionId}.${formId}.${epoch}`
   return verify(baseString, signature, publicKey)

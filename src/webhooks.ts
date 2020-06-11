@@ -37,10 +37,6 @@ export default class Webhooks {
       f: formId,
     } = signatureHeader
 
-    if (!epoch || !signature || !submissionId || !formId) {
-      throw new WebhookAuthenticateError('X-FormSG-Signature header is invalid')
-    }
-
     // Verify signature authenticity
     if (!isSignatureHeaderValid(uri, signatureHeader, this.publicKey)) {
       throw new WebhookAuthenticateError(
