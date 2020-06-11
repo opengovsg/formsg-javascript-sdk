@@ -1,22 +1,19 @@
-type Signature = {
+// The constituents of the X-FormSG-Signature
+export type Signature = {
+  // The ed25519 signature
   v1: string
-  t: string
+  // The epoch used for signing, number of milliseconds since Jan 1, 1970
+  t: number
+  // The submission ID, usually the MongoDB submission ObjectId
   s: string
+  // The form ID, usually the MongoDB form ObjectId
   f: string
 }
 
 /**
- * The constituents of the X-FormSG-Signature
- * @typedef {Object} Signature
- * @property {string} v1 - The ed25519 signature
- * @property {string} t - The epoch used for signing
- * @property {string} s - The submission ID
- * @property {string} f - The form ID
- */
-/**
  * Parses the X-FormSG-Signature header into its constitutents
- * @param {string} header The X-FormSG-Signature header
- * @returns the signature header
+ * @param header The X-FormSG-Signature header
+ * @returns The signature header
  */
 function parseSignatureHeader(header: string): Signature {
   const parsedSignature = header
@@ -26,6 +23,8 @@ function parseSignatureHeader(header: string): Signature {
       acc[k] = v
       return acc
     }, {} as Record<string, any>)
+
+  parsedSignature.t = Number(parsedSignature.t)
 
   return parsedSignature as Signature
 }
