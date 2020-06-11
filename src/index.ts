@@ -1,8 +1,11 @@
-import crypto from './crypto'
 import { PackageInitParams } from './types'
+
+import { getPublicKey } from './util/publicKey'
+
 import verification from './verification'
 import Webhooks from './webhooks'
-import { getPublicKey } from './util/publicKey'
+import Crypto from './crypto'
+
 /**
  * Entrypoint into the FormSG SDK
  * @param {PackageInitParams} config Package initialization config parameters
@@ -12,14 +15,14 @@ import { getPublicKey } from './util/publicKey'
  */
 export = function (config: PackageInitParams = {}) {
   const { publicKey, webhookSecretKey, mode } = config
-  const webhookPublicKey = publicKey || getPublicKey(mode || 'production')
+  const encryptionPublicKey = publicKey || getPublicKey(mode || 'production')
 
   return {
     webhooks: new Webhooks({
-      publicKey: webhookPublicKey,
+      publicKey: encryptionPublicKey,
       secretKey: webhookSecretKey,
     }),
-    crypto: crypto(config),
+    crypto: new Crypto({ publicSigningKey: encryptionPublicKey }),
     verification: verification(config),
   }
 }
