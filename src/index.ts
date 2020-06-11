@@ -1,8 +1,8 @@
 import { PackageInitParams } from './types'
 
-import { getPublicKey } from './util/publicKey'
+import { getSigningPublicKey, getVerificationPublicKey } from './util/publicKey'
 
-import verification from './verification'
+import Verification from './verification'
 import Webhooks from './webhooks'
 import Crypto from './crypto'
 
@@ -14,8 +14,11 @@ import Crypto from './crypto'
  * @param {string?} [config.webhookSecretKey] Optional base64 secret key for signing webhooks
  */
 export = function (config: PackageInitParams = {}) {
-  const { publicKey, webhookSecretKey, mode } = config
-  const encryptionPublicKey = publicKey || getPublicKey(mode || 'production')
+  const { publicKey, webhookSecretKey, mode, verificationOptions } = config
+  const encryptionPublicKey =
+    publicKey || getSigningPublicKey(mode || 'production')
+  const verificationPublicKey =
+    publicKey || getVerificationPublicKey(mode || 'production')
 
   return {
     webhooks: new Webhooks({
@@ -23,6 +26,10 @@ export = function (config: PackageInitParams = {}) {
       secretKey: webhookSecretKey,
     }),
     crypto: new Crypto({ publicSigningKey: encryptionPublicKey }),
-    verification: verification(config),
+    verification: new Verification({
+      verificationPublicKey,
+      transactionExpiry: verificationOptions?.transactionExpiry,
+      verificationSecretKey: verificationOptions?.secretKey,
+    }),
   }
 }
