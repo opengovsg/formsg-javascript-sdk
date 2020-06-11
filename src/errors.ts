@@ -1,6 +1,6 @@
 class MissingSecretKeyError extends Error {
   constructor(
-    message = 'Provide a secret key when when initializing the FormSG SDK to use this function.'
+    message = 'Provide a secret key when initializing the FormSG SDK to use this function.'
   ) {
     super(message)
     this.name = this.constructor.name
@@ -12,7 +12,7 @@ class MissingSecretKeyError extends Error {
 }
 class MissingPublicKeyError extends Error {
   constructor(
-    message = 'Provide a public key when when initializing the FormSG SDK to use this function.'
+    message = 'Provide a public key when initializing the FormSG SDK to use this function.'
   ) {
     super(message)
     this.name = this.constructor.name
