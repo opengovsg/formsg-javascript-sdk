@@ -25,7 +25,7 @@ export default class Webhooks {
    * @param header X-FormSG-Signature header
    * @param uri The endpoint that FormSG is POSTing to
    * @returns true if the header is verified
-   * @throws {Error} If the signature or uri cannot be verified
+   * @throws {WebhookAuthenticateError} If the signature or uri cannot be verified
    */
   authenticate = (header: string, uri: string) => {
     // Parse the header
