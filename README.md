@@ -33,7 +33,8 @@ const formsg = require('@opengovsg/formsg-sdk')({
 
 ```javascript
 // This example uses Express to receive webhooks
-const app = require('express')()
+const express = require('express')
+const app = express()
 
 // Instantiating formsg-sdk without parameters default to using the package's
 // production public signing key.
@@ -58,9 +59,11 @@ app.post(
       return res.status(401).send({ message: 'Unauthorized' })
     }
   },
+  // Parse JSON from raw request body
+  express.json(),
   // Decrypt the submission
   function (req, res, next) {
-    // `req.body.data` must be an object fulfilling the DecryptParams interface.
+    // `req.body.data` is an object fulfilling the DecryptParams interface.
     // interface DecryptParams {
     //   encryptedContent: EncryptedContent
     //   version: number
