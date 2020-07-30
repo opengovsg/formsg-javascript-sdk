@@ -112,7 +112,7 @@ the shape
 
 <pre>
 {
-  responses: <a href="https://github.com/opengovsg/formsg-javascript-sdk/blob/master/src/types/index.d.ts#L27">FormField[]</a>
+  responses: <a href="./src/types.ts#L30">FormField</a>[]
   verified?: <a href="https://www.typescriptlang.org/docs/handbook/utility-types.html#recordkt">Record&lt;string, any&gt;</a>
 }
 </pre>

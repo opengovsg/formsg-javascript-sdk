@@ -63,6 +63,7 @@ export default class Webhooks {
    * @param params.epoch Number of milliseconds since Jan 1, 1970
    * @returns the generated signature
    * @throws {MissingSecretKeyError} if a secret key is not provided when instantiating this class
+   * @throws {TypeError} if any parameters are undefined
    */
   generateSignature = ({
     uri,
@@ -71,12 +72,16 @@ export default class Webhooks {
     epoch,
   }: {
     uri: string
-    submissionId: Object
+    submissionId: string
     formId: string
     epoch: number
   }) => {
     if (!this.secretKey) {
       throw new MissingSecretKeyError()
+    }
+
+    if (!submissionId || !uri || !formId || !epoch) {
+      throw new TypeError('submissionId, uri, formId, or epoch must be provided to generate a webhook signature')
     }
 
     const baseString = `${
