@@ -110,6 +110,58 @@ describe('Webhooks', () => {
     ).toThrow(MissingSecretKeyError)
   })
 
+  it('should throw error if generateSignature is called with undefined uri', () => {
+    expect(() =>
+      webhooks.generateSignature({
+        // For TypeScript to accept it since signature only accepts strings, but
+        // still want to test for undefined behavior.
+        uri: undefined!,
+        submissionId,
+        formId,
+        epoch: Date.now(),
+      })
+    ).toThrow(TypeError)
+  })
+
+  it('should throw error if generateSignature is called with undefined submissionId', () => {
+    expect(() =>
+      webhooks.generateSignature({
+        uri,
+        // For TypeScript to accept it since signature only accepts strings, but
+        // still want to test for undefined behavior.
+        submissionId: undefined!,
+        formId,
+        epoch: Date.now(),
+      })
+    ).toThrow(TypeError)
+  })
+
+  it('should throw error if generateSignature is called with undefined formId', () => {
+    expect(() =>
+      webhooks.generateSignature({
+        uri,
+        submissionId,
+        // For TypeScript to accept it since signature only accepts strings, but
+        // still want to test for undefined behavior.
+        formId: undefined!,
+        epoch: Date.now(),
+      })
+    ).toThrow(TypeError)
+  })
+
+  it('should throw error if generateSignature is called with undefined epoch', () => {
+    expect(() =>
+      webhooks.generateSignature({
+        uri,
+        submissionId,
+        formId,
+        // For TypeScript to accept it since signature only accepts strings, but
+        // still want to test for undefined behavior.
+        epoch: undefined!,
+      })
+    ).toThrow(TypeError)
+  })
+
   it('should throw error if constructHeader is called without a secret key in class instantiation', () => {
     const testEpoch = Date.now()
     const validSignature = generateTestSignature(testEpoch)
