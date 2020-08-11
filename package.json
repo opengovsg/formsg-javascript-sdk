@@ -3,7 +3,7 @@
   "version": "0.8.2",
   "repository": {
     "type": "git",
-    "url": "https://github.com/opengovsg/formsg-javascript-sdk.git"
+    "url": "https://github.com/opengovsg/formsg-sdk.git"
   },
   "description": "Node.js SDK for integrating with FormSG",
   "main": "./dist/index.js",
