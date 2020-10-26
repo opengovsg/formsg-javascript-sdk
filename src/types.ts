@@ -35,7 +35,7 @@ export type FormField = {
   signature?: string
 } & (
   | { answer: string; answerArray?: never }
-  | { answer?: never; answerArray: string[] }
+  | { answer?: never; answerArray: string[] | string[][] }
 )
 
 // Encrypted basestring containing the submission public key,
