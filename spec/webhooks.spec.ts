@@ -54,11 +54,65 @@ describe('Webhooks', () => {
       signature,
     }) as string
 
-    webhook.authenticate(header, uri)
+    expect(() => webhook.authenticate(header, uri)).not.toThrow()
   })
 
   it('should reject signatures generated more than 5 minutes ago', () => {
-    const epoch = Date.now() - 5 * 60 * 1000 - 1
+    const epoch = Date.now() - 5 * 60 * 1000 - 1 // 5min 1s into the past
+    const signature = webhook.generateSignature({
+      uri,
+      submissionId,
+      formId,
+      epoch,
+    }) as string
+    const header = webhook.constructHeader({
+      epoch,
+      submissionId,
+      formId,
+      signature,
+    }) as string
+
+    expect(() => webhook.authenticate(header, uri)).toThrow()
+  })
+
+  it('should accept signatures generated within 5 minutes', () => {
+    const epoch = Date.now() - 5 * 60 * 1000 + 1000 // 4min 59s into the past
+    const signature = webhook.generateSignature({
+      uri,
+      submissionId,
+      formId,
+      epoch,
+    }) as string
+    const header = webhook.constructHeader({
+      epoch,
+      submissionId,
+      formId,
+      signature,
+    }) as string
+
+    expect(() => webhook.authenticate(header, uri)).not.toThrow()
+  })
+
+  it('should authenticate signatures if Form server drifts 4m59s into the future', () => {
+    const epoch = Date.now() + 5 * 60 * 1000 - 1000 // 4min 59s into the future
+    const signature = webhook.generateSignature({
+      uri,
+      submissionId,
+      formId,
+      epoch,
+    }) as string
+    const header = webhook.constructHeader({
+      epoch,
+      submissionId,
+      formId,
+      signature,
+    }) as string
+
+    expect(() => webhook.authenticate(header, uri)).not.toThrow()
+  })
+
+  it('should reject signatures if Form server drifts 5m1s into the future', () => {
+    const epoch = Date.now() + 5 * 60 * 1000 + 1000 // 5min 1s into the future
     const signature = webhook.generateSignature({
       uri,
       submissionId,

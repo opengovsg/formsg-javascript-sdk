@@ -29,13 +29,14 @@ function verifySignature(
 
 /**
  * Helper function to verify that the epoch submitted is recent.
- * Prevents against replay attacks.
- * @param epoch The number of milliseconds since Jan 1, 1979
+ * Prevents against replay attacks. Allows for negative time interval
+ * in case of clock drift between Form servers and recipient server.
+ * @param epoch The number of milliseconds since 1 Jan 1970 00:00:00 UTC
  * @param expiry Duration of expiry. The default is 5 minutes.
  */
 function verifyEpoch(epoch: number, expiry: number = 300000) {
-  const difference = Date.now() - epoch
-  return difference > 0 && difference < expiry
+  const difference = Math.abs(Date.now() - epoch)
+  return difference < expiry
 }
 
 /**
