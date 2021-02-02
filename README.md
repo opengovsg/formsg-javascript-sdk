@@ -19,13 +19,15 @@ npm install @opengovsg/formsg-sdk --save
 
 ```javascript
 const formsg = require('@opengovsg/formsg-sdk')({
-  mode: 'production',
+  publicKey: 'replace-me-with-public-key',
 })
 ```
 
-| Option | Default      | Description                                                     |
-| ------ | ------------ | --------------------------------------------------------------- |
-| mode   | 'production' | Set to 'staging' if integrating against FormSG staging servers. |
+| Option    | Description                                                                                           |
+| --------- |  ---------------------------------------------------------------------------------------------------- |
+| publicKey | (required) This public key is used to authenticate or verify signed objects passed into this package. |
+
+You can find the public key for the FormSG staging and production environments at the bottom of this README.md file.
 
 ## Usage
 
