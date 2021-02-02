@@ -28,7 +28,7 @@ export = function (config: PackageInitParams = {}) {
     publicKey || getVerificationPublicKey(mode || 'production')
 
   if (typeof mode !== 'undefined') {
-    console.warn('Initializing the FormSG SDK is now deprecated. Please switch to the publicKey parameter instead.')
+    console.warn('Initializing the FormSG SDK with the `mode` parameter is now deprecated. Please switch to the publicKey parameter instead.')
   }
 
   return {
