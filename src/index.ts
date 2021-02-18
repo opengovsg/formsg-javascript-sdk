@@ -8,8 +8,8 @@ import Crypto from './crypto'
 
 /**
  * Deprecated entrypoint into the FormSG SDK
+ * Deprecated since January 2021.
  *
- * @deprecated since January 2021
  * @param {PackageInitParams} config Package initialization config parameters
  * @param {string?} [config.mode] Optional. Initializes public key used for verifying and decrypting in this package. If `config.signingPublicKey` is given, this param will be ignored.
  * @param {string?} [config.webhookSecretKey] Optional. base64 secret key for signing webhooks. If provided, enables generating signature and headers to authenticate webhook data.
