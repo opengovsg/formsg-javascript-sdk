@@ -1,18 +1,11 @@
 export type PackageInitParams = {
+  /** base64 secret key for signing webhooks. If provided, enables generating signature and headers to authenticate webhook data. */
   webhookSecretKey?: string
+  /** If provided, enables the usage of the verification module. */
   verificationOptions?: VerificationOptions
-} & (
-  | {
-      signingPublicKey?: string
-      /** @deprecated Please switch to using the `signingPublicKey` and `verificationOptions.publicKey` parameters instead. Deprecated since January 2021. */
-      mode?: never
-    }
-  | {
-      signingPublicKey?: never
-      /** @deprecated Please switch to using the `signingPublicKey` and `verificationOptions.publicKey` parameters instead. Deprecated since January 2021. */
-      mode?: PackageMode
-    }
-)
+  /** Initializes public key used for verifying and decrypting in this package. If not given, will default to "production". */
+  mode?: PackageMode
+}
 
 // A field type available in FormSG as a string
 export type FieldType =

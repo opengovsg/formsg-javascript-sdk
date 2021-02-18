@@ -25,10 +25,10 @@ import {
 } from './util/crypto'
 
 export default class Crypto {
-  publicSigningKey?: string
+  signingPublicKey?: string
 
-  constructor({ publicSigningKey }: { publicSigningKey?: string } = {}) {
-    this.publicSigningKey = publicSigningKey
+  constructor({ signingPublicKey }: { signingPublicKey?: string } = {}) {
+    this.signingPublicKey = signingPublicKey
   }
 
   /**
@@ -85,7 +85,7 @@ export default class Crypto {
       }
 
       if (verifiedContent) {
-        if (!this.publicSigningKey) {
+        if (!this.signingPublicKey) {
           throw new MissingPublicKeyError(
             'Public signing key must be provided when instantiating the Crypto class in order to verify verified content'
           )
@@ -103,7 +103,7 @@ export default class Crypto {
         }
         const decryptedVerifiedObject = verifySignedMessage(
           decryptedVerifiedContent,
-          this.publicSigningKey
+          this.signingPublicKey
         )
 
         returnedObject.verified = decryptedVerifiedObject
