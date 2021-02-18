@@ -14,7 +14,7 @@ import Crypto from './crypto'
  * @param {string?} [config.webhookSecretKey] Optional. base64 secret key for signing webhooks. If provided, enables generating signature and headers to authenticate webhook data.
  * @param {VerificationOptions?} [config.verificationOptions] Optional. If provided, enables the usage of the verification module.
  */
-export default function (config: PackageInitParams = {}) {
+export = function (config: PackageInitParams = {}) {
   const { webhookSecretKey, mode, verificationOptions } = config
   const signingPublicKey = getSigningPublicKey(mode || 'production')
   const verificationPublicKey = getVerificationPublicKey(mode || 'production')
