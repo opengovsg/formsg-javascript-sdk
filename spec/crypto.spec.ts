@@ -17,7 +17,7 @@ const signingSecretKey = SIGNING_KEYS.test.secretKey
 const testFileBuffer = new Uint8Array(Buffer.from('./resources/ogp.svg'))
 
 describe('Crypto', function () {
-  const crypto = new Crypto({ publicSigningKey: encryptionPublicKey })
+  const crypto = new Crypto({ signingPublicKey: encryptionPublicKey })
 
   const mockVerifiedContent = {
     uinFin: 'S12345679Z',
