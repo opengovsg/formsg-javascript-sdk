@@ -2,8 +2,16 @@ export type PackageInitParams = {
   webhookSecretKey?: string
   verificationOptions?: VerificationOptions
 } & (
-  | { publicKey?: string; mode?: never }
-  | { publicKey?: never; mode?: PackageMode }
+  | {
+      signingPublicKey?: string
+      /** @deprecated Please switch to using the `signingPublicKey` and `verificationOptions.publicKey` parameters instead. Deprecated since January 2021. */
+      mode?: never
+    }
+  | {
+      signingPublicKey?: never
+      /** @deprecated Please switch to using the `signingPublicKey` and `verificationOptions.publicKey` parameters instead. Deprecated since January 2021. */
+      mode?: PackageMode
+    }
 )
 
 // A field type available in FormSG as a string
@@ -70,6 +78,7 @@ export type Keypair = {
 export type PackageMode = 'staging' | 'production' | 'development' | 'test'
 
 export type VerificationOptions = {
+  publicKey?: string
   secretKey?: string
   transactionExpiry?: number
 }

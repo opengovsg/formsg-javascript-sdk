@@ -8,6 +8,7 @@ import { decodeUTF8, decodeBase64, encodeBase64 } from 'tweetnacl-util'
 import {
   VerificationSignatureOptions,
   VerificationAuthenticateOptions,
+  VerificationOptions,
 } from '../types'
 
 import { MissingSecretKeyError, MissingPublicKeyError } from '../errors'
@@ -20,18 +21,10 @@ export default class Verification {
   verificationSecretKey?: string
   transactionExpiry?: number
 
-  constructor({
-    verificationPublicKey,
-    verificationSecretKey,
-    transactionExpiry,
-  }: {
-    verificationPublicKey?: string
-    verificationSecretKey?: string
-    transactionExpiry?: number
-  }) {
-    this.verificationPublicKey = verificationPublicKey
-    this.verificationSecretKey = verificationSecretKey
-    this.transactionExpiry = transactionExpiry
+  constructor(params?: VerificationOptions) {
+    this.verificationPublicKey = params?.publicKey
+    this.verificationSecretKey = params?.secretKey
+    this.transactionExpiry = params?.transactionExpiry
   }
 
   /**
