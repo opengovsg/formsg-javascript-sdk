@@ -1,1 +1,8 @@
 src
+coverage
+spec
+.prettierrc.js
+.travis.yml
+jest.config.js
+tsconfig.json
+package-lock.json
