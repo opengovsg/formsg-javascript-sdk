@@ -16,7 +16,14 @@ import Crypto from './crypto'
  */
 export = function (config: PackageInitParams = {}) {
   const { webhookSecretKey, mode, verificationOptions } = config
+  /**
+   * Public key is used for decrypting signed verified content in the `crypto` module, and
+   * also for verifying webhook signatures' authenticity in the `wehbooks` module.
+   */
   const signingPublicKey = getSigningPublicKey(mode || 'production')
+  /**
+   * Public key is used for verifying verified field signatures' authenticity in the `verification` module.
+   */
   const verificationPublicKey = getVerificationPublicKey(mode || 'production')
 
   return {
