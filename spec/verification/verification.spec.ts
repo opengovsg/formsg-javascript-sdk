@@ -2,8 +2,8 @@ import { VERIFICATION_KEYS } from '../../src/resource/verification-keys'
 import Verification from '../../src/verification'
 import { MissingSecretKeyError, MissingPublicKeyError } from '../../src/errors'
 
-const publicKey = VERIFICATION_KEYS.test.publicKey
-const secretKey = VERIFICATION_KEYS.test.secretKey
+const TEST_PUBLIC_KEY = VERIFICATION_KEYS.test.publicKey
+const TEST_SECRET_KEY = VERIFICATION_KEYS.test.secretKey
 
 const TEST_TRANSACTION_EXPIRY = 10000
 const TEST_PARAMS = {
@@ -43,7 +43,7 @@ describe('Verification', () => {
       const verification = new Verification({
         // No public key provided.
         transactionExpiry: TEST_TRANSACTION_EXPIRY,
-        verificationSecretKey: secretKey,
+        secretKey: TEST_SECRET_KEY,
       })
 
       expect(() => verification.authenticate(VALID_AUTH_PAYLOAD)).toThrow(
@@ -54,8 +54,8 @@ describe('Verification', () => {
     it('should not authenticate if transaction expiry is not provided', () => {
       const verification = new Verification({
         // No transaction expiry provided.
-        verificationPublicKey: publicKey,
-        verificationSecretKey: secretKey,
+        publicKey: TEST_PUBLIC_KEY,
+        secretKey: TEST_SECRET_KEY,
       })
 
       expect(() => verification.authenticate(VALID_AUTH_PAYLOAD)).toThrow(
@@ -67,8 +67,8 @@ describe('Verification', () => {
   describe('Usage', () => {
     const verification = new Verification({
       transactionExpiry: TEST_TRANSACTION_EXPIRY,
-      verificationSecretKey: secretKey,
-      verificationPublicKey: publicKey,
+      secretKey: TEST_SECRET_KEY,
+      publicKey: TEST_PUBLIC_KEY,
     })
 
     let now: jest.MockInstance<number, any>
