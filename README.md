@@ -18,7 +18,7 @@ npm install @opengovsg/formsg-sdk --save
 ## Configuration
 
 ```javascript
-const formsg = require('@opengovsg/formsg')({
+const formsg = require('@opengovsg/formsg-sdk')({
   mode: 'production',
 })
 ```
@@ -33,11 +33,12 @@ const formsg = require('@opengovsg/formsg')({
 
 ```javascript
 // This example uses Express to receive webhooks
-const app = require('express')()
+const express = require('express')
+const app = express()
 
 // Instantiating formsg-sdk without parameters default to using the package's
 // production public signing key.
-const formsg = require('@opengovsg/formsg')()
+const formsg = require('@opengovsg/formsg-sdk')()
 
 // This is where your domain is hosted, and should match
 // the URI supplied to FormSG in the form dashboard
@@ -58,9 +59,11 @@ app.post(
       return res.status(401).send({ message: 'Unauthorized' })
     }
   },
+  // Parse JSON from raw request body
+  express.json(),
   // Decrypt the submission
   function (req, res, next) {
-    // `req.body.data` must be an object fulfilling the DecryptParams interface.
+    // `req.body.data` is an object fulfilling the DecryptParams interface.
     // interface DecryptParams {
     //   encryptedContent: EncryptedContent
     //   version: number
@@ -109,7 +112,7 @@ the shape
 
 <pre>
 {
-  responses: <a href="https://github.com/opengovsg/formsg-javascript-sdk/blob/master/src/types/index.d.ts#L27">FormField[]</a>
+  responses: <a href="./src/types.ts#L30">FormField</a>[]
   verified?: <a href="https://www.typescriptlang.org/docs/handbook/utility-types.html#recordkt">Record&lt;string, any&gt;</a>
 }
 </pre>

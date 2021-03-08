@@ -1,7 +1,10 @@
 export type PackageInitParams = {
-  mode?: PackageMode
+  /** base64 secret key for signing webhooks. If provided, enables generating signature and headers to authenticate webhook data. */
   webhookSecretKey?: string
+  /** If provided, enables the usage of the verification module. */
   verificationOptions?: VerificationOptions
+  /** Initializes public key used for verifying and decrypting in this package. If not given, will default to "production". */
+  mode?: PackageMode
 }
 
 // A field type available in FormSG as a string
@@ -22,6 +25,7 @@ export type FieldType =
   | 'attachment'
   | 'date'
   | 'mobile'
+  | 'homeno'
 
 // Represents form field responses in a form.
 export type FormField = {
@@ -32,7 +36,7 @@ export type FormField = {
   signature?: string
 } & (
   | { answer: string; answerArray?: never }
-  | { answer?: never; answerArray: string[] }
+  | { answer?: never; answerArray: string[] | string[][] }
 )
 
 // Encrypted basestring containing the submission public key,
@@ -67,6 +71,7 @@ export type Keypair = {
 export type PackageMode = 'staging' | 'production' | 'development' | 'test'
 
 export type VerificationOptions = {
+  publicKey?: string
   secretKey?: string
   transactionExpiry?: number
 }

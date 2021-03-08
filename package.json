@@ -1,6 +1,6 @@
 {
   "name": "@opengovsg/formsg-sdk",
-  "version": "0.8.3",
+  "version": "0.8.4",
   "repository": {
     "type": "git",
     "url": "https://github.com/opengovsg/formsg-javascript-sdk.git"
@@ -9,7 +9,8 @@
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "scripts": {
-    "test": "jest --coverage && coveralls < coverage/lcov.info && rm -rf ./coverage",
+    "test": "jest",
+    "test-ci": "jest --coverage && coveralls < coverage/lcov.info && rm -rf ./coverage",
     "test:watch": "jest --watch",
     "build": "tsc",
     "prepare": "npm run build"

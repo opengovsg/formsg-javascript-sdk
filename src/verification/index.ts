@@ -2,42 +2,127 @@
  * @file Manages verification of otp form fields (email, sms, whatsapp)
  * @author Jean Tan
  */
-import { PackageInitParams } from '../types'
+import nacl from 'tweetnacl'
+import { decodeUTF8, decodeBase64, encodeBase64 } from 'tweetnacl-util'
 
-import authenticate from './authenticate'
-import generateSignature from './generate-signature'
-import getPublicKey from './get-public-key'
+import {
+  VerificationSignatureOptions,
+  VerificationAuthenticateOptions,
+  VerificationOptions,
+} from '../types'
 
-/**
- * Provider that accepts configuration
- * before returning the webhooks module
- */
-export = function (params: PackageInitParams = {}) {
-  const { mode, verificationOptions } = params
-  if (verificationOptions !== undefined) {
-    const verificationPublicKey = getPublicKey(mode)
-    const {
-      secretKey: verificationSecretKey,
-      transactionExpiry,
-    } = verificationOptions
-    return {
-      authenticate:
-        transactionExpiry !== undefined
-          ? authenticate(verificationPublicKey, transactionExpiry)
-          : function () {
-              throw new Error(
-                'Provide transactionExpiry when initializing the formsg sdk to use this function.'
-              )
-            },
-      generateSignature:
-        verificationSecretKey !== undefined
-          ? generateSignature(verificationSecretKey)
-          : function () {
-              throw new Error(
-                'Provide verificationSecretKey when initializing the formsg sdk to use this function.'
-              )
-            },
+import { MissingSecretKeyError, MissingPublicKeyError } from '../errors'
+import { parseVerificationSignature } from '../util/parser'
+
+import { isSignatureTimeValid, formatToBaseString } from './utils'
+
+export default class Verification {
+  verificationPublicKey?: string
+  verificationSecretKey?: string
+  transactionExpiry?: number
+
+  constructor(params?: VerificationOptions) {
+    this.verificationPublicKey = params?.publicKey
+    this.verificationSecretKey = params?.secretKey
+    this.transactionExpiry = params?.transactionExpiry
+  }
+
+  /**
+   *  Verifies signature
+   * @param {object} data
+   * @param {string} data.signatureString
+   * @param {number} data.submissionCreatedAt date in milliseconds
+   * @param {string} data.fieldId
+   * @param {string} data.answer
+   * @param {string} data.publicKey
+   */
+  authenticate = ({
+    signatureString,
+    submissionCreatedAt,
+    fieldId,
+    answer,
+  }: VerificationAuthenticateOptions) => {
+    if (!this.transactionExpiry) {
+      throw new Error(
+        'Provide a transaction expiry when when initializing the FormSG SDK to use this function.'
+      )
+    }
+
+    if (!this.verificationPublicKey) {
+      throw new MissingPublicKeyError()
+    }
+
+    try {
+      const {
+        v: transactionId,
+        t: time,
+        f: formId,
+        s: signature,
+      } = parseVerificationSignature(signatureString)
+
+      if (!time) {
+        throw new Error('Malformed signature string was passed into function')
+      }
+
+      if (
+        isSignatureTimeValid(time, submissionCreatedAt, this.transactionExpiry)
+      ) {
+        const data = formatToBaseString({
+          transactionId,
+          formId,
+          fieldId,
+          answer,
+          time,
+        })
+
+        return nacl.sign.detached.verify(
+          decodeUTF8(data),
+          decodeBase64(signature),
+          decodeBase64(this.verificationPublicKey)
+        )
+      } else {
+        console.info(
+          `Signature was expired for signatureString="${signatureString}" signatureDate="${time}" submissionCreatedAt="${submissionCreatedAt}"`
+        )
+        return false
+      }
+    } catch (error) {
+      console.error(`An error occurred for \
+            signatureString="${signatureString}" \
+            submissionCreatedAt="${submissionCreatedAt}" \
+            fieldId="${fieldId}" \
+            answer="${answer}" \
+            error="${error}"`)
+      return false
     }
   }
-  return {}
+
+  generateSignature = ({
+    transactionId,
+    formId,
+    fieldId,
+    answer,
+  }: VerificationSignatureOptions): string => {
+    if (!this.verificationSecretKey) {
+      throw new MissingSecretKeyError(
+        'Provide a secret key when when initializing the Verification class to use this function.'
+      )
+    }
+
+    const time = Date.now()
+    const data = formatToBaseString({
+      transactionId,
+      formId,
+      fieldId,
+      answer,
+      time,
+    })
+    const signature = nacl.sign.detached(
+      decodeUTF8(data),
+      decodeBase64(this.verificationSecretKey)
+    )
+    return `f=${formId},v=${transactionId},t=${time},s=${encodeBase64(
+      signature
+    )}`
+  }
 }

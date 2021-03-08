@@ -1,14 +1,15 @@
 import { SIGNING_KEYS } from '../resource/signing-keys'
+import { VERIFICATION_KEYS } from '../resource/verification-keys'
 import { PackageMode } from '../types'
 
 import STAGE from './stage'
 
 /**
- * Retrieves the appropriate public key.
+ * Retrieves the appropriate signing public key.
  * Defaults to production.
  * @param mode The package mode to retrieve the public key for.
  */
-function getPublicKey(mode?: PackageMode) {
+function getSigningPublicKey(mode?: PackageMode) {
   switch (mode) {
     case STAGE.development:
     case STAGE.staging:
@@ -20,4 +21,21 @@ function getPublicKey(mode?: PackageMode) {
   }
 }
 
-export { getPublicKey }
+/**
+ * Retrieves the appropriate verification public key.
+ * Defaults to production.
+ * @param mode The package mode to retrieve the public key for.
+ */
+function getVerificationPublicKey(mode?: PackageMode) {
+  switch (mode) {
+    case STAGE.development:
+    case STAGE.staging:
+      return VERIFICATION_KEYS.staging.publicKey
+    case STAGE.test:
+      return VERIFICATION_KEYS.test.publicKey
+    default:
+      return VERIFICATION_KEYS.production.publicKey
+  }
+}
+
+export { getSigningPublicKey, getVerificationPublicKey }
