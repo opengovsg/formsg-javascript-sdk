@@ -100,7 +100,7 @@ The underlying cryptosystem is `x25519-xsalsa20-poly1305` which is implemented b
 | Key              | Type   | Description                         |
 | ---------------- | ------ | ----------------------------------- |
 | formId           | string | Unique form identifier.             |
-| submissionId     | string | Unique submission identifier.       |
+| submissionId     | string | Unique response identifier, displayed as 'Response ID' to form respondents       |
 | encryptedContent | string | The encrypted submission in base64. |
 | created          | string | Creation timestamp.                 |
 
