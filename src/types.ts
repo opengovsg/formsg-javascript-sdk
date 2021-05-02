@@ -45,16 +45,29 @@ export type FormField = {
 // <SubmissionPublicKey>;<Base64Nonce>:<Base64EncryptedData>
 export type EncryptedContent = string
 
+// Records containing a map of field IDs to URLs where encrypted
+// attachments can be downloaded.
+export type EncryptedAttachmentRecords = Record<string, string>
+
 export interface DecryptParams {
   encryptedContent: EncryptedContent
   version: number
   verifiedContent?: EncryptedContent
+  attachmentDownloadUrls?: EncryptedAttachmentRecords
 }
 
 export type DecryptedContent = {
   responses: FormField[]
   verified?: Record<string, any>
 }
+
+export type DecryptedFile = {
+  filename: string
+  content: Uint8Array | null
+}
+
+// Records containing a map of field IDs to DecryptedFiles.
+export type DecryptedAttachments = Record<string, DecryptedFile>
 
 export type EncryptedFileContent = {
   submissionPublicKey: string

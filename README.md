@@ -103,6 +103,7 @@ The underlying cryptosystem is `x25519-xsalsa20-poly1305` which is implemented b
 | submissionId     | string | Unique response identifier, displayed as 'Response ID' to form respondents       |
 | encryptedContent | string | The encrypted submission in base64. |
 | created          | string | Creation timestamp.                 |
+| attachmentDownloadUrls | Record<string, string> | (Optional) Records containing field IDs and URLs where encrypted uploaded attachments can be downloaded. |
 
 ### Format of Decrypted Submissions
 

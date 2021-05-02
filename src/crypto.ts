@@ -1,8 +1,11 @@
+import axios from 'axios'
 import nacl from 'tweetnacl'
 
 import {
   DecryptParams,
+  DecryptedAttachments,
   DecryptedContent,
+  EncryptedAttachmentRecords,
   EncryptedContent,
   EncryptedFileContent,
   FormField,
@@ -14,6 +17,8 @@ import {
   encodeUTF8,
   decodeUTF8,
 } from 'tweetnacl-util'
+
+import { decode as decodeBase64ToUint8Array } from '@stablelib/base64'
 
 import { determineIsFormFields } from './util/validate'
 import { MissingPublicKeyError } from './errors'
@@ -194,5 +199,42 @@ export default class Crypto {
       decodeBase64(submissionPublicKey),
       decodeBase64(formSecretKey)
     )
+  }
+
+  /**
+   * Download and decrypt the given attachments.
+   * @param formSecretKey Secret key as a base-64 string
+   * @param decryptParams The params containing encrypted content and information.
+   * @returns The decrypted attachments if successful. Else, null will be returned.
+   * @throws {MissingPublicKeyError} if a public key is not provided when instantiating this class and is needed for verifying signed content.
+   */
+  downloadAndDecryptAttachments = async(formSecretKey: string, decryptParams: DecryptParams): Promise<DecryptedAttachments | null> => {
+    let decryptedRecords: DecryptedAttachments = {}
+
+    const attachmentRecords: EncryptedAttachmentRecords = decryptParams.attachmentDownloadUrls ?? {}
+    const decryptedContent = this.decrypt(formSecretKey, decryptParams)
+    if (decryptedContent === null) return null
+
+    for (let fieldId in attachmentRecords) {
+      const downloadResponse = await axios.get(attachmentRecords[fieldId], { responseType: 'json' })
+      if (downloadResponse.status !== 200) return null
+
+      let data = downloadResponse.data
+      data.encryptedFile.binary = decodeBase64ToUint8Array(data.encryptedFile.binary)
+      const decryptedFile = await this.decryptFile(formSecretKey, data.encryptedFile)
+
+      let filename = 'Unknown File.data'
+      for (const i in decryptedContent.responses) {
+        const response = decryptedContent.responses[i]
+        if (response._id === fieldId && response.answer) {
+          filename = response.answer
+          break
+        }
+      }
+
+      decryptedRecords[fieldId] = { filename, content: decryptedFile }
+    }
+
+    return decryptedRecords
   }
 }

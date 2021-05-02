@@ -1,5 +1,10 @@
+import mockAxios from 'jest-mock-axios'
 import Crypto from '../src/crypto'
 import { SIGNING_KEYS } from '../src/resource/signing-keys'
+
+import {
+  encodeBase64,
+} from 'tweetnacl-util'
 
 import {
   plaintext,
@@ -16,7 +21,11 @@ const encryptionPublicKey = SIGNING_KEYS.test.publicKey
 const signingSecretKey = SIGNING_KEYS.test.secretKey
 const testFileBuffer = new Uint8Array(Buffer.from('./resources/ogp.svg'))
 
+jest.mock('axios', () => mockAxios)
+
 describe('Crypto', function () {
+  afterEach(() => mockAxios.reset())
+
   const crypto = new Crypto({ signingPublicKey: encryptionPublicKey })
 
   const mockVerifiedContent = {
@@ -230,5 +239,42 @@ describe('Crypto', function () {
       version: INTERNAL_TEST_VERSION,
     })
     expect(decryptResult).toBeNull()
+  })
+
+  it('should be able to download and decrypt an attachment successfully', async () => {
+    // Arrange
+    const { publicKey, secretKey } = crypto.generate()
+
+    let attachmentPlaintext = plaintext
+    attachmentPlaintext.push({
+      _id: '6e771c946b3c5100240368e5',
+      question: 'Random file',
+      fieldType: 'attachment',
+      answer: 'my-random-file.txt',
+    })
+
+    // Encrypt content that is not signed
+    const ciphertext = crypto.encrypt(attachmentPlaintext, publicKey)
+
+    // Encrypt file
+    const encryptedFile = await crypto.encryptFile(testFileBuffer, publicKey)
+    const uploadedFile = {
+      submissionPublicKey: encryptedFile.submissionPublicKey,
+      nonce: encryptedFile.nonce,
+      binary: encodeBase64(encryptedFile.binary)
+    }
+
+    // Act
+    const decryptedFilesPromise = crypto.downloadAndDecryptAttachments(secretKey, {
+      encryptedContent: ciphertext,
+      attachmentDownloadUrls: { '6e771c946b3c5100240368e5': 'https://some.s3.url/some/encrypted/file' },
+      version: INTERNAL_TEST_VERSION,
+    })
+    mockAxios.mockResponse({ data: { encryptedFile: uploadedFile }})
+    const decryptedFiles = await(decryptedFilesPromise)
+
+    // Assert
+    expect(mockAxios.get).toHaveBeenCalledWith('https://some.s3.url/some/encrypted/file', { responseType: 'json' })
+    expect(decryptedFiles).toHaveProperty('6e771c946b3c5100240368e5', { filename: 'my-random-file.txt', content: testFileBuffer })
   })
 })
