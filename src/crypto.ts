@@ -208,7 +208,10 @@ export default class Crypto {
    * @returns The decrypted attachments if successful. Else, null will be returned.
    * @throws {MissingPublicKeyError} if a public key is not provided when instantiating this class and is needed for verifying signed content.
    */
-  downloadAndDecryptAttachments = async(formSecretKey: string, decryptParams: DecryptParams): Promise<DecryptedAttachments | null> => {
+  downloadAndDecryptAttachments = async (
+    formSecretKey: string,
+    decryptParams: DecryptParams
+  ): Promise<DecryptedAttachments | null> => {
     let decryptedRecords: DecryptedAttachments = {}
 
     const attachmentRecords: EncryptedAttachmentRecords = decryptParams.attachmentDownloadUrls ?? {}
