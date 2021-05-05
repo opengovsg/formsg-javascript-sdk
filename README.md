@@ -161,7 +161,7 @@ If the decrypted content is the correct shape, then:
 
 ### Processing Attachments
 
-`formsg.crypto.decryptWithAttachments(formSecretKey: string, decryptParams: DecryptParams) behaves similarly except it will return a `Promise<DecryptedContentAndAttachments | null>`.
+`formsg.crypto.decryptWithAttachments(formSecretKey: string, decryptParams: DecryptParams)` behaves similarly except it will return a `Promise<DecryptedContentAndAttachments | null>`.
 
 `DecryptedContentAndAttachments` is an object containing two fields: 
  - `content`: the standard form decrypted responses (same as the return type of `formsg.crypto.decrypt`)
