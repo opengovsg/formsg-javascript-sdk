@@ -63,16 +63,29 @@ export type DecryptedContent = {
 
 export type DecryptedFile = {
   filename: string
-  content: Uint8Array | null
+  content: Uint8Array
 }
 
 // Records containing a map of field IDs to DecryptedFiles.
 export type DecryptedAttachments = Record<string, DecryptedFile>
 
+export type DecryptedContentAndAttachments = {
+  content: DecryptedContent
+  attachments: DecryptedAttachments
+}
+
 export type EncryptedFileContent = {
   submissionPublicKey: string
   nonce: string
   binary: Uint8Array
+}
+
+export type EncryptedAttachmentContent = {
+  encryptedFile: {
+    submissionPublicKey: string
+    nonce: string
+    binary: string
+  }
 }
 
 // A base-64 encoded cryptographic keypair suitable for curve25519.

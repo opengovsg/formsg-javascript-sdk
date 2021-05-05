@@ -23,7 +23,6 @@
   "author": "Open Government Products (FormSG)",
   "license": "MIT",
   "dependencies": {
-    "@stablelib/base64": "^1.0.0",
     "axios": "^0.21.1",
     "tweetnacl": "^1.0.3",
     "tweetnacl-util": "^0.15.1"

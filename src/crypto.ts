@@ -5,6 +5,8 @@ import {
   DecryptParams,
   DecryptedAttachments,
   DecryptedContent,
+  DecryptedContentAndAttachments,
+  EncryptedAttachmentContent,
   EncryptedAttachmentRecords,
   EncryptedContent,
   EncryptedFileContent,
@@ -17,8 +19,6 @@ import {
   encodeUTF8,
   decodeUTF8,
 } from 'tweetnacl-util'
-
-import { decode as decodeBase64ToUint8Array } from '@stablelib/base64'
 
 import { determineIsFormFields } from './util/validate'
 import { MissingPublicKeyError } from './errors'
@@ -202,42 +202,55 @@ export default class Crypto {
   }
 
   /**
-   * Download and decrypt the given attachments.
+   * Decrypts an encrypted submission, and also download and decrypt any attachments alongside it.
    * @param formSecretKey Secret key as a base-64 string
    * @param decryptParams The params containing encrypted content and information.
-   * @returns The decrypted attachments if successful. Else, null will be returned.
+   * @returns A promise of the decrypted submission, including attachments (if any). Or else returns null if a decryption error decrypting any part of the submission.
    * @throws {MissingPublicKeyError} if a public key is not provided when instantiating this class and is needed for verifying signed content.
    */
-  downloadAndDecryptAttachments = async (
+  decryptWithAttachments = async (
     formSecretKey: string,
     decryptParams: DecryptParams
-  ): Promise<DecryptedAttachments | null> => {
-    let decryptedRecords: DecryptedAttachments = {}
+  ): Promise<DecryptedContentAndAttachments | null> => {
+    const decryptedRecords: DecryptedAttachments = {}
+    const filenames: Record<string, string> = {}
 
     const attachmentRecords: EncryptedAttachmentRecords = decryptParams.attachmentDownloadUrls ?? {}
     const decryptedContent = this.decrypt(formSecretKey, decryptParams)
     if (decryptedContent === null) return null
 
+    // Retrieve all original filenames for attachments for easy lookup
+    for (const i in decryptedContent.responses) {
+      const response = decryptedContent.responses[i]
+      if (response.fieldType === 'attachment' && response.answer) {
+        filenames[response._id] = response.answer
+      }
+    }
+
     for (let fieldId in attachmentRecords) {
       const downloadResponse = await axios.get(attachmentRecords[fieldId], { responseType: 'json' })
       if (downloadResponse.status !== 200) return null
 
-      let data = downloadResponse.data
-      data.encryptedFile.binary = decodeBase64ToUint8Array(data.encryptedFile.binary)
-      const decryptedFile = await this.decryptFile(formSecretKey, data.encryptedFile)
-
-      let filename = 'Unknown File.data'
-      for (const i in decryptedContent.responses) {
-        const response = decryptedContent.responses[i]
-        if (response._id === fieldId && response.answer) {
-          filename = response.answer
-          break
-        }
+      const encryptedAttachment: EncryptedAttachmentContent = downloadResponse.data
+      const encryptedFile: EncryptedFileContent = {
+        submissionPublicKey: encryptedAttachment.encryptedFile.submissionPublicKey,
+        nonce: encryptedAttachment.encryptedFile.nonce,
+        binary: decodeBase64(encryptedAttachment.encryptedFile.binary),
       }
+      const decryptedFile = await this.decryptFile(formSecretKey, encryptedFile)
 
-      decryptedRecords[fieldId] = { filename, content: decryptedFile }
+      // Decryption for a file failed
+      if (decryptedFile === null) return null
+
+      // Original name for the file is not found
+      if (filenames[fieldId] === undefined) return null
+
+      decryptedRecords[fieldId] = { filename: filenames[fieldId], content: decryptedFile }
     }
 
-    return decryptedRecords
+    return {
+      content: decryptedContent,
+      attachments: decryptedRecords
+    }
   }
 }
