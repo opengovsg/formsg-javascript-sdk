@@ -86,6 +86,49 @@ app.post(
   }
 )
 
+// Example for submissions with attachments
+app.post(
+  '/submissions-attachment',
+  // Endpoint authentication by verifying signatures
+  function (req, res, next) {
+    try {
+      formsg.webhooks.authenticate(req.get('X-FormSG-Signature'), POST_URI)
+      // Continue processing the POST body
+      return next()
+    } catch (e) {
+      return res.status(401).send({ message: 'Unauthorized' })
+    }
+  },
+  // Parse JSON from raw request body
+  express.json(),
+  // Decrypt the submission and attachments
+  async function (req, res, next) {
+    // `req.body.data` is an object fulfilling the DecryptParams interface.
+    // interface DecryptParams {
+    //   encryptedContent: EncryptedContent
+    //   version: number
+    //   verifiedContent?: EncryptedContent
+    // }
+    /** @type {{content: DecryptedContent, attachments: DecryptedAttachments}} */
+    const submission = formsg.crypto.decryptWithAttachments(
+      formSecretKey,
+      // If `verifiedContent` is provided in `req.body.data`, the return object
+      // will include a verified key.
+      req.body.data
+    )
+
+    // If the decryption failed, submission will be `null`.
+    if (submission) {
+      // Continue processing the submission
+
+      // processSubmission(submission.content)
+      // processAttachments(submission.attachments)
+    } else {
+      // Could not decrypt the submission
+    }
+  }
+)
+
 app.listen(8080, () => console.log('Running on port 8080'))
 ```
 

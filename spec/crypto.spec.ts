@@ -369,7 +369,6 @@ describe('Crypto', function () {
       attachmentDownloadUrls: { '6e771c946b3c5100240368e5': 'https://some.s3.url/some/encrypted/file' },
       version: INTERNAL_TEST_VERSION,
     })
-    mockAxios.mockResponse({ data: { encryptedFile: uploadedFile }})
     const decryptedContents = await decryptedFilesPromise
 
     // Assert

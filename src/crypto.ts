@@ -220,32 +220,40 @@ export default class Crypto {
     if (decryptedContent === null) return null
 
     // Retrieve all original filenames for attachments for easy lookup
-    for (const i in decryptedContent.responses) {
-      const response = decryptedContent.responses[i]
+    decryptedContent.responses.forEach((response) => {
       if (response.fieldType === 'attachment' && response.answer) {
         filenames[response._id] = response.answer
       }
-    }
+    })
 
+    const downloadPromises : Array<Promise<void>> = []
     for (let fieldId in attachmentRecords) {
-      const downloadResponse = await axios.get(attachmentRecords[fieldId], { responseType: 'json' })
-      if (downloadResponse.status !== 200) return null
-
-      const encryptedAttachment: EncryptedAttachmentContent = downloadResponse.data
-      const encryptedFile: EncryptedFileContent = {
-        submissionPublicKey: encryptedAttachment.encryptedFile.submissionPublicKey,
-        nonce: encryptedAttachment.encryptedFile.nonce,
-        binary: decodeBase64(encryptedAttachment.encryptedFile.binary),
-      }
-      const decryptedFile = await this.decryptFile(formSecretKey, encryptedFile)
-
-      // Decryption for a file failed
-      if (decryptedFile === null) return null
-
       // Original name for the file is not found
       if (filenames[fieldId] === undefined) return null
 
-      decryptedRecords[fieldId] = { filename: filenames[fieldId], content: decryptedFile }
+      downloadPromises.push(
+        axios.get(attachmentRecords[fieldId], { responseType: 'json' })
+      .then((downloadResponse) => {
+        if (downloadResponse.status !== 200) throw new Error("Download failed")
+
+        const encryptedAttachment: EncryptedAttachmentContent = downloadResponse.data
+        const encryptedFile: EncryptedFileContent = {
+          submissionPublicKey: encryptedAttachment.encryptedFile.submissionPublicKey,
+          nonce: encryptedAttachment.encryptedFile.nonce,
+          binary: decodeBase64(encryptedAttachment.encryptedFile.binary),
+        }
+
+        return this.decryptFile(formSecretKey, encryptedFile)
+      }).then((decryptedFile) => {
+        if (decryptedFile === null) throw new Error("Attachment decryption failed")
+        decryptedRecords[fieldId] = { filename: filenames[fieldId], content: decryptedFile }
+      }))
+    }
+
+    try {
+      await Promise.all(downloadPromises)
+    } catch (e) {
+      return null
     }
 
     return {
