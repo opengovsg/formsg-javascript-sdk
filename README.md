@@ -108,6 +108,7 @@ app.post(
     //   encryptedContent: EncryptedContent
     //   version: number
     //   verifiedContent?: EncryptedContent
+    //   attachmentDownloadUrls?: Record<string, string>
     // }
     /** @type {{content: DecryptedContent, attachments: DecryptedAttachments}} */
     const submission = formsg.crypto.decryptWithAttachments(
@@ -117,7 +118,7 @@ app.post(
       req.body.data
     )
 
-    // If the decryption failed, submission will be `null`.
+    // If the decryption failed at any point, submission will be `null`.
     if (submission) {
       // Continue processing the submission
 
