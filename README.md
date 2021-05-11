@@ -63,13 +63,6 @@ app.post(
   express.json(),
   // Decrypt the submission
   function (req, res, next) {
-    // `req.body.data` is an object fulfilling the DecryptParams interface.
-    // interface DecryptParams {
-    //   encryptedContent: EncryptedContent
-    //   version: number
-    //   verifiedContent?: EncryptedContent
-    // }
-    /** @type {{responses: FormField[], verified?: Record<string, any>}} */
     const submission = formsg.crypto.decrypt(
       formSecretKey,
       // If `verifiedContent` is provided in `req.body.data`, the return object
@@ -103,14 +96,6 @@ app.post(
   express.json(),
   // Decrypt the submission and attachments
   async function (req, res, next) {
-    // `req.body.data` is an object fulfilling the DecryptParams interface.
-    // interface DecryptParams {
-    //   encryptedContent: EncryptedContent
-    //   version: number
-    //   verifiedContent?: EncryptedContent
-    //   attachmentDownloadUrls?: Record<string, string>
-    // }
-    /** @type {{content: DecryptedContent, attachments: DecryptedAttachments}} */
     const submission = formsg.crypto.decryptWithAttachments(
       formSecretKey,
       // If `verifiedContent` is provided in `req.body.data`, the return object
