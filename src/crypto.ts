@@ -234,8 +234,6 @@ export default class Crypto {
       downloadPromises.push(
         axios.get(attachmentRecords[fieldId], { responseType: 'json' })
       .then((downloadResponse) => {
-        if (downloadResponse.status !== 200) throw new Error("Download failed")
-
         const encryptedAttachment: EncryptedAttachmentContent = downloadResponse.data
         const encryptedFile: EncryptedFileContent = {
           submissionPublicKey: encryptedAttachment.encryptedFile.submissionPublicKey,
