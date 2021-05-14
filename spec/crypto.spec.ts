@@ -1,5 +1,10 @@
+import mockAxios from 'jest-mock-axios'
 import Crypto from '../src/crypto'
 import { SIGNING_KEYS } from '../src/resource/signing-keys'
+
+import {
+  encodeBase64,
+} from 'tweetnacl-util'
 
 import {
   plaintext,
@@ -16,7 +21,11 @@ const encryptionPublicKey = SIGNING_KEYS.test.publicKey
 const signingSecretKey = SIGNING_KEYS.test.secretKey
 const testFileBuffer = new Uint8Array(Buffer.from('./resources/ogp.svg'))
 
+jest.mock('axios', () => mockAxios)
+
 describe('Crypto', function () {
+  afterEach(() => mockAxios.reset())
+
   const crypto = new Crypto({ signingPublicKey: encryptionPublicKey })
 
   const mockVerifiedContent = {
@@ -230,5 +239,172 @@ describe('Crypto', function () {
       version: INTERNAL_TEST_VERSION,
     })
     expect(decryptResult).toBeNull()
+  })
+
+  it('should be able to download and decrypt an attachment successfully', async () => {
+    // Arrange
+    const { publicKey, secretKey } = crypto.generate()
+
+    let attachmentPlaintext = plaintext.slice(0)
+    attachmentPlaintext.push({
+      _id: '6e771c946b3c5100240368e5',
+      question: 'Random file',
+      fieldType: 'attachment',
+      answer: 'my-random-file.txt',
+    })
+
+    // Encrypt content that is not signed
+    const ciphertext = crypto.encrypt(attachmentPlaintext, publicKey)
+
+    // Encrypt file
+    const encryptedFile = await crypto.encryptFile(testFileBuffer, publicKey)
+    const uploadedFile = {
+      submissionPublicKey: encryptedFile.submissionPublicKey,
+      nonce: encryptedFile.nonce,
+      binary: encodeBase64(encryptedFile.binary)
+    }
+
+    // Act
+    const decryptedFilesPromise = crypto.decryptWithAttachments(secretKey, {
+      encryptedContent: ciphertext,
+      attachmentDownloadUrls: { '6e771c946b3c5100240368e5': 'https://some.s3.url/some/encrypted/file' },
+      version: INTERNAL_TEST_VERSION,
+    })
+    mockAxios.mockResponse({ data: { encryptedFile: uploadedFile }})
+    const decryptedContentWithAttachments = await decryptedFilesPromise
+    const decryptedFiles = decryptedContentWithAttachments!.attachments
+
+    // Assert
+    expect(mockAxios.get).toHaveBeenCalledWith('https://some.s3.url/some/encrypted/file', { responseType: 'json' })
+    expect(decryptedFiles).toHaveProperty('6e771c946b3c5100240368e5', { filename: 'my-random-file.txt', content: testFileBuffer })
+  })
+
+  it('should be able to handle fields without attachmentDownloadUrls', async () => {
+    // Arrange
+    const { publicKey, secretKey } = crypto.generate()
+
+    // Encrypt content that is not signed
+    const ciphertext = crypto.encrypt(plaintext, publicKey)
+
+    // Act
+    const decryptedContentWithAttachments = await crypto.decryptWithAttachments(secretKey, {
+      encryptedContent: ciphertext,
+      version: INTERNAL_TEST_VERSION,
+    })
+    const decryptedFiles = decryptedContentWithAttachments!.attachments
+
+    // Assert
+    expect(decryptedFiles).toEqual({})
+  })
+
+  it('should be able to handle corrupted encrypted content', async () => {
+    // Arrange
+    const { secretKey } = crypto.generate()
+
+    // Act
+    const decryptedContents = await crypto.decryptWithAttachments(secretKey, {
+      encryptedContent: 'bad encrypted content',
+      version: INTERNAL_TEST_VERSION,
+    })
+
+    // Assert
+    expect(decryptedContents).toBe(null)
+  })
+
+  it('should be able to handle corrupted download', async () => {
+    // Arrange
+    const { publicKey, secretKey } = crypto.generate()
+
+    let attachmentPlaintext = plaintext.slice(0)
+    attachmentPlaintext.push({
+      _id: '6e771c946b3c5100240368e5',
+      question: 'Random file',
+      fieldType: 'attachment',
+      answer: 'my-random-file.txt',
+    })
+
+    // Encrypt content that is not signed
+    const ciphertext = crypto.encrypt(attachmentPlaintext, publicKey)
+
+    // Encrypt file
+    const encryptedFile = await crypto.encryptFile(testFileBuffer, publicKey)
+    const uploadedFile = {
+      submissionPublicKey: encryptedFile.submissionPublicKey,
+      nonce: encryptedFile.nonce,
+      binary: 'YmFkZW5jcnlwdGVkY29udGVudHM=',  // invalid data
+    }
+
+    // Act
+    const decryptedFilesPromise = crypto.decryptWithAttachments(secretKey, {
+      encryptedContent: ciphertext,
+      attachmentDownloadUrls: { '6e771c946b3c5100240368e5': 'https://some.s3.url/some/encrypted/file' },
+      version: INTERNAL_TEST_VERSION,
+    })
+    mockAxios.mockResponse({ data: { encryptedFile: uploadedFile }})
+    const decryptedContents = await decryptedFilesPromise
+
+    // Assert
+    expect(decryptedContents).toBe(null)
+  })
+
+  it('should be able to handle decrypted submission without corresponding attachment field', async () => {
+    // Arrange
+    const { publicKey, secretKey } = crypto.generate()
+
+    // Encrypt content that is not signed
+    // Note that plaintext doesn't have any attachment fields
+    const ciphertext = crypto.encrypt(plaintext, publicKey)
+
+    // Encrypt file
+    const encryptedFile = await crypto.encryptFile(testFileBuffer, publicKey)
+    const uploadedFile = {
+      submissionPublicKey: encryptedFile.submissionPublicKey,
+      nonce: encryptedFile.nonce,
+      binary: encodeBase64(encryptedFile.binary)
+    }
+
+    // Act
+    const decryptedFilesPromise = crypto.decryptWithAttachments(secretKey, {
+      encryptedContent: ciphertext,
+      attachmentDownloadUrls: { '6e771c946b3c5100240368e5': 'https://some.s3.url/some/encrypted/file' },
+      version: INTERNAL_TEST_VERSION,
+    })
+    const decryptedContents = await decryptedFilesPromise
+
+    // Assert
+    expect(decryptedContents).toBe(null)
+  })
+
+  it('should be able to handle axios errors', async () => {
+    // Arrange
+    const { publicKey, secretKey } = crypto.generate()
+
+    let attachmentPlaintext = plaintext.slice(0)
+    attachmentPlaintext.push({
+      _id: '6e771c946b3c5100240368e5',
+      question: 'Random file',
+      fieldType: 'attachment',
+      answer: 'my-random-file.txt',
+    })
+
+    // Encrypt content that is not signed
+    const ciphertext = crypto.encrypt(attachmentPlaintext, publicKey)
+
+    // Act
+    const decryptedFilesPromise = crypto.decryptWithAttachments(secretKey, {
+      encryptedContent: ciphertext,
+      attachmentDownloadUrls: { '6e771c946b3c5100240368e5': 'https://some.s3.url/some/encrypted/file' },
+      version: INTERNAL_TEST_VERSION,
+    })
+    mockAxios.mockResponse({
+      data: {},
+      status: 404,
+      statusText: 'Not Found',
+    })
+    const decryptedContents = await decryptedFilesPromise
+
+    // Assert
+    expect(mockAxios.get).toHaveBeenCalledWith('https://some.s3.url/some/encrypted/file', { responseType: 'json' })
+    expect(decryptedContents).toBe(null)
   })
 })
