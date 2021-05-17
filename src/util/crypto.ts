@@ -79,3 +79,16 @@ export const verifySignedMessage = (
     throw new Error('Failed to open signed message with given public key')
   return JSON.parse(encodeUTF8(openedMessage))
 }
+
+/**
+ * Helper method to check  if all the fields given are wtihin the filenames
+ * @param fieldIds the list of fieldIds to check
+ * @param filenames the filenames that should contain the fields
+ * @returns boolean indicating whether the fields are valid
+ */
+export const areFieldsValid = (
+  fieldIds: string[],
+  filenames: Record<string, string>
+): boolean => {
+  return fieldIds.every((fieldId) => filenames[fieldId])
+}
