@@ -21,7 +21,7 @@ import {
 } from 'tweetnacl-util'
 
 import { determineIsFormFields } from './util/validate'
-import { MissingFilenameError, MissingPublicKeyError } from './errors'
+import { MissingPublicKeyError } from './errors'
 import {
   encryptMessage,
   decryptContent,
@@ -232,7 +232,7 @@ export default class Crypto {
     const fieldIds = Object.keys(attachmentRecords)
     // Check if all fieldIds are within filenames
     if (!areFieldsValid(fieldIds, filenames)) {
-      throw new MissingFilenameError()
+      return null
     }
 
     try {

@@ -33,22 +33,8 @@ class WebhookAuthenticateError extends Error {
   }
 }
 
-class MissingFilenameError extends Error {
-  constructor(
-    message = 'Some of the dowenloads failed due to missing filename. Please ensure that all files are named appropriately'
-  ) {
-    super(message)
-    this.name = this.constructor.name
-
-    // Set the prototype explicitly.
-    // See https://github.com/facebook/jest/issues/8279
-    Object.setPrototypeOf(this, MissingFilenameError.prototype)
-  }
-}
-
 export {
   MissingSecretKeyError,
   MissingPublicKeyError,
   WebhookAuthenticateError,
-  MissingFilenameError,
 }
