@@ -81,12 +81,12 @@ export const verifySignedMessage = (
 }
 
 /**
- * Helper method to check  if all the fields given are wtihin the filenames
+ * Helper method to check if all the field IDs given are within the filenames
  * @param fieldIds the list of fieldIds to check
  * @param filenames the filenames that should contain the fields
  * @returns boolean indicating whether the fields are valid
  */
-export const areFieldsValid = (
+export const areAttachmentFieldIdsValid = (
   fieldIds: string[],
   filenames: Record<string, string>
 ): boolean => {
