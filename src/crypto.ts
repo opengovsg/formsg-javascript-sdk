@@ -207,7 +207,7 @@ export default class Crypto {
    * @param formSecretKey Secret key as a base-64 string
    * @param decryptParams The params containing encrypted content and information.
    * @returns A promise of the decrypted submission, including attachments (if any). Or else returns null if a decryption error decrypting any part of the submission.
-   * @throws {MissingPublicKeyError} if a public key is not provided when instantiating this class and is needed for verifying signed content.]
+   * @throws {MissingPublicKeyError} if a public key is not provided when instantiating this class and is needed for verifying signed content.
    */
   decryptWithAttachments = async (
     formSecretKey: string,
@@ -235,27 +235,31 @@ export default class Crypto {
     }
 
     const downloadPromises = fieldIds.map((fieldId) => {
-      return axios
-        .get(attachmentRecords[fieldId], { responseType: 'json' })
-        .then((downloadResponse) => {
-          const encryptedAttachment: EncryptedAttachmentContent =
-            downloadResponse.data
-          const encryptedFile: EncryptedFileContent = {
-            submissionPublicKey:
-              encryptedAttachment.encryptedFile.submissionPublicKey,
-            nonce: encryptedAttachment.encryptedFile.nonce,
-            binary: decodeBase64(encryptedAttachment.encryptedFile.binary),
-          }
-          return this.decryptFile(formSecretKey, encryptedFile)
-        })
-        .then((decryptedFile) => {
-          if (decryptedFile === null)
-            throw new Error('Attachment decryption failed')
-          decryptedRecords[fieldId] = {
-            filename: filenames[fieldId],
-            content: decryptedFile,
-          }
-        })
+      return (
+        axios
+          // Retrieve all the attachments as JSON
+          .get(attachmentRecords[fieldId], { responseType: 'json' })
+          // Decrypt all the attachments
+          .then((downloadResponse) => {
+            const encryptedAttachment: EncryptedAttachmentContent =
+              downloadResponse.data
+            const encryptedFile: EncryptedFileContent = {
+              submissionPublicKey:
+                encryptedAttachment.encryptedFile.submissionPublicKey,
+              nonce: encryptedAttachment.encryptedFile.nonce,
+              binary: decodeBase64(encryptedAttachment.encryptedFile.binary),
+            }
+            return this.decryptFile(formSecretKey, encryptedFile)
+          })
+          .then((decryptedFile) => {
+            if (decryptedFile === null)
+              throw new Error('Attachment decryption failed')
+            decryptedRecords[fieldId] = {
+              filename: filenames[fieldId],
+              content: decryptedFile,
+            }
+          })
+      )
     })
 
     try {
