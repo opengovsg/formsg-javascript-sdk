@@ -28,6 +28,8 @@ import {
   verifySignedMessage,
   generateKeypair,
   areAttachmentFieldIdsValid,
+  isNonEmptyArray,
+  convertEncryptedAttachmentToFileContent,
 } from './util/crypto'
 
 export default class Crypto {
@@ -238,25 +240,27 @@ export default class Crypto {
       return (
         axios
           // Retrieve all the attachments as JSON
-          .get(attachmentRecords[fieldId], { responseType: 'json' })
-          // Decrypt all the attachments
-          .then((downloadResponse) => {
-            const encryptedAttachment: EncryptedAttachmentContent =
-              downloadResponse.data
-            const encryptedFile: EncryptedFileContent = {
-              submissionPublicKey:
-                encryptedAttachment.encryptedFile.submissionPublicKey,
-              nonce: encryptedAttachment.encryptedFile.nonce,
-              binary: decodeBase64(encryptedAttachment.encryptedFile.binary),
-            }
-            return this.decryptFile(formSecretKey, encryptedFile)
+          .get<EncryptedAttachmentContent>(attachmentRecords[fieldId], {
+            responseType: 'json',
           })
-          .then((decryptedFile) => {
-            if (decryptedFile === null)
+          // Decrypt all the attachments
+          .then(async ({ data: downloadResponse }) => {
+            const encryptedFile =
+              convertEncryptedAttachmentToFileContent(downloadResponse)
+
+            const decryptedFile = await this.decryptFile(
+              formSecretKey,
+              encryptedFile
+            )
+
+            // If there is content, extract and put
+            if (decryptedFile) {
+              decryptedRecords[fieldId] = {
+                filename: filenames[fieldId],
+                content: decryptedFile,
+              }
+            } else {
               throw new Error('Attachment decryption failed')
-            decryptedRecords[fieldId] = {
-              filename: filenames[fieldId],
-              content: decryptedFile,
             }
           })
       )

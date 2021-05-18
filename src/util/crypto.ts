@@ -1,7 +1,12 @@
 import { encodeBase64, decodeBase64, encodeUTF8 } from 'tweetnacl-util'
 import nacl from 'tweetnacl'
 
-import { Keypair, EncryptedContent } from '../types'
+import {
+  Keypair,
+  EncryptedContent,
+  EncryptedAttachmentContent,
+  EncryptedFileContent,
+} from '../types'
 
 /**
  * Helper method to generate a new keypair for encryption.
@@ -92,3 +97,16 @@ export const areAttachmentFieldIdsValid = (
 ): boolean => {
   return fieldIds.every((fieldId) => filenames[fieldId])
 }
+
+/**
+ * Converts an encrypted attachment to encrypted file content
+ * @param encryptedAttachment The encrypted attachment
+ * @returns EncryptedFileContent The encrypted file content
+ */
+export const convertEncryptedAttachmentToFileContent = (
+  encryptedAttachment: EncryptedAttachmentContent
+): EncryptedFileContent => ({
+  submissionPublicKey: encryptedAttachment.encryptedFile.submissionPublicKey,
+  nonce: encryptedAttachment.encryptedFile.nonce,
+  binary: decodeBase64(encryptedAttachment.encryptedFile.binary),
+})
