@@ -28,7 +28,6 @@ import {
   verifySignedMessage,
   generateKeypair,
   areAttachmentFieldIdsValid,
-  isNonEmptyArray,
   convertEncryptedAttachmentToFileContent,
 } from './util/crypto'
 
