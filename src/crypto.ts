@@ -21,7 +21,7 @@ import {
 } from 'tweetnacl-util'
 
 import { determineIsFormFields } from './util/validate'
-import { MissingPublicKeyError } from './errors'
+import { AttachmentDecryptionError, MissingPublicKeyError } from './errors'
 import {
   encryptMessage,
   decryptContent,
@@ -259,7 +259,7 @@ export default class Crypto {
                 content: decryptedFile,
               }
             } else {
-              throw new Error('Attachment decryption failed')
+              throw new AttachmentDecryptionError()
             }
           })
       )
