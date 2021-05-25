@@ -3,18 +3,17 @@
  * @author Jean Tan
  */
 import nacl from 'tweetnacl'
-import { decodeUTF8, decodeBase64, encodeBase64 } from 'tweetnacl-util'
+import { decodeBase64, decodeUTF8, encodeBase64 } from 'tweetnacl-util'
 
+import { MissingPublicKeyError, MissingSecretKeyError } from '../errors'
 import {
-  VerificationSignatureOptions,
   VerificationAuthenticateOptions,
   VerificationOptions,
+  VerificationSignatureOptions,
 } from '../types'
-
-import { MissingSecretKeyError, MissingPublicKeyError } from '../errors'
 import { parseVerificationSignature } from '../util/parser'
 
-import { isSignatureTimeValid, formatToBaseString } from './utils'
+import { formatToBaseString, isSignatureTimeValid } from './utils'
 
 export default class Verification {
   verificationPublicKey?: string

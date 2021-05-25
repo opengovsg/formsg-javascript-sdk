@@ -1,5 +1,5 @@
 import * as tweetnacl from 'tweetnacl'
-import { decodeUTF8, encodeBase64, decodeBase64 } from 'tweetnacl-util'
+import { decodeBase64, decodeUTF8, encodeBase64 } from 'tweetnacl-util'
 
 /**
  * Returns a signature from a basestring and secret key

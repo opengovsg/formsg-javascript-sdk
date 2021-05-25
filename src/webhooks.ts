@@ -1,8 +1,8 @@
 import * as url from 'url'
 
-import { sign } from './util/signature'
 import { parseSignatureHeader } from './util/parser'
-import { isSignatureHeaderValid, hasEpochExpired } from './util/webhooks'
+import { sign } from './util/signature'
+import { hasEpochExpired, isSignatureHeaderValid } from './util/webhooks'
 import { MissingSecretKeyError, WebhookAuthenticateError } from './errors'
 
 export default class Webhooks {
@@ -81,7 +81,9 @@ export default class Webhooks {
     }
 
     if (!submissionId || !uri || !formId || !epoch) {
-      throw new TypeError('submissionId, uri, formId, or epoch must be provided to generate a webhook signature')
+      throw new TypeError(
+        'submissionId, uri, formId, or epoch must be provided to generate a webhook signature'
+      )
     }
 
     const baseString = `${
