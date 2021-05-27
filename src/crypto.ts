@@ -243,16 +243,13 @@ export default class Crypto {
             responseType: 'json',
           })
           // Decrypt all the attachments
-          .then(async ({ data: downloadResponse }) => {
+          .then(({ data: downloadResponse }) => {
             const encryptedFile =
               convertEncryptedAttachmentToFileContent(downloadResponse)
-
-            const decryptedFile = await this.decryptFile(
-              formSecretKey,
-              encryptedFile
-            )
-
-            // If there is content, extract and put
+            return this.decryptFile(formSecretKey, encryptedFile)
+          })
+          .then((decryptedFile) => {
+            // Check if the file exists and set the filename accordingly; otherwise, throw an error
             if (decryptedFile) {
               decryptedRecords[fieldId] = {
                 filename: filenames[fieldId],
