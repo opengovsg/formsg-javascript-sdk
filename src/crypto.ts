@@ -1,35 +1,33 @@
 import axios from 'axios'
 import nacl from 'tweetnacl'
+import {
+  decodeBase64,
+  decodeUTF8,
+  encodeBase64,
+  encodeUTF8,
+} from 'tweetnacl-util'
 
 import {
-  DecryptParams,
+  decryptContent,
+  encryptMessage,
+  generateKeypair,
+  verifySignedMessage,
+  areAttachmentFieldIdsValid,
+  convertEncryptedAttachmentToFileContent,
+} from './util/crypto'
+import { determineIsFormFields } from './util/validate'
+import { MissingPublicKeyError, AttachmentDecryptionError } from './errors'
+import {
   DecryptedAttachments,
   DecryptedContent,
   DecryptedContentAndAttachments,
+  DecryptParams,
   EncryptedAttachmentContent,
   EncryptedAttachmentRecords,
   EncryptedContent,
   EncryptedFileContent,
   FormField,
 } from './types'
-
-import {
-  encodeBase64,
-  decodeBase64,
-  encodeUTF8,
-  decodeUTF8,
-} from 'tweetnacl-util'
-
-import { determineIsFormFields } from './util/validate'
-import { AttachmentDecryptionError, MissingPublicKeyError } from './errors'
-import {
-  encryptMessage,
-  decryptContent,
-  verifySignedMessage,
-  generateKeypair,
-  areAttachmentFieldIdsValid,
-  convertEncryptedAttachmentToFileContent,
-} from './util/crypto'
 
 export default class Crypto {
   signingPublicKey?: string
@@ -74,7 +72,7 @@ export default class Crypto {
     decryptParams: DecryptParams
   ): DecryptedContent | null => {
     try {
-      const { encryptedContent, verifiedContent, version } = decryptParams
+      const { encryptedContent, verifiedContent } = decryptParams
 
       // Do not return the transformed object in `_decrypt` function as a signed
       // object is not encoded in UTF8 and is encoded in Base-64 instead.
@@ -82,12 +80,14 @@ export default class Crypto {
       if (!decryptedContent) {
         throw new Error('Failed to decrypt content')
       }
-      const decryptedObject: Object = JSON.parse(encodeUTF8(decryptedContent))
+      const decryptedObject: Record<string, unknown> = JSON.parse(
+        encodeUTF8(decryptedContent)
+      )
       if (!determineIsFormFields(decryptedObject)) {
         throw new Error('Decrypted object does not fit expected shape')
       }
 
-      let returnedObject: DecryptedContent = {
+      const returnedObject: DecryptedContent = {
         responses: decryptedObject,
       }
 

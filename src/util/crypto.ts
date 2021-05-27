@@ -1,5 +1,5 @@
-import { encodeBase64, decodeBase64, encodeUTF8 } from 'tweetnacl-util'
 import nacl from 'tweetnacl'
+import { decodeBase64, encodeBase64, encodeUTF8 } from 'tweetnacl-util'
 
 import {
   Keypair,

@@ -1,8 +1,9 @@
 import * as url from 'url'
 
+import { WebhookAuthenticateError } from '../errors'
+
 import { HeaderSignature } from './parser'
 import { verify } from './signature'
-import { WebhookAuthenticateError } from '../errors'
 
 /**
  * Helper function to construct the basestring and verify the signature of an
@@ -40,7 +41,7 @@ const isSignatureHeaderValid = (
  * @param expiry Duration of expiry in milliseconds. The default is 5 minutes.
  * @returns true if the epoch given has exceeded expiry duration calculated from current time.
  */
-const hasEpochExpired = (epoch: number, expiry: number = 300000) => {
+const hasEpochExpired = (epoch: number, expiry = 300000) => {
   const difference = Math.abs(Date.now() - epoch)
   return difference > expiry
 }
