@@ -7,7 +7,7 @@ describe('utils', () => {
         mock: 'file',
         alsomock: 'file2',
       }
-      const MOCK_FIELD_IDS = ['mock', 'alsomock']
+      const MOCK_FIELD_IDS = Object.keys(MOCK_FILENAMES)
 
       // Act
       const actual = areAttachmentFieldIdsValid(MOCK_FIELD_IDS, MOCK_FILENAMES)
@@ -22,7 +22,7 @@ describe('utils', () => {
         mock: 'file',
         alsomock: 'file2',
       }
-      const MOCK_FIELD_IDS = ['mock', 'missingField']
+      const MOCK_FIELD_IDS = Object.keys(MOCK_FILENAMES).concat('missingField')
 
       // Act
       const actual = areAttachmentFieldIdsValid(MOCK_FIELD_IDS, MOCK_FILENAMES)
