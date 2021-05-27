@@ -37,9 +37,6 @@ class AttachmentDecryptionError extends Error {
   constructor(message = 'Attachment decryption with the given nonce failed.') {
     super(message)
     this.name = this.constructor.name
-    // Set the prototype explicitly.
-    // See https://github.com/facebook/jest/issues/8279
-    Object.setPrototypeOf(this, AttachmentDecryptionError.prototype)
   }
 }
 
