@@ -33,8 +33,16 @@ class WebhookAuthenticateError extends Error {
   }
 }
 
+class AttachmentDecryptionError extends Error {
+  constructor(message = 'Attachment decryption with the given nonce failed.') {
+    super(message)
+    this.name = this.constructor.name
+  }
+}
+
 export {
   MissingSecretKeyError,
   MissingPublicKeyError,
   WebhookAuthenticateError,
+  AttachmentDecryptionError,
 }

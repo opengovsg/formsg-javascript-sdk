@@ -12,9 +12,11 @@ import {
   encryptMessage,
   generateKeypair,
   verifySignedMessage,
+  areAttachmentFieldIdsValid,
+  convertEncryptedAttachmentToFileContent,
 } from './util/crypto'
 import { determineIsFormFields } from './util/validate'
-import { MissingPublicKeyError } from './errors'
+import { MissingPublicKeyError, AttachmentDecryptionError } from './errors'
 import {
   DecryptedAttachments,
   DecryptedContent,
@@ -227,40 +229,42 @@ export default class Crypto {
       }
     })
 
-    const downloadPromises: Array<Promise<void>> = []
-    for (const fieldId in attachmentRecords) {
-      // Original name for the file is not found
-      if (filenames[fieldId] === undefined) return null
+    const fieldIds = Object.keys(attachmentRecords)
+    // Check if all fieldIds are within filenames
+    if (!areAttachmentFieldIdsValid(fieldIds, filenames)) {
+      return null
+    }
 
-      downloadPromises.push(
+    const downloadPromises = fieldIds.map((fieldId) => {
+      return (
         axios
-          .get(attachmentRecords[fieldId], { responseType: 'json' })
-          .then((downloadResponse) => {
-            const encryptedAttachment: EncryptedAttachmentContent =
-              downloadResponse.data
-            const encryptedFile: EncryptedFileContent = {
-              submissionPublicKey:
-                encryptedAttachment.encryptedFile.submissionPublicKey,
-              nonce: encryptedAttachment.encryptedFile.nonce,
-              binary: decodeBase64(encryptedAttachment.encryptedFile.binary),
-            }
-
+          // Retrieve all the attachments as JSON
+          .get<EncryptedAttachmentContent>(attachmentRecords[fieldId], {
+            responseType: 'json',
+          })
+          // Decrypt all the attachments
+          .then(({ data: downloadResponse }) => {
+            const encryptedFile =
+              convertEncryptedAttachmentToFileContent(downloadResponse)
             return this.decryptFile(formSecretKey, encryptedFile)
           })
           .then((decryptedFile) => {
-            if (decryptedFile === null)
-              throw new Error('Attachment decryption failed')
-            decryptedRecords[fieldId] = {
-              filename: filenames[fieldId],
-              content: decryptedFile,
+            // Check if the file exists and set the filename accordingly; otherwise, throw an error
+            if (decryptedFile) {
+              decryptedRecords[fieldId] = {
+                filename: filenames[fieldId],
+                content: decryptedFile,
+              }
+            } else {
+              throw new AttachmentDecryptionError()
             }
           })
       )
-    }
+    })
 
     try {
       await Promise.all(downloadPromises)
-    } catch (e) {
+    } catch {
       return null
     }
 
