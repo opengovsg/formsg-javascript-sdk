@@ -10,8 +10,8 @@
   "types": "./dist/index.d.ts",
   "scripts": {
     "test": "jest",
-    "test-ci": "jest --coverage && coveralls < coverage/lcov.info && rm -rf ./coverage",
-    "test:watch": "jest --watch",
+    "test-ci": "jest --coverage",
+    "test-watch": "jest --watch",
     "build": "tsc",
     "prepare": "npm run build"
   },
