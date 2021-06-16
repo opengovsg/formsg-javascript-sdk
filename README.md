@@ -62,7 +62,8 @@ app.post(
   // Parse JSON from raw request body
   express.json(),
   // Decrypt the submission
-  function (req, res, next) {
+  async function (req, res, next) {
+    // Use `decrypt` if the submission does not contain attachments
     const submission = formsg.crypto.decrypt(
       formSecretKey,
       // If `verifiedContent` is provided in `req.body.data`, the return object
@@ -70,46 +71,14 @@ app.post(
       req.body.data
     )
 
-    // If the decryption failed, submission will be `null`.
-    if (submission) {
+    // Use `decryptWithAttachments` if the submission contains attachments. The result
+    // will contain the decrypted submission and attachments.
+    const submissionWithAttachments =
+      await formsg.crypto.decryptWithAttachments(formSecretKey, req.body.data)
+
+    // If the decryption failed, submission or submissionWithAttachments will be `null`.
+    if (submission) { // or if (submissionWithAttachments)
       // Continue processing the submission
-    } else {
-      // Could not decrypt the submission
-    }
-  }
-)
-
-// Example for submissions with attachments
-app.post(
-  '/submissions-attachment',
-  // Endpoint authentication by verifying signatures
-  function (req, res, next) {
-    try {
-      formsg.webhooks.authenticate(req.get('X-FormSG-Signature'), POST_URI)
-      // Continue processing the POST body
-      return next()
-    } catch (e) {
-      return res.status(401).send({ message: 'Unauthorized' })
-    }
-  },
-  // Parse JSON from raw request body
-  express.json(),
-  // Decrypt the submission and attachments
-  async function (req, res, next) {
-    // Note that this function is only available from version 0.9.0 onwards
-    const submission = await formsg.crypto.decryptWithAttachments(
-      formSecretKey,
-      // If `verifiedContent` is provided in `req.body.data`, the return object
-      // will include a verified key.
-      req.body.data
-    )
-
-    // If the decryption failed at any point, submission will be `null`.
-    if (submission) {
-      // Continue processing the submission
-
-      // processSubmission(submission.content)
-      // processAttachments(submission.attachments)
     } else {
       // Could not decrypt the submission
     }
