@@ -96,7 +96,8 @@ app.post(
   express.json(),
   // Decrypt the submission and attachments
   async function (req, res, next) {
-    const submission = formsg.crypto.decryptWithAttachments(
+    // Note that this function is only available from version 0.9.0 onwards
+    const submission = await formsg.crypto.decryptWithAttachments(
       formSecretKey,
       // If `verifiedContent` is provided in `req.body.data`, the return object
       // will include a verified key.
@@ -190,7 +191,7 @@ If the decrypted content is the correct shape, then:
 
 ### Processing Attachments
 
-`formsg.crypto.decryptWithAttachments(formSecretKey: string, decryptParams: DecryptParams)` behaves similarly except it will return a `Promise<DecryptedContentAndAttachments | null>`.
+`formsg.crypto.decryptWithAttachments(formSecretKey: string, decryptParams: DecryptParams)` (available from version 0.9.0 onwards) behaves similarly except it will return a `Promise<DecryptedContentAndAttachments | null>`.
 
 `DecryptedContentAndAttachments` is an object containing two fields: 
  - `content`: the standard form decrypted responses (same as the return type of `formsg.crypto.decrypt`)
