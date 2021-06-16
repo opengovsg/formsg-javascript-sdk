@@ -4,8 +4,8 @@ export const VERIFICATION_KEYS = {
     publicKey: 'bDgK1223JbrDNePFIrj7b0z02Z5nSiBzkRYRqDdVPfA=',
   },
   development: {
-    // Using the same keys for staging.
-    publicKey: 'bDgK1223JbrDNePFIrj7b0z02Z5nSiBzkRYRqDdVPfA=',
+    publicKey: 'yMfJ8unVMWfHPoDRY23SdFnWudMXmB6pGfDgBVhRbzs=',
+    secretKey: 'p4iJR5B/YobjRYcIO8iiJmmsMH7YjIr4O1P4DY1lyO0=',
   },
   production: {
     // production must never contain secret keys

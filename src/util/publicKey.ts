@@ -12,6 +12,7 @@ import STAGE from './stage'
 function getSigningPublicKey(mode?: PackageMode) {
   switch (mode) {
     case STAGE.development:
+      return SIGNING_KEYS.development.publicKey
     case STAGE.staging:
       return SIGNING_KEYS.staging.publicKey
     case STAGE.test:
@@ -29,6 +30,7 @@ function getSigningPublicKey(mode?: PackageMode) {
 function getVerificationPublicKey(mode?: PackageMode) {
   switch (mode) {
     case STAGE.development:
+      return VERIFICATION_KEYS.development.publicKey
     case STAGE.staging:
       return VERIFICATION_KEYS.staging.publicKey
     case STAGE.test:

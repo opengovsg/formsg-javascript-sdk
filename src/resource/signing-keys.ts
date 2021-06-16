@@ -4,8 +4,8 @@ export const SIGNING_KEYS = {
     publicKey: 'rjv41kYqZwcbe3r6ymMEEKQ+Vd+DPuogN+Gzq3lP2Og=',
   },
   development: {
-    // Using the same keys for staging.
-    publicKey: 'rjv41kYqZwcbe3r6ymMEEKQ+Vd+DPuogN+Gzq3lP2Og=',
+    publicKey: '5AYDhjpaloNn4kg7PY0LVpsYAEG/7oI8n1XZjR42vz0=',
+    secretKey: '0oUKRb8q2l8/n32WeXWQ0yiBhEQXTD7i3UPGj2Y0a0g=',
   },
   production: {
     // production must never contain secret keys
