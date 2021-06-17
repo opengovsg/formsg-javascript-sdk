@@ -1,4 +1,4 @@
-// keys generated using nacl.sign.keyPair()
+// keys generated using nacl.sign.keyPair() from tweetnacl
 export const VERIFICATION_KEYS = {
   staging: {
     // staging must never contain secret keys
