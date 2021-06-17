@@ -4,8 +4,8 @@ export const VERIFICATION_KEYS = {
     publicKey: 'bDgK1223JbrDNePFIrj7b0z02Z5nSiBzkRYRqDdVPfA=',
   },
   development: {
-    publicKey: 'yMfJ8unVMWfHPoDRY23SdFnWudMXmB6pGfDgBVhRbzs=',
-    secretKey: 'p4iJR5B/YobjRYcIO8iiJmmsMH7YjIr4O1P4DY1lyO0=',
+    publicKey: 'SZ4pV0JXgj8dhFU69uHllqYcxTtliYmi+d6Ml56lnQU=',
+    secretKey: 'iGkfOuI6uxrlfw+7CZFFUZBwk86I+pu6v+g7EWA6qJpJnilXQleCPx2EVTr24eWWphzFO2WJiaL53oyXnqWdBQ==',
   },
   production: {
     // production must never contain secret keys
