@@ -1,11 +1,12 @@
+// keys generated using nacl.sign.keyPair() from tweetnacl
 export const VERIFICATION_KEYS = {
   staging: {
     // staging must never contain secret keys
     publicKey: 'bDgK1223JbrDNePFIrj7b0z02Z5nSiBzkRYRqDdVPfA=',
   },
   development: {
-    // Using the same keys for staging.
-    publicKey: 'bDgK1223JbrDNePFIrj7b0z02Z5nSiBzkRYRqDdVPfA=',
+    publicKey: 'SZ4pV0JXgj8dhFU69uHllqYcxTtliYmi+d6Ml56lnQU=',
+    secretKey: 'iGkfOuI6uxrlfw+7CZFFUZBwk86I+pu6v+g7EWA6qJpJnilXQleCPx2EVTr24eWWphzFO2WJiaL53oyXnqWdBQ==',
   },
   production: {
     // production must never contain secret keys
