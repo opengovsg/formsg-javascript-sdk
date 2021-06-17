@@ -1,7 +1,12 @@
-import { encodeBase64, decodeBase64, encodeUTF8 } from 'tweetnacl-util'
 import nacl from 'tweetnacl'
+import { decodeBase64, encodeBase64, encodeUTF8 } from 'tweetnacl-util'
 
-import { Keypair, EncryptedContent } from '../types'
+import {
+  Keypair,
+  EncryptedContent,
+  EncryptedAttachmentContent,
+  EncryptedFileContent,
+} from '../types'
 
 /**
  * Helper method to generate a new keypair for encryption.
@@ -79,3 +84,29 @@ export const verifySignedMessage = (
     throw new Error('Failed to open signed message with given public key')
   return JSON.parse(encodeUTF8(openedMessage))
 }
+
+/**
+ * Helper method to check if all the field IDs given are within the filenames
+ * @param fieldIds the list of fieldIds to check
+ * @param filenames the filenames that should contain the fields
+ * @returns boolean indicating whether the fields are valid
+ */
+export const areAttachmentFieldIdsValid = (
+  fieldIds: string[],
+  filenames: Record<string, string>
+): boolean => {
+  return fieldIds.every((fieldId) => filenames[fieldId])
+}
+
+/**
+ * Converts an encrypted attachment to encrypted file content
+ * @param encryptedAttachment The encrypted attachment
+ * @returns EncryptedFileContent The encrypted file content
+ */
+export const convertEncryptedAttachmentToFileContent = (
+  encryptedAttachment: EncryptedAttachmentContent
+): EncryptedFileContent => ({
+  submissionPublicKey: encryptedAttachment.encryptedFile.submissionPublicKey,
+  nonce: encryptedAttachment.encryptedFile.nonce,
+  binary: decodeBase64(encryptedAttachment.encryptedFile.binary),
+})

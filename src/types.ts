@@ -45,10 +45,15 @@ export type FormField = {
 // <SubmissionPublicKey>;<Base64Nonce>:<Base64EncryptedData>
 export type EncryptedContent = string
 
+// Records containing a map of field IDs to URLs where encrypted
+// attachments can be downloaded.
+export type EncryptedAttachmentRecords = Record<string, string>
+
 export interface DecryptParams {
   encryptedContent: EncryptedContent
   version: number
   verifiedContent?: EncryptedContent
+  attachmentDownloadUrls?: EncryptedAttachmentRecords
 }
 
 export type DecryptedContent = {
@@ -56,10 +61,31 @@ export type DecryptedContent = {
   verified?: Record<string, any>
 }
 
+export type DecryptedFile = {
+  filename: string
+  content: Uint8Array
+}
+
+// Records containing a map of field IDs to DecryptedFiles.
+export type DecryptedAttachments = Record<string, DecryptedFile>
+
+export type DecryptedContentAndAttachments = {
+  content: DecryptedContent
+  attachments: DecryptedAttachments
+}
+
 export type EncryptedFileContent = {
   submissionPublicKey: string
   nonce: string
   binary: Uint8Array
+}
+
+export type EncryptedAttachmentContent = {
+  encryptedFile: {
+    submissionPublicKey: string
+    nonce: string
+    binary: string
+  }
 }
 
 // A base-64 encoded cryptographic keypair suitable for curve25519.

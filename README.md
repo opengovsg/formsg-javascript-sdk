@@ -47,6 +47,9 @@ const POST_URI = 'https://my-domain.com/submissions'
 // Your form's secret key downloaded from FormSG upon form creation
 const formSecretKey = process.env.FORM_SECRET_KEY
 
+// Set to true if you need to download and decrypt attachments from submissions
+const HAS_ATTACHMENTS = false
+
 app.post(
   '/submissions',
   // Endpoint authentication by verifying signatures
@@ -62,20 +65,12 @@ app.post(
   // Parse JSON from raw request body
   express.json(),
   // Decrypt the submission
-  function (req, res, next) {
-    // `req.body.data` is an object fulfilling the DecryptParams interface.
-    // interface DecryptParams {
-    //   encryptedContent: EncryptedContent
-    //   version: number
-    //   verifiedContent?: EncryptedContent
-    // }
-    /** @type {{responses: FormField[], verified?: Record<string, any>}} */
-    const submission = formsg.crypto.decrypt(
-      formSecretKey,
-      // If `verifiedContent` is provided in `req.body.data`, the return object
-      // will include a verified key.
-      req.body.data
-    )
+  async function (req, res, next) {
+    // If `verifiedContent` is provided in `req.body.data`, the return object
+    // will include a verified key.
+    const submission = HAS_ATTACHMENTS
+      ? await formsg.crypto.decryptWithAttachments(formSecretKey, req.body.data)
+      : formsg.crypto.decrypt(formSecretKey, req.body.data)
 
     // If the decryption failed, submission will be `null`.
     if (submission) {
@@ -97,12 +92,13 @@ The underlying cryptosystem is `x25519-xsalsa20-poly1305` which is implemented b
 
 ### Format of Submission Response
 
-| Key              | Type   | Description                         |
-| ---------------- | ------ | ----------------------------------- |
-| formId           | string | Unique form identifier.             |
-| submissionId     | string | Unique submission identifier.       |
-| encryptedContent | string | The encrypted submission in base64. |
-| created          | string | Creation timestamp.                 |
+| Key                    | Type                   | Description                                                                                              |
+| ---------------------- | ---------------------- | -------------------------------------------------------------------------------------------------------- |
+| formId                 | string                 | Unique form identifier.                                                                                  |
+| submissionId           | string                 | Unique response identifier, displayed as 'Response ID' to form respondents                               |
+| encryptedContent       | string                 | The encrypted submission in base64.                                                                      |
+| created                | string                 | Creation timestamp.                                                                                      |
+| attachmentDownloadUrls | Record<string, string> | (Optional) Records containing field IDs and URLs where encrypted uploaded attachments can be downloaded. |
 
 ### Format of Decrypted Submissions
 
@@ -157,6 +153,23 @@ If the decrypted content is the correct shape, then:
    value of `verified` key. There is no shape validation for the decrypted
    verified content. **If the verification fails, `null` is returned, even if
    `decryptParams.encryptedContent` was successfully decrypted.**
+
+### Processing Attachments
+
+`formsg.crypto.decryptWithAttachments(formSecretKey: string, decryptParams: DecryptParams)` (available from version 0.9.0 onwards) behaves similarly except it will return a `Promise<DecryptedContentAndAttachments | null>`.
+
+`DecryptedContentAndAttachments` is an object containing two fields:
+
+- `content`: the standard form decrypted responses (same as the return type of `formsg.crypto.decrypt`)
+- `attachments`: A `Record<string, DecryptedFile>` containing a map of field ids of the attachment fields to a object containing the original user supplied filename and a `Uint8Array` containing the contents of the uploaded file.
+
+If the contents of any file fails to decrypt or there is a mismatch between the attachments and submission (e.g. the submission doesn't contain the original file name), then `null` will be returned.
+
+Attachments are downloaded using S3 pre-signed URLs, with a expiry time of _one hour_. You must call `decryptWithAttachments` within this time window, or else the URL to the encrypted files will become invalid.
+
+Attachments are end-to-end encrypted in the same way as normal form submissions, so any eavesdropper will not be able to view form attachments without your secret key.
+
+_Warning:_ We do not have the ability to scan any attachments for malicious content (e.g. spyware or viruses), so careful handling is needed.
 
 ## Verifying Signatures Manually
 
