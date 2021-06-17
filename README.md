@@ -47,6 +47,9 @@ const POST_URI = 'https://my-domain.com/submissions'
 // Your form's secret key downloaded from FormSG upon form creation
 const formSecretKey = process.env.FORM_SECRET_KEY
 
+// Set to true if you need to download and decrypt attachments from submissions
+const HAS_ATTACHMENTS = false
+
 app.post(
   '/submissions',
   // Endpoint authentication by verifying signatures
@@ -63,21 +66,14 @@ app.post(
   express.json(),
   // Decrypt the submission
   async function (req, res, next) {
-    // Use `decrypt` if the submission does not contain attachments
-    const submission = formsg.crypto.decrypt(
-      formSecretKey,
-      // If `verifiedContent` is provided in `req.body.data`, the return object
-      // will include a verified key.
-      req.body.data
-    )
+    // If `verifiedContent` is provided in `req.body.data`, the return object
+    // will include a verified key.
+    const submission = HAS_ATTACHMENTS
+      ? await formsg.crypto.decryptWithAttachments(formSecretKey, req.body.data)
+      : formsg.crypto.decrypt(formSecretKey, req.body.data)
 
-    // Use `decryptWithAttachments` if the submission contains attachments. The result
-    // will contain the decrypted submission and attachments.
-    const submissionWithAttachments =
-      await formsg.crypto.decryptWithAttachments(formSecretKey, req.body.data)
-
-    // If the decryption failed, submission or submissionWithAttachments will be `null`.
-    if (submission) { // or if (submissionWithAttachments)
+    // If the decryption failed, submission will be `null`.
+    if (submission) {
       // Continue processing the submission
     } else {
       // Could not decrypt the submission
