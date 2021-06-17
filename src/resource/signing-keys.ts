@@ -1,3 +1,4 @@
+// keys generated using nacl.sign.keyPair()
 export const SIGNING_KEYS = {
   staging: {
     // staging must never contain secret keys
