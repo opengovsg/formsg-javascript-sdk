@@ -14,6 +14,7 @@ import {
 } from './resources/crypto-data-20200322'
 import { plaintextMultiLang } from './resources/crypto-data-20200604'
 import { MissingPublicKeyError } from '../src/errors'
+import { plaintextEmptyTitles } from './resources/crypto-data-20221114'
 
 const INTERNAL_TEST_VERSION = 1
 
@@ -120,6 +121,21 @@ describe('Crypto', function () {
     })
     // Assert
     expect(decrypted).toHaveProperty('responses', plaintextMultiLang)
+  })
+
+  it('should be able to encrypt and decrypt submissions with empty field titles from 2022-11-14 end-to-end successfully', () => {
+    // Arrange
+    const { publicKey, secretKey } = crypto.generate()
+
+    // Act
+    const ciphertext = crypto.encrypt(plaintextEmptyTitles, publicKey)
+    const decrypted = crypto.decrypt(secretKey, {
+      encryptedContent: ciphertext,
+      version: INTERNAL_TEST_VERSION,
+    })
+    
+    // Assert
+    expect(decrypted).toHaveProperty('responses', plaintextEmptyTitles)
   })
 
   it('should be able to encrypt submissions without signing if signingPrivateKey is missing', () => {
