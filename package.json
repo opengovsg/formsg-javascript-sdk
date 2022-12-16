@@ -13,7 +13,8 @@
     "test-ci": "jest --coverage",
     "test-watch": "jest --watch",
     "build": "tsc",
-    "prepare": "npm run build"
+    "prepare": "npm run build",
+    "version": "auto-changelog -p && git add CHANGELOG.md"
   },
   "keywords": [
     "formsg",
@@ -34,6 +35,7 @@
     "@types/jest": "^27.0.3",
     "@types/node": "^13.11.1",
     "@typescript-eslint/eslint-plugin": "^4.25.0",
+    "auto-changelog": "^2.4.0",
     "coveralls": "^3.1.1",
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-import": "^2.23.3",
