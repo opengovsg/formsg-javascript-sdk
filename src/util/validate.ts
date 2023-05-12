@@ -16,7 +16,9 @@ function determineIsFormFields(tbd: any): tbd is FormField[] {
         internal.isHeader) &&
       internal._id &&
       internal.fieldType &&
-      internal.question
+      // The field is still valid even when the question title is empty string
+      // (even though it is not intended behavior).
+      typeof internal.question === 'string'
   )
 
   return filter.length === tbd.length
