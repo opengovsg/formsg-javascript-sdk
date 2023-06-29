@@ -7,6 +7,10 @@ _Please note that this is an SDK for webhooks integration, and_ **_not_** _the F
 
 This SDK provides convenient utilities for verifying FormSG webhooks and decrypting submissions in JavaScript and Node.js.
 
+Not using Javascript? Check out our sister SDKs:
+- [formsg-python-sdk](https://github.com/opengovsg/formsg-python-sdk)
+- [formsg-ruby-sdk](https://github.com/opengovsg/formsg-ruby-sdk)
+
 ## Installation
 
 Install the package with
