@@ -136,7 +136,7 @@ of the returned object.
 Note that due to end-to-end encryption, FormSG servers are unable to verify the data format.
 
 However, the `decrypt` function exposed by this library [validates](https://github.com/opengovsg/formsg-javascript-sdk/blob/master/src/util/validate.ts) the decrypted content and will **return `null` if the
-decrypted content does not fit the schema displayed below.**
+decrypted content does not contain all of the fields displayed in the schema below.**
 
 | Key         | Type     | Description                                                                                              |
 | ----------- | -------- | -------------------------------------------------------------------------------------------------------- |
@@ -145,6 +145,9 @@ decrypted content does not fit the schema displayed below.**
 | answerArray | string[] | The submitter's answer to the question on form. Either this key or `answer` must exist.                  |
 | fieldType   | string   | The type of field for the question.                                                                      |
 | \_id        | string   | A unique identifier of the form field. WARNING: Changes when new fields are created/removed in the form. |
+
+**Important Note: **
+Additional internal fields may be included in webhooks from time to time, which will then be published as part of our official schema once it is stable for public consumption. If you are applying your own validation, you should account for this e.g. by not rejecting the webhook if there are additional fields included.
 
 The full schema can be viewed in
 [`validate.ts`](https://github.com/opengovsg/formsg-javascript-sdk/tree/master/src/util/validate.ts).
