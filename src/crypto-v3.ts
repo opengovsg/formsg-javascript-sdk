@@ -1,4 +1,9 @@
-import { decodeUTF8, encodeUTF8 } from 'tweetnacl-util'
+import {
+  decodeBase64,
+  decodeUTF8,
+  encodeBase64,
+  encodeUTF8,
+} from 'tweetnacl-util'
 
 import { decryptContent, encryptMessage } from './util/crypto'
 import { determineIsFormFieldsV3 } from './util/validate'
@@ -29,13 +34,12 @@ export default class CryptoV3 extends CryptoBase {
 
   /**
    * Encrypt input with a unique keypair for each key.
-   * @param k The key to encrypt as a string.
+   * @param k The base-64 encoded key to encrypt as a string.
    * @param formPublicKey The base-64 encoded public key for encrypting.
    * @returns The encrypted key string.
    */
   encryptKey = (k: string, formPublicKey: string): EncryptedContent => {
-    const processedMsg = decodeUTF8(k)
-    return encryptMessage(processedMsg, formPublicKey)
+    return encryptMessage(decodeBase64(k), formPublicKey)
   }
 
   /**
@@ -118,12 +122,12 @@ export default class CryptoV3 extends CryptoBase {
    * Decrypts an encrypted key and returns it.
    * @param formSecretKey The base-64 encoded secret key for decrypting.
    * @param ct The encrypted key encoded with base-64.
-   * @returns The decrypted content if successful. Else, null will be returned.
+   * @returns The decrypted key encoded with base-64 if successful. Else, null will be returned.
    */
   decryptKey = (formSecretKey: string, ct: string): string | null => {
     const decryptedContent = decryptContent(formSecretKey, ct)
     if (decryptedContent === null) return null
-    return encodeUTF8(decryptedContent)
+    return encodeBase64(decryptedContent)
   }
 
   /**
