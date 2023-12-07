@@ -1,66 +1,46 @@
-import axios from 'axios'
-import nacl from 'tweetnacl'
-import {
-  decodeBase64,
-  decodeUTF8,
-  encodeBase64,
-  encodeUTF8,
-} from 'tweetnacl-util'
+import { decodeUTF8, encodeUTF8 } from 'tweetnacl-util'
 
-import {
-  areAttachmentFieldIdsValid,
-  convertEncryptedAttachmentToFileContent,
-  decryptContent,
-  encryptMessage,
-  verifySignedMessage,
-} from './util/crypto'
-import { determineIsFormFields } from './util/validate'
+import { decryptContent, encryptMessage } from './util/crypto'
+import { determineIsFormFieldsV3 } from './util/validate'
 import CryptoBase from './crypto-base'
-import { AttachmentDecryptionError, MissingPublicKeyError } from './errors'
+import { MissingPublicKeyError } from './errors'
 import {
-  DecryptedAttachments,
-  DecryptedContent,
-  DecryptedContentAndAttachments,
+  DecryptedContentV3,
   DecryptParams,
-  EncryptedAttachmentContent,
-  EncryptedAttachmentRecords,
   EncryptedContent,
-  EncryptedFileContent,
-  FormField,
+  FormFieldsV3,
 } from './types'
 
-export default class Crypto extends CryptoBase {
-  signingPublicKey?: string
-
-  constructor({ signingPublicKey }: { signingPublicKey?: string } = {}) {
+export default class CryptoV3 extends CryptoBase {
+  constructor() {
     super()
-    this.signingPublicKey = signingPublicKey
   }
 
   /**
-   * Encrypt input with a unique keypair for each submission
-   * @param encryptionPublicKey The base-64 encoded public key for encrypting.
+   * Encrypt input with a unique keypair for each submission.
    * @param msg The message to encrypt, will be stringified.
-   * @param signingPrivateKey Optional. Must be a base-64 encoded private key. If given, will be used to signing the given msg param prior to encrypting.
+   * @param submissionPublicKey The base-64 encoded public key for encrypting.
    * @returns The encrypted basestring.
    */
-  encrypt = (
-    msg: any,
-    encryptionPublicKey: string,
-    signingPrivateKey?: string
-  ): EncryptedContent => {
-    let processedMsg = decodeUTF8(JSON.stringify(msg))
+  encrypt = (msg: any, submissionPublicKey: string): EncryptedContent => {
+    const processedMsg = decodeUTF8(JSON.stringify(msg))
+    return encryptMessage(processedMsg, submissionPublicKey)
+  }
 
-    if (signingPrivateKey) {
-      processedMsg = nacl.sign(processedMsg, decodeBase64(signingPrivateKey))
-    }
-
-    return encryptMessage(processedMsg, encryptionPublicKey)
+  /**
+   * Encrypt input with a unique keypair for each key.
+   * @param k The key to encrypt as a string.
+   * @param formPublicKey The base-64 encoded public key for encrypting.
+   * @returns The encrypted key string.
+   */
+  encryptKey = (k: string, formPublicKey: string): EncryptedContent => {
+    const processedMsg = decodeUTF8(k)
+    return encryptMessage(processedMsg, formPublicKey)
   }
 
   /**
    * Decrypts an encrypted submission and returns it.
-   * @param formSecretKey The base-64 secret key of the form to decrypt with.
+   * @param submissionSecretKey The base-64 encoded secret key for decrypting.
    * @param decryptParams The params containing encrypted content and information.
    * @param decryptParams.encryptedContent The encrypted content encoded with base-64.
    * @param decryptParams.version The version of the payload. Used to determine the decryption process to decrypt the content with.
@@ -69,29 +49,33 @@ export default class Crypto extends CryptoBase {
    * @throws {MissingPublicKeyError} if a public key is not provided when instantiating this class and is needed for verifying signed content.
    */
   decrypt = (
-    formSecretKey: string,
+    submissionSecretKey: string,
     decryptParams: DecryptParams
-  ): DecryptedContent | null => {
+  ): DecryptedContentV3 | null => {
     try {
       const { encryptedContent, verifiedContent } = decryptParams
 
       // Do not return the transformed object in `_decrypt` function as a signed
       // object is not encoded in UTF8 and is encoded in Base-64 instead.
-      const decryptedContent = decryptContent(formSecretKey, encryptedContent)
+      const decryptedContent = decryptContent(
+        submissionSecretKey,
+        encryptedContent
+      )
       if (!decryptedContent) {
         throw new Error('Failed to decrypt content')
       }
       const decryptedObject: Record<string, unknown> = JSON.parse(
         encodeUTF8(decryptedContent)
       )
-      if (!determineIsFormFields(decryptedObject)) {
+      if (!determineIsFormFieldsV3(decryptedObject)) {
         throw new Error('Decrypted object does not fit expected shape')
       }
 
-      const returnedObject: DecryptedContent = {
+      const returnedObject: DecryptedContentV3 = {
         responses: decryptedObject,
       }
 
+      /*
       if (verifiedContent) {
         if (!this.signingPublicKey) {
           throw new MissingPublicKeyError(
@@ -102,7 +86,7 @@ export default class Crypto extends CryptoBase {
         // we need to append it to the end.
         // Decrypted message must be able to be authenticated by the public key.
         const decryptedVerifiedContent = decryptContent(
-          formSecretKey,
+          decryptionSecretKey,
           verifiedContent
         )
         if (!decryptedVerifiedContent) {
@@ -116,6 +100,7 @@ export default class Crypto extends CryptoBase {
 
         returnedObject.verified = decryptedVerifiedObject
       }
+      */
 
       return returnedObject
     } catch (err) {
@@ -130,13 +115,25 @@ export default class Crypto extends CryptoBase {
   }
 
   /**
+   * Decrypts an encrypted key and returns it.
+   * @param formSecretKey The base-64 encoded secret key for decrypting.
+   * @param ct The encrypted key encoded with base-64.
+   * @returns The decrypted content if successful. Else, null will be returned.
+   */
+  decryptKey = (formSecretKey: string, ct: string): string | null => {
+    const decryptedContent = decryptContent(formSecretKey, ct)
+    if (decryptedContent === null) return null
+    return encodeUTF8(decryptedContent)
+  }
+
+  /**
    * Returns true if a pair of public & secret keys are associated with each other
    * @param publicKey The public key to verify against.
    * @param secretKey The private key to verify against.
    */
   valid = (publicKey: string, secretKey: string) => {
-    const testResponse: FormField[] = []
-    const internalValidationVersion = 1
+    const testResponse: FormFieldsV3 = {}
+    const internalValidationVersion = 3
 
     const cipherResponse = this.encrypt(testResponse, publicKey)
     // Use toString here since the return should be an empty array.
@@ -156,6 +153,7 @@ export default class Crypto extends CryptoBase {
    * @returns Promise holding the encrypted file
    * @throws error if any of the encrypt methods fail
    */
+  /*
   encryptFile = async (
     binary: Uint8Array,
     formPublicKey: string
@@ -173,6 +171,7 @@ export default class Crypto extends CryptoBase {
       ),
     }
   }
+  */
 
   /**
    * Decrypt the given encrypted file content.
@@ -182,6 +181,7 @@ export default class Crypto extends CryptoBase {
    * @param encrypted.nonce The nonce as a base-64 string
    * @param encrypted.blob The encrypted file as a Blob object
    */
+  /*
   decryptFile = async (
     formSecretKey: string,
     {
@@ -197,6 +197,7 @@ export default class Crypto extends CryptoBase {
       decodeBase64(formSecretKey)
     )
   }
+  */
 
   /**
    * Decrypts an encrypted submission, and also download and decrypt any attachments alongside it.
@@ -205,6 +206,7 @@ export default class Crypto extends CryptoBase {
    * @returns A promise of the decrypted submission, including attachments (if any). Or else returns null if a decryption error decrypting any part of the submission.
    * @throws {MissingPublicKeyError} if a public key is not provided when instantiating this class and is needed for verifying signed content.
    */
+  /*
   decryptWithAttachments = async (
     formSecretKey: string,
     decryptParams: DecryptParams
@@ -268,4 +270,5 @@ export default class Crypto extends CryptoBase {
       attachments: decryptedRecords,
     }
   }
+  */
 }

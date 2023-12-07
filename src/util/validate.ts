@@ -1,4 +1,4 @@
-import { FormField } from '../types'
+import { FormField, FormFieldsV3 } from '../types'
 
 function determineIsFormFields(tbd: any): tbd is FormField[] {
   if (!Array.isArray(tbd)) {
@@ -24,4 +24,13 @@ function determineIsFormFields(tbd: any): tbd is FormField[] {
   return filter.length === tbd.length
 }
 
-export { determineIsFormFields }
+function determineIsFormFieldsV3(tbd: any): tbd is FormFieldsV3 {
+  for (const id of Object.keys(tbd)) {
+    const value = tbd[id]
+    const hasCorrectShape = value.fieldType && value.answer !== undefined
+    if (!hasCorrectShape) return false
+  }
+  return true
+}
+
+export { determineIsFormFields, determineIsFormFieldsV3 }

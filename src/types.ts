@@ -26,6 +26,11 @@ export type FieldType =
   | 'date'
   | 'mobile'
   | 'homeno'
+  | 'statement'
+  | 'image'
+  | 'country_region'
+  | 'uen'
+  | 'children'
 
 // Represents form field responses in a form.
 export type FormField = {
@@ -38,6 +43,15 @@ export type FormField = {
   | { answer: string; answerArray?: never }
   | { answer?: never; answerArray: string[] | string[][] }
 )
+
+// Represents form field responses in a form.
+export type FormFieldsV3 = Record<
+  string,
+  {
+    fieldType: FieldType
+    answer: any // too complex to represent here
+  }
+>
 
 // Encrypted basestring containing the submission public key,
 // nonce and encrypted data in base-64.
@@ -59,6 +73,11 @@ export interface DecryptParams {
 export type DecryptedContent = {
   responses: FormField[]
   verified?: Record<string, any>
+}
+
+export type DecryptedContentV3 = {
+  responses: FormFieldsV3
+  // verified?: Record<string, any>
 }
 
 export type DecryptedFile = {
