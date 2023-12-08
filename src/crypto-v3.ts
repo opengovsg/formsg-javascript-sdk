@@ -5,14 +5,15 @@ import {
   encodeUTF8,
 } from 'tweetnacl-util'
 
-import { decryptContent, encryptMessage } from './util/crypto'
+import { decryptContent, encryptMessage, generateKeypair } from './util/crypto'
 import { determineIsFormFieldsV3 } from './util/validate'
 import CryptoBase from './crypto-base'
 import { MissingPublicKeyError } from './errors'
 import {
   DecryptedContentV3,
   DecryptParams,
-  EncryptedContent,
+  DecryptParamsV3,
+  EncryptedContentV3,
   FormFieldsV3,
 } from './types'
 
@@ -24,22 +25,24 @@ export default class CryptoV3 extends CryptoBase {
   /**
    * Encrypt input with a unique keypair for each submission.
    * @param msg The message to encrypt, will be stringified.
-   * @param submissionPublicKey The base-64 encoded public key for encrypting.
+   * @param form The base-64 encoded form public key for encrypting.
    * @returns The encrypted basestring.
    */
-  encrypt = (msg: any, submissionPublicKey: string): EncryptedContent => {
-    const processedMsg = decodeUTF8(JSON.stringify(msg))
-    return encryptMessage(processedMsg, submissionPublicKey)
-  }
+  encrypt = (msg: any, formPublicKey: string): EncryptedContentV3 => {
+    const submissionKeypair = generateKeypair()
 
-  /**
-   * Encrypt input with a unique keypair for each key.
-   * @param k The base-64 encoded key to encrypt as a string.
-   * @param formPublicKey The base-64 encoded public key for encrypting.
-   * @returns The encrypted key string.
-   */
-  encryptKey = (k: string, formPublicKey: string): EncryptedContent => {
-    return encryptMessage(decodeBase64(k), formPublicKey)
+    const encryptedSubmissionSecretKey = encryptMessage(
+      decodeBase64(submissionKeypair.secretKey),
+      formPublicKey
+    )
+
+    const processedMsg = decodeUTF8(JSON.stringify(msg))
+    const encryptedContent = encryptMessage(
+      processedMsg,
+      submissionKeypair.publicKey
+    )
+
+    return { encryptedContent, encryptedSubmissionSecretKey }
   }
 
   /**
@@ -52,7 +55,7 @@ export default class CryptoV3 extends CryptoBase {
    * @returns The decrypted content if successful. Else, null will be returned.
    * @throws {MissingPublicKeyError} if a public key is not provided when instantiating this class and is needed for verifying signed content.
    */
-  decrypt = (
+  decryptFromSubmissionKey = (
     submissionSecretKey: string,
     decryptParams: DecryptParams
   ): DecryptedContentV3 | null => {
@@ -119,15 +122,32 @@ export default class CryptoV3 extends CryptoBase {
   }
 
   /**
-   * Decrypts an encrypted key and returns it.
-   * @param formSecretKey The base-64 encoded secret key for decrypting.
-   * @param ct The encrypted key encoded with base-64.
-   * @returns The decrypted key encoded with base-64 if successful. Else, null will be returned.
+   * Decrypts an encrypted submission and returns it.
+   * @param form The base-64 encoded form secret key for decrypting the submission.
+   * @param decryptParams The params containing encrypted content, encrypted submission key and information.
+   * @param decryptParams.encryptedContent The encrypted content encoded with base-64.
+   * @param decryptParams.encryptedSubmissionSecretKey The encrypted submission secret key encoded with base-64.
+   * @param decryptParams.version The version of the payload. Used to determine the decryption process to decrypt the content with.
+   * @param decryptParams.verifiedContent Optional. The encrypted and signed verified content. If given, the signingPublicKey will be used to attempt to open the signed message.
+   * @returns The decrypted content if successful. Else, null will be returned.
+   * @throws {MissingPublicKeyError} if a public key is not provided when instantiating this class and is needed for verifying signed content.
    */
-  decryptKey = (formSecretKey: string, ct: string): string | null => {
-    const decryptedContent = decryptContent(formSecretKey, ct)
-    if (decryptedContent === null) return null
-    return encodeBase64(decryptedContent)
+  decrypt = (
+    formSecretKey: string,
+    decryptParams: DecryptParamsV3
+  ): DecryptedContentV3 | null => {
+    const { encryptedSubmissionSecretKey, ...rest } = decryptParams
+
+    const submissionSecretKey = decryptContent(
+      formSecretKey,
+      encryptedSubmissionSecretKey
+    )
+    if (submissionSecretKey === null) return null
+
+    return this.decryptFromSubmissionKey(
+      encodeBase64(submissionSecretKey),
+      rest
+    )
   }
 
   /**
@@ -144,7 +164,7 @@ export default class CryptoV3 extends CryptoBase {
     return (
       testResponse.toString() ===
       this.decrypt(secretKey, {
-        encryptedContent: cipherResponse,
+        ...cipherResponse,
         version: internalValidationVersion,
       })?.responses.toString()
     )
