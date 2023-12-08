@@ -111,6 +111,7 @@ export default class CryptoV3 extends CryptoBase {
 
       return returnedObject
     } catch (err) {
+      console.error(err)
       // Should only throw if MissingPublicKeyError.
       // This library should be able to be used to encrypt and decrypt content
       // if the content does not contain verified fields.
@@ -123,7 +124,7 @@ export default class CryptoV3 extends CryptoBase {
 
   /**
    * Decrypts an encrypted submission and returns it.
-   * @param form The base-64 encoded form secret key for decrypting the submission.
+   * @param formSecretKey The base-64 encoded form secret key for decrypting the submission.
    * @param decryptParams The params containing encrypted content, encrypted submission key and information.
    * @param decryptParams.encryptedContent The encrypted content encoded with base-64.
    * @param decryptParams.encryptedSubmissionSecretKey The encrypted submission secret key encoded with base-64.
