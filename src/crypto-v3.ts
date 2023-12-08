@@ -147,10 +147,10 @@ export default class CryptoV3 extends CryptoBase {
 
     throw new Error(`secretKey: ${encodeBase64(submissionSecretKey)}`)
 
-    return this.decryptFromSubmissionKey(
-      encodeBase64(submissionSecretKey),
-      rest
-    )
+    // return this.decryptFromSubmissionKey(
+    //   encodeBase64(submissionSecretKey),
+    //   rest
+    // )
   }
 
   /**
