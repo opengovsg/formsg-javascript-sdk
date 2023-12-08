@@ -59,30 +59,30 @@ export default class CryptoV3 extends CryptoBase {
     submissionSecretKey: string,
     decryptParams: DecryptParams
   ): DecryptedContentV3 | null => {
-    try {
-      const { encryptedContent, verifiedContent } = decryptParams
+    // try {
+    const { encryptedContent, verifiedContent } = decryptParams
 
-      // Do not return the transformed object in `_decrypt` function as a signed
-      // object is not encoded in UTF8 and is encoded in Base-64 instead.
-      const decryptedContent = decryptContent(
-        submissionSecretKey,
-        encryptedContent
-      )
-      if (!decryptedContent) {
-        throw new Error('Failed to decrypt content')
-      }
-      const decryptedObject: Record<string, unknown> = JSON.parse(
-        encodeUTF8(decryptedContent)
-      )
-      // if (!determineIsFormFieldsV3(decryptedObject)) {
-      //   throw new Error('Decrypted object does not fit expected shape')
-      // }
+    // Do not return the transformed object in `_decrypt` function as a signed
+    // object is not encoded in UTF8 and is encoded in Base-64 instead.
+    const decryptedContent = decryptContent(
+      submissionSecretKey,
+      encryptedContent
+    )
+    if (!decryptedContent) {
+      throw new Error('Failed to decrypt content')
+    }
+    const decryptedObject: Record<string, unknown> = JSON.parse(
+      encodeUTF8(decryptedContent)
+    )
+    // if (!determineIsFormFieldsV3(decryptedObject)) {
+    //   throw new Error('Decrypted object does not fit expected shape')
+    // }
 
-      const returnedObject: DecryptedContentV3 = {
-        responses: decryptedObject as FormFieldsV3,
-      }
+    const returnedObject: DecryptedContentV3 = {
+      responses: decryptedObject as FormFieldsV3,
+    }
 
-      /*
+    /*
       if (verifiedContent) {
         if (!this.signingPublicKey) {
           throw new MissingPublicKeyError(
@@ -109,17 +109,16 @@ export default class CryptoV3 extends CryptoBase {
       }
       */
 
-      return returnedObject
-    } catch (err) {
-      console.error(err)
-      // Should only throw if MissingPublicKeyError.
-      // This library should be able to be used to encrypt and decrypt content
-      // if the content does not contain verified fields.
-      if (err instanceof MissingPublicKeyError) {
-        throw err
-      }
-      return null
-    }
+    return returnedObject
+    // } catch (err) {
+    // Should only throw if MissingPublicKeyError.
+    // This library should be able to be used to encrypt and decrypt content
+    // if the content does not contain verified fields.
+    //   if (err instanceof MissingPublicKeyError) {
+    //     throw err
+    //   }
+    //   return null
+    // }
   }
 
   /**
@@ -143,6 +142,7 @@ export default class CryptoV3 extends CryptoBase {
       formSecretKey,
       encryptedSubmissionSecretKey
     )
+
     if (submissionSecretKey === null) return null
 
     return this.decryptFromSubmissionKey(
