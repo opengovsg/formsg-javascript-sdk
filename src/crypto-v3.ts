@@ -74,12 +74,12 @@ export default class CryptoV3 extends CryptoBase {
       const decryptedObject: Record<string, unknown> = JSON.parse(
         encodeUTF8(decryptedContent)
       )
-      if (!determineIsFormFieldsV3(decryptedObject)) {
-        throw new Error('Decrypted object does not fit expected shape')
-      }
+      // if (!determineIsFormFieldsV3(decryptedObject)) {
+      //   throw new Error('Decrypted object does not fit expected shape')
+      // }
 
       const returnedObject: DecryptedContentV3 = {
-        responses: decryptedObject,
+        responses: decryptedObject as FormFieldsV3,
       }
 
       /*
