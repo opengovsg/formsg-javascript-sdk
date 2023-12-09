@@ -17,10 +17,8 @@ import {
   FormFieldsV3,
 } from './types'
 
-export default class CryptoV3 extends CryptoBase {
-  constructor() {
-    super()
-  }
+export default class CryptoV3 {
+  generate = generateKeypair
 
   /**
    * Encrypt input with a unique keypair for each submission.
@@ -145,12 +143,10 @@ export default class CryptoV3 extends CryptoBase {
 
     if (submissionSecretKey === null) return null
 
-    throw new Error(`secretKey: ${encodeBase64(submissionSecretKey)}`)
-
-    // return this.decryptFromSubmissionKey(
-    //   encodeBase64(submissionSecretKey),
-    //   rest
-    // )
+    return this.decryptFromSubmissionKey(
+      encodeBase64(submissionSecretKey),
+      rest
+    )
   }
 
   /**
