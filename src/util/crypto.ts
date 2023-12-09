@@ -54,18 +54,18 @@ export const decryptContent = (
   formPrivateKey: string,
   encryptedContent: EncryptedContent
 ): Uint8Array | null => {
-  // try {
-  const [submissionPublicKey, nonceEncrypted] = encryptedContent.split(';')
-  const [nonce, encrypted] = nonceEncrypted.split(':').map(decodeBase64)
-  return nacl.box.open(
-    encrypted,
-    nonce,
-    decodeBase64(submissionPublicKey),
-    decodeBase64(formPrivateKey)
-  )
-  // } catch (err) {
-  //   return null
-  // }
+  try {
+    const [submissionPublicKey, nonceEncrypted] = encryptedContent.split(';')
+    const [nonce, encrypted] = nonceEncrypted.split(':').map(decodeBase64)
+    return nacl.box.open(
+      encrypted,
+      nonce,
+      decodeBase64(submissionPublicKey),
+      decodeBase64(formPrivateKey)
+    )
+  } catch (err) {
+    return null
+  }
 }
 
 /**

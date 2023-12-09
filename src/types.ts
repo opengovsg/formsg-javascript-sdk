@@ -61,6 +61,7 @@ export type EncryptedContent = string
 
 export type EncryptedContentV3 = {
   encryptedContent: EncryptedContent
+  submissionSecretKey: string
   encryptedSubmissionSecretKey: EncryptedContent
 }
 
@@ -89,6 +90,7 @@ export type DecryptedContent = {
 }
 
 export type DecryptedContentV3 = {
+  submissionSecretKey: string
   responses: FormFieldsV3
   // verified?: Record<string, any>
 }

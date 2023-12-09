@@ -40,7 +40,11 @@ export default class CryptoV3 {
       submissionKeypair.publicKey
     )
 
-    return { encryptedContent, encryptedSubmissionSecretKey }
+    return {
+      encryptedContent,
+      submissionSecretKey: submissionKeypair.secretKey,
+      encryptedSubmissionSecretKey,
+    }
   }
 
   /**
@@ -77,6 +81,7 @@ export default class CryptoV3 {
     // }
 
     const returnedObject: DecryptedContentV3 = {
+      submissionSecretKey,
       responses: decryptedObject as FormFieldsV3,
     }
 
