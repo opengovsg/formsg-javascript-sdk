@@ -12,10 +12,10 @@ import {
   convertEncryptedAttachmentToFileContent,
   decryptContent,
   encryptMessage,
-  generateKeypair,
   verifySignedMessage,
 } from './util/crypto'
 import { determineIsFormFields } from './util/validate'
+import CryptoBase from './crypto-base'
 import { AttachmentDecryptionError, MissingPublicKeyError } from './errors'
 import {
   DecryptedAttachments,
@@ -29,14 +29,13 @@ import {
   FormField,
 } from './types'
 
-export default class Crypto {
+export default class Crypto extends CryptoBase {
   signingPublicKey?: string
 
   constructor({ signingPublicKey }: { signingPublicKey?: string } = {}) {
+    super()
     this.signingPublicKey = signingPublicKey
   }
-
-  generate = generateKeypair
 
   /**
    * Encrypt input with a unique keypair for each submission

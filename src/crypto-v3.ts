@@ -17,8 +17,10 @@ import {
   FormFieldsV3,
 } from './types'
 
-export default class CryptoV3 {
-  generate = generateKeypair
+export default class CryptoV3 extends CryptoBase {
+  constructor() {
+    super()
+  }
 
   /**
    * Encrypt input with a unique keypair for each submission.

@@ -45,6 +45,8 @@ jobs:
             ${{ runner.OS }}-
       - run: npm ci
       - run: npm run test-ci
+        env:
+          NODE_OPTIONS: '--max-old-space-size=8192'
       - name: Submit test coverage to Coveralls
         uses: coverallsapp/github-action@v1.1.2
         with:
