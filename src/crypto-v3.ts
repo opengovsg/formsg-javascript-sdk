@@ -43,8 +43,9 @@ export default class CryptoV3 extends CryptoBase {
     )
 
     return {
-      encryptedContent,
+      submissionPublicKey: submissionKeypair.publicKey,
       submissionSecretKey: submissionKeypair.secretKey,
+      encryptedContent,
       encryptedSubmissionSecretKey,
     }
   }

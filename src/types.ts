@@ -60,8 +60,9 @@ export type FormFieldsV3 = Record<
 export type EncryptedContent = string
 
 export type EncryptedContentV3 = {
-  encryptedContent: EncryptedContent
+  submissionPublicKey: string
   submissionSecretKey: string
+  encryptedContent: EncryptedContent
   encryptedSubmissionSecretKey: EncryptedContent
 }
 
