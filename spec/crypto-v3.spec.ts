@@ -100,7 +100,7 @@ describe('CryptoV3', function () {
     // Act
     // Encrypt
     const encrypted = await crypto.encryptFile(testFileBuffer, publicKey)
-    expect(encrypted).toHaveProperty('filePublicKey')
+    expect(encrypted).toHaveProperty('submissionPublicKey')
     expect(encrypted).toHaveProperty('nonce')
     expect(encrypted).toHaveProperty('binary')
 

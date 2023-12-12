@@ -1,4 +1,3 @@
-import nacl from 'tweetnacl'
 import {
   decodeBase64,
   decodeUTF8,
@@ -14,7 +13,6 @@ import {
   DecryptParams,
   DecryptParamsV3,
   EncryptedContentV3,
-  EncryptedFileContentV3,
   FormFieldsV3,
 } from './types'
 
@@ -140,52 +138,6 @@ export default class CryptoV3 extends CryptoBase {
         ...cipherResponse,
         version: internalValidationVersion,
       })?.responses.toString()
-    )
-  }
-
-  /**
-   * Encrypt given binary file with a unique keypair for each submission.
-   * @requires encrypt() must have been called prior to retrieve a { submissionPublicKey, submissionSecretKey } keypair
-   * @param binary The file to encrypt, should be a blob that is converted to Uint8Array binary
-   * @param submissionPublicKey The base-64 encoded submission public key
-   * @returns Promise holding the encrypted file
-   * @throws error if any of the encrypt methods fail
-   */
-  encryptFile = async (
-    binary: Uint8Array,
-    submissionPublicKey: string
-  ): Promise<EncryptedFileContentV3> => {
-    const fileKeypair = this.generate()
-    const nonce = nacl.randomBytes(24)
-    return {
-      filePublicKey: fileKeypair.publicKey,
-      nonce: encodeBase64(nonce),
-      binary: nacl.box(
-        binary,
-        nonce,
-        decodeBase64(submissionPublicKey),
-        decodeBase64(fileKeypair.secretKey)
-      ),
-    }
-  }
-
-  /**
-   * Decrypt the given encrypted file content.
-   * @param submissionSecretKey Secret key as a base-64 string
-   * @param encrypted Object returned from encryptFile function
-   * @param encrypted.filePublicKey The submission public key as a base-64 string
-   * @param encrypted.nonce The nonce as a base-64 string
-   * @param encrypted.blob The encrypted file as a Blob object
-   */
-  decryptFile = async (
-    submissionSecretKey: string,
-    { filePublicKey, nonce, binary: encryptedBinary }: EncryptedFileContentV3
-  ): Promise<Uint8Array | null> => {
-    return nacl.box.open(
-      encryptedBinary,
-      decodeBase64(nonce),
-      decodeBase64(filePublicKey),
-      decodeBase64(submissionSecretKey)
     )
   }
 }

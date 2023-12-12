@@ -91,7 +91,6 @@ export type DecryptedContent = {
 export type DecryptedContentV3 = {
   submissionSecretKey: string
   responses: FormFieldsV3
-  // verified?: Record<string, any>
 }
 
 export type DecryptedFile = {
@@ -109,12 +108,6 @@ export type DecryptedContentAndAttachments = {
 
 export type EncryptedFileContent = {
   submissionPublicKey: string
-  nonce: string
-  binary: Uint8Array
-}
-
-export type EncryptedFileContentV3 = {
-  filePublicKey: string
   nonce: string
   binary: Uint8Array
 }
