@@ -7,6 +7,7 @@ import {
 } from 'tweetnacl-util'
 
 import { decryptContent, encryptMessage, generateKeypair } from './util/crypto'
+import { determineIsFormFieldsV3 } from './util/validate'
 import CryptoBase from './crypto-base'
 import {
   DecryptedContentV3,
@@ -55,8 +56,7 @@ export default class CryptoV3 extends CryptoBase {
    * @param submissionSecretKey The base-64 encoded secret key for decrypting.
    * @param decryptParams The params containing encrypted content and information.
    * @param decryptParams.encryptedContent The encrypted content encoded with base-64.
-   * @param decryptParams.version The version of the payload. Used to determine the decryption process to decrypt the content with.
-   * @param decryptParams.verifiedContent Optional. The encrypted and signed verified content. If given, the signingPublicKey will be used to attempt to open the signed message.
+   * @param decryptParams.version The version of the payload.
    * @returns The decrypted content if successful. Else, null will be returned.
    * @throws {MissingPublicKeyError} if a public key is not provided when instantiating this class and is needed for verifying signed content.
    */
@@ -64,67 +64,34 @@ export default class CryptoV3 extends CryptoBase {
     submissionSecretKey: string,
     decryptParams: DecryptParams
   ): DecryptedContentV3 | null => {
-    // try {
-    const { encryptedContent, verifiedContent } = decryptParams
+    try {
+      const { encryptedContent } = decryptParams
 
-    // Do not return the transformed object in `_decrypt` function as a signed
-    // object is not encoded in UTF8 and is encoded in Base-64 instead.
-    const decryptedContent = decryptContent(
-      submissionSecretKey,
-      encryptedContent
-    )
-    if (!decryptedContent) {
-      throw new Error('Failed to decrypt content')
-    }
-    const decryptedObject: Record<string, unknown> = JSON.parse(
-      encodeUTF8(decryptedContent)
-    )
-    // if (!determineIsFormFieldsV3(decryptedObject)) {
-    //   throw new Error('Decrypted object does not fit expected shape')
-    // }
-
-    const returnedObject: DecryptedContentV3 = {
-      submissionSecretKey,
-      responses: decryptedObject as FormFieldsV3,
-    }
-
-    /*
-      if (verifiedContent) {
-        if (!this.signingPublicKey) {
-          throw new MissingPublicKeyError(
-            'Public signing key must be provided when instantiating the Crypto class in order to verify verified content'
-          )
-        }
-        // Only care if it is the correct shape if verifiedContent exists, since
-        // we need to append it to the end.
-        // Decrypted message must be able to be authenticated by the public key.
-        const decryptedVerifiedContent = decryptContent(
-          decryptionSecretKey,
-          verifiedContent
-        )
-        if (!decryptedVerifiedContent) {
-          // Returns null if decrypting verified content failed.
-          throw new Error('Failed to decrypt verified content')
-        }
-        const decryptedVerifiedObject = verifySignedMessage(
-          decryptedVerifiedContent,
-          this.signingPublicKey
-        )
-
-        returnedObject.verified = decryptedVerifiedObject
+      // Do not return the transformed object in `_decrypt` function as a signed
+      // object is not encoded in UTF8 and is encoded in Base-64 instead.
+      const decryptedContent = decryptContent(
+        submissionSecretKey,
+        encryptedContent
+      )
+      if (!decryptedContent) {
+        throw new Error('Failed to decrypt content')
       }
-      */
+      const decryptedObject: Record<string, unknown> = JSON.parse(
+        encodeUTF8(decryptedContent)
+      )
+      if (!determineIsFormFieldsV3(decryptedObject)) {
+        throw new Error('Decrypted object does not fit expected shape')
+      }
 
-    return returnedObject
-    // } catch (err) {
-    // Should only throw if MissingPublicKeyError.
-    // This library should be able to be used to encrypt and decrypt content
-    // if the content does not contain verified fields.
-    //   if (err instanceof MissingPublicKeyError) {
-    //     throw err
-    //   }
-    //   return null
-    // }
+      const returnedObject: DecryptedContentV3 = {
+        submissionSecretKey,
+        responses: decryptedObject as FormFieldsV3,
+      }
+
+      return returnedObject
+    } catch (err) {
+      return null
+    }
   }
 
   /**
@@ -134,7 +101,6 @@ export default class CryptoV3 extends CryptoBase {
    * @param decryptParams.encryptedContent The encrypted content encoded with base-64.
    * @param decryptParams.encryptedSubmissionSecretKey The encrypted submission secret key encoded with base-64.
    * @param decryptParams.version The version of the payload. Used to determine the decryption process to decrypt the content with.
-   * @param decryptParams.verifiedContent Optional. The encrypted and signed verified content. If given, the signingPublicKey will be used to attempt to open the signed message.
    * @returns The decrypted content if successful. Else, null will be returned.
    * @throws {MissingPublicKeyError} if a public key is not provided when instantiating this class and is needed for verifying signed content.
    */
@@ -222,77 +188,4 @@ export default class CryptoV3 extends CryptoBase {
       decodeBase64(submissionSecretKey)
     )
   }
-
-  /**
-   * Decrypts an encrypted submission, and also download and decrypt any attachments alongside it.
-   * @param formSecretKey Secret key as a base-64 string
-   * @param decryptParams The params containing encrypted content and information.
-   * @returns A promise of the decrypted submission, including attachments (if any). Or else returns null if a decryption error decrypting any part of the submission.
-   * @throws {MissingPublicKeyError} if a public key is not provided when instantiating this class and is needed for verifying signed content.
-   */
-  /*
-  decryptWithAttachments = async (
-    formSecretKey: string,
-    decryptParams: DecryptParams
-  ): Promise<DecryptedContentAndAttachments | null> => {
-    const decryptedRecords: DecryptedAttachments = {}
-    const filenames: Record<string, string> = {}
-
-    const attachmentRecords: EncryptedAttachmentRecords =
-      decryptParams.attachmentDownloadUrls ?? {}
-    const decryptedContent = this.decrypt(formSecretKey, decryptParams)
-    if (decryptedContent === null) return null
-
-    // Retrieve all original filenames for attachments for easy lookup
-    decryptedContent.responses.forEach((response) => {
-      if (response.fieldType === 'attachment' && response.answer) {
-        filenames[response._id] = response.answer
-      }
-    })
-
-    const fieldIds = Object.keys(attachmentRecords)
-    // Check if all fieldIds are within filenames
-    if (!areAttachmentFieldIdsValid(fieldIds, filenames)) {
-      return null
-    }
-
-    const downloadPromises = fieldIds.map((fieldId) => {
-      return (
-        axios
-          // Retrieve all the attachments as JSON
-          .get<EncryptedAttachmentContent>(attachmentRecords[fieldId], {
-            responseType: 'json',
-          })
-          // Decrypt all the attachments
-          .then(({ data: downloadResponse }) => {
-            const encryptedFile =
-              convertEncryptedAttachmentToFileContent(downloadResponse)
-            return this.decryptFile(formSecretKey, encryptedFile)
-          })
-          .then((decryptedFile) => {
-            // Check if the file exists and set the filename accordingly; otherwise, throw an error
-            if (decryptedFile) {
-              decryptedRecords[fieldId] = {
-                filename: filenames[fieldId],
-                content: decryptedFile,
-              }
-            } else {
-              throw new AttachmentDecryptionError()
-            }
-          })
-      )
-    })
-
-    try {
-      await Promise.all(downloadPromises)
-    } catch {
-      return null
-    }
-
-    return {
-      content: decryptedContent,
-      attachments: decryptedRecords,
-    }
-  }
-  */
 }

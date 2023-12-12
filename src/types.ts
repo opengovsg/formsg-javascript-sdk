@@ -81,8 +81,6 @@ export interface DecryptParamsV3 {
   encryptedContent: EncryptedContent
   encryptedSubmissionSecretKey: EncryptedContent
   version: number
-  verifiedContent?: EncryptedContent
-  attachmentDownloadUrls?: EncryptedAttachmentRecords
 }
 
 export type DecryptedContent = {

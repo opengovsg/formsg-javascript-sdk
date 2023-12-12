@@ -24,6 +24,7 @@ function determineIsFormFields(tbd: any): tbd is FormField[] {
   return filter.length === tbd.length
 }
 
+// TODO(MRF): This is currently very rudimentary, we should look at making this more specific where required.
 function determineIsFormFieldsV3(tbd: any): tbd is FormFieldsV3 {
   for (const id of Object.keys(tbd)) {
     const value = tbd[id]
