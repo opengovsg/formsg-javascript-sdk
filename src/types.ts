@@ -115,6 +115,12 @@ export type EncryptedFileContent = {
   binary: Uint8Array
 }
 
+export type EncryptedFileContentV3 = {
+  filePublicKey: string
+  nonce: string
+  binary: Uint8Array
+}
+
 export type EncryptedAttachmentContent = {
   encryptedFile: {
     submissionPublicKey: string

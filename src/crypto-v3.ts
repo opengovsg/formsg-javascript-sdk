@@ -1,3 +1,4 @@
+import nacl from 'tweetnacl'
 import {
   decodeBase64,
   decodeUTF8,
@@ -6,14 +7,13 @@ import {
 } from 'tweetnacl-util'
 
 import { decryptContent, encryptMessage, generateKeypair } from './util/crypto'
-import { determineIsFormFieldsV3 } from './util/validate'
 import CryptoBase from './crypto-base'
-import { MissingPublicKeyError } from './errors'
 import {
   DecryptedContentV3,
   DecryptParams,
   DecryptParamsV3,
   EncryptedContentV3,
+  EncryptedFileContentV3,
   FormFieldsV3,
 } from './types'
 
@@ -179,56 +179,49 @@ export default class CryptoV3 extends CryptoBase {
 
   /**
    * Encrypt given binary file with a unique keypair for each submission.
+   * @requires encrypt() must have been called prior to retrieve a { submissionPublicKey, submissionSecretKey } keypair
    * @param binary The file to encrypt, should be a blob that is converted to Uint8Array binary
-   * @param formPublicKey The base-64 encoded public key
+   * @param submissionPublicKey The base-64 encoded submission public key
    * @returns Promise holding the encrypted file
    * @throws error if any of the encrypt methods fail
    */
-  /*
   encryptFile = async (
     binary: Uint8Array,
-    formPublicKey: string
-  ): Promise<EncryptedFileContent> => {
-    const submissionKeypair = this.generate()
+    submissionPublicKey: string
+  ): Promise<EncryptedFileContentV3> => {
+    const fileKeypair = this.generate()
     const nonce = nacl.randomBytes(24)
     return {
-      submissionPublicKey: submissionKeypair.publicKey,
+      filePublicKey: fileKeypair.publicKey,
       nonce: encodeBase64(nonce),
       binary: nacl.box(
         binary,
         nonce,
-        decodeBase64(formPublicKey),
-        decodeBase64(submissionKeypair.secretKey)
+        decodeBase64(submissionPublicKey),
+        decodeBase64(fileKeypair.secretKey)
       ),
     }
   }
-  */
 
   /**
    * Decrypt the given encrypted file content.
-   * @param formSecretKey Secret key as a base-64 string
+   * @param submissionSecretKey Secret key as a base-64 string
    * @param encrypted Object returned from encryptFile function
-   * @param encrypted.submissionPublicKey The submission public key as a base-64 string
+   * @param encrypted.filePublicKey The submission public key as a base-64 string
    * @param encrypted.nonce The nonce as a base-64 string
    * @param encrypted.blob The encrypted file as a Blob object
    */
-  /*
   decryptFile = async (
-    formSecretKey: string,
-    {
-      submissionPublicKey,
-      nonce,
-      binary: encryptedBinary,
-    }: EncryptedFileContent
+    submissionSecretKey: string,
+    { filePublicKey, nonce, binary: encryptedBinary }: EncryptedFileContentV3
   ): Promise<Uint8Array | null> => {
     return nacl.box.open(
       encryptedBinary,
       decodeBase64(nonce),
-      decodeBase64(submissionPublicKey),
-      decodeBase64(formSecretKey)
+      decodeBase64(filePublicKey),
+      decodeBase64(submissionSecretKey)
     )
   }
-  */
 
   /**
    * Decrypts an encrypted submission, and also download and decrypt any attachments alongside it.
