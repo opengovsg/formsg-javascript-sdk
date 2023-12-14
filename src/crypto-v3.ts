@@ -56,7 +56,6 @@ export default class CryptoV3 extends CryptoBase {
    * @param decryptParams.encryptedContent The encrypted content encoded with base-64.
    * @param decryptParams.version The version of the payload.
    * @returns The decrypted content if successful. Else, null will be returned.
-   * @throws {MissingPublicKeyError} if a public key is not provided when instantiating this class and is needed for verifying signed content.
    */
   decryptFromSubmissionKey = (
     submissionSecretKey: string,
@@ -100,7 +99,6 @@ export default class CryptoV3 extends CryptoBase {
    * @param decryptParams.encryptedSubmissionSecretKey The encrypted submission secret key encoded with base-64.
    * @param decryptParams.version The version of the payload. Used to determine the decryption process to decrypt the content with.
    * @returns The decrypted content if successful. Else, null will be returned.
-   * @throws {MissingPublicKeyError} if a public key is not provided when instantiating this class and is needed for verifying signed content.
    */
   decrypt = (
     formSecretKey: string,
