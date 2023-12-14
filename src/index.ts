@@ -1,5 +1,6 @@
 import { getSigningPublicKey, getVerificationPublicKey } from './util/publicKey'
 import Crypto from './crypto'
+import CryptoV3 from './crypto-v3'
 import { PackageInitParams } from './types'
 import Verification from './verification'
 import Webhooks from './webhooks'
@@ -30,6 +31,7 @@ export = function (config: PackageInitParams = {}) {
       secretKey: webhookSecretKey,
     }),
     crypto: new Crypto({ signingPublicKey }),
+    cryptoV3: new CryptoV3(),
     verification: new Verification({
       publicKey: verificationPublicKey,
       secretKey: verificationOptions?.secretKey,
