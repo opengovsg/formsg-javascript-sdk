@@ -103,6 +103,9 @@ The underlying cryptosystem is `x25519-xsalsa20-poly1305` which is implemented b
 | encryptedContent       | string                 | The encrypted submission in base64.                                                                      |
 | created                | string                 | Creation timestamp.                                                                                      |
 | attachmentDownloadUrls | Record<string, string> | (Optional) Records containing field IDs and URLs where encrypted uploaded attachments can be downloaded. |
+| paymentContent         | Record<string, string> | (Optional) Records containing payment details for forms with payments[1]                                 |
+
+[1] Forms with the deprecated Fixed Payment Type is not supported
 
 ### Format of Decrypted Submissions
 
