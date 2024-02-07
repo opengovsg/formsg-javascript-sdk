@@ -103,6 +103,9 @@ The underlying cryptosystem is `x25519-xsalsa20-poly1305` which is implemented b
 | encryptedContent       | string                 | The encrypted submission in base64.                                                                      |
 | created                | string                 | Creation timestamp.                                                                                      |
 | attachmentDownloadUrls | Record<string, string> | (Optional) Records containing field IDs and URLs where encrypted uploaded attachments can be downloaded. |
+| paymentContent         | Record<string, string> | (Optional) Records containing payment details for forms with payments[1]                                 |
+
+[1] Forms with the deprecated Fixed Payment Type is not supported
 
 ### Format of Decrypted Submissions
 
@@ -130,7 +133,7 @@ decrypt and open the signed decrypted content with the package's own
 The resulting decrypted verifiedContent will be assigned to the `verified` key
 of the returned object.
 
-> **NOTE** <br>
+> **Note:** <br>
 > If any errors occur, either from the failure to decrypt either `encryptedContent` or `verifiedContent`, or the failure to authenticate the decrypted signed message in `verifiedContent`, `null` will be returned.
 
 Note that due to end-to-end encryption, FormSG servers are unable to verify the data format.
@@ -146,8 +149,8 @@ decrypted content does not contain all of the fields displayed in the schema bel
 | fieldType   | string   | The type of field for the question.                                                                      |
 | \_id        | string   | A unique identifier of the form field. WARNING: Changes when new fields are created/removed in the form. |
 
-**Important Note: **
-Additional internal fields may be included in webhooks from time to time, which will then be published as part of our official schema once it is stable for public consumption. If you are applying your own validation, you should account for this e.g. by not rejecting the webhook if there are additional fields included.
+> **Note:** <br>
+> Additional internal fields may be included in webhooks from time to time, which will then be published as part of our official schema once it is stable for public consumption. If you are applying your own validation, you should account for this e.g. by not rejecting the webhook if there are additional fields included.
 
 The full schema can be viewed in
 [`validate.ts`](https://github.com/opengovsg/formsg-javascript-sdk/tree/master/src/util/validate.ts).
@@ -177,6 +180,24 @@ Attachments are downloaded using S3 pre-signed URLs, with a expiry time of _one 
 Attachments are end-to-end encrypted in the same way as normal form submissions, so any eavesdropper will not be able to view form attachments without your secret key.
 
 _Warning:_ We do not have the ability to scan any attachments for malicious content (e.g. spyware or viruses), so careful handling is needed.
+
+### Format of Payment Content
+
+These fields will be available if the submission is a payment submission, otherwise, the value will be an empty `{}`.
+
+| Key            | Type             | Description                                      |
+| -------------- | ---------------- | ------------------------------------------------ |
+| type           | 'payment_charge' | Payment event associated with this webhook       |
+| status         | string           | Status of the payment intent                     |
+| payer          | string           | The email associated with this email             |
+| url            | string           | The url of the proof of payment for this payment |
+| paymentIntent  | string           | The payment intent associated with this payment  |
+| amount         | string           | The amount charged to the user                   |
+| productService | string           | The product or service name of the payment       |
+| dateTime       | string           | The time of which this payment was transacted    |
+| transactionFee | string           | The fees charged for this transaction            |
+
+
 
 ## Verifying Signatures Manually
 
