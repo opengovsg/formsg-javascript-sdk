@@ -183,7 +183,7 @@ _Warning:_ We do not have the ability to scan any attachments for malicious cont
 
 ### Format of Payment Content
 
-These fields will be available if the submission is a payment subsmission, otherwise, the value will be an empty `{}`.
+These fields will be available if the submission is a payment submission, otherwise, the value will be an empty `{}`.
 
 | Key            | Type             | Description                                      |
 | -------------- | ---------------- | ------------------------------------------------ |
