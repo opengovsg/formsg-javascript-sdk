@@ -103,6 +103,7 @@ The underlying cryptosystem is `x25519-xsalsa20-poly1305` which is implemented b
 | encryptedContent       | string                 | The encrypted submission in base64.                                                                      |
 | created                | string                 | Creation timestamp.                                                                                      |
 | attachmentDownloadUrls | Record<string, string> | (Optional) Records containing field IDs and URLs where encrypted uploaded attachments can be downloaded. |
+| paymentContent | Object (more details can be found [below](https://github.com/opengovsg/formsg-javascript-sdk?tab=readme-ov-file#format-of-payment-content)) | Details of payment made for the unique response
 
 ### Format of Decrypted Submissions
 
@@ -177,6 +178,21 @@ Attachments are downloaded using S3 pre-signed URLs, with a expiry time of _one 
 Attachments are end-to-end encrypted in the same way as normal form submissions, so any eavesdropper will not be able to view form attachments without your secret key.
 
 _Warning:_ We do not have the ability to scan any attachments for malicious content (e.g. spyware or viruses), so careful handling is needed.
+
+### Format of Payment Content
+The payment content object will contain the following fields if a payment is associated with the fom. Otherwise, an empty object `{}`` will be returned.
+
+| Key         | Type     | Description                                                                                              |
+| ----------- | -------- | -------------------------------------------------------------------------------------------------------- |
+| type    | string   | The type of payment made e.g. payment_charge |
+| status      | string   | The status of the payment |
+| payer | string | The payer's email address                 |
+| url   | string   | The invoice download url |
+| paymentIntent | string   | A unique identifier of payment |
+| amount | string   | Payment amount |
+| productService | string   | A breakdown of the product and quantity selected and paid through the form |
+| dateTime | string   | Payment timestamp |
+| transactionFee | string   | Transaction fee |
 
 ## Verifying Signatures Manually
 
