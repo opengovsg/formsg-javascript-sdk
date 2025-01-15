@@ -31,6 +31,7 @@ export type FieldType =
   | 'country_region'
   | 'uen'
   | 'children'
+  | 'address'
 
 // Represents form field responses in a form.
 export type FormField = {
