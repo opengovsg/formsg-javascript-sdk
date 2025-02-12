@@ -181,6 +181,10 @@ Attachments are end-to-end encrypted in the same way as normal form submissions,
 
 _Warning:_ We do not have the ability to scan any attachments for malicious content (e.g. spyware or viruses), so careful handling is needed.
 
+### Processing Local address fields
+
+Address Field is a compound field with 6 inputs in the answerArray. It will always follow the ordinance of [`blockNumber`, `streetName`, `buildingName`, `levelNumber`, `unitNumber`, `postalCode`]
+
 ### Format of Payment Content
 
 These fields will be available if the submission is a payment submission, otherwise, the value will be an empty `{}`.
