@@ -1,3 +1,5 @@
+import axios from 'axios'
+
 import mockJwks from '../resource/mock-jwks.json'
 
 // import { toBase64Url } from './base64'
@@ -12,6 +14,18 @@ export interface JwksKey {
   y?: string // For EC keys
   n?: string // For RSA keys
   e?: string // For RSA keys
+}
+
+// TODO: use actual cached JWKS
+let cachedJwks = mockJwks
+
+export const fetchJwks = async (jwksUrl: string): Promise<void> => {
+  try {
+    const { data } = await axios.get(jwksUrl)
+    cachedJwks = data
+  } catch (error) {
+    console.warn('Failed to fetch JWKS, falling back to mock JWKS:', error)
+  }
 }
 
 export const getKeyFromJwks = (
@@ -45,14 +59,14 @@ export const getKeyFromJwks = (
 
 export const getSigningPublicKeyFromJwks = (): string => {
   const signingKid = 'signing-d26b11d1-4a03-40df-9b88-2234eac30ef7'
-  const key = getKeyFromJwks(signingKid, mockJwks)
+  const key = getKeyFromJwks(signingKid, cachedJwks)
   if (!key) throw new Error(`Unable to find signing key with kid=${signingKid}`)
   return key
 }
 
 export const getVerificationPublicKeyFromJwks = (): string => {
   const verificationKid = 'verification-09305bf4-b4da-469b-b502-afe318ac2a18'
-  const key = getKeyFromJwks(verificationKid, mockJwks)
+  const key = getKeyFromJwks(verificationKid, cachedJwks)
   if (!key)
     throw new Error(
       `Unable to find verification key with kid=${verificationKid}`

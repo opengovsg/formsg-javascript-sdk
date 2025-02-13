@@ -5,6 +5,8 @@ export type PackageInitParams = {
   verificationOptions?: VerificationOptions
   /** Initializes public key used for verifying and decrypting in this package. If not given, will default to "production". */
   mode?: PackageMode
+  /** URL to fetch JWKS from. */
+  jwksUrl?: string
 }
 
 // A field type available in FormSG as a string
