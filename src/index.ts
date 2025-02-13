@@ -1,8 +1,4 @@
-import {
-  fetchJwks,
-  getSigningPublicKeyFromJwks,
-  getVerificationPublicKeyFromJwks,
-} from './util/jwks'
+import { getPublicKeys } from './util/keys'
 import Crypto from './crypto'
 import CryptoV3 from './crypto-v3'
 import { PackageInitParams } from './types'
@@ -18,22 +14,11 @@ import Webhooks from './webhooks'
  * @param {VerificationOptions?} [config.verificationOptions] Optional. If provided, enables the usage of the verification module.
  */
 export = async function (config: PackageInitParams = {}) {
-  const { webhookSecretKey, verificationOptions, jwksUrl } = config
-
-  // Fetch JWKS if URL is provided
-  if (jwksUrl) {
-    await fetchJwks(jwksUrl)
-  }
-
-  /**
-   * Public key is used for decrypting signed verified content in the `crypto` module, and
-   * also for verifying webhook signatures' authenticity in the `webhooks` module.
-   */
-  const signingPublicKey = getSigningPublicKeyFromJwks()
-  /**
-   * Public key is used for verifying verified field signatures' authenticity in the `verification` module.
-   */
-  const verificationPublicKey = getVerificationPublicKeyFromJwks()
+  const { webhookSecretKey, verificationOptions, jwksUrl, mode } = config
+  const { signingPublicKey, verificationPublicKey } = await getPublicKeys(
+    jwksUrl,
+    mode
+  )
 
   return {
     webhooks: new Webhooks({
