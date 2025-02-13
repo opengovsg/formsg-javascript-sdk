@@ -14,9 +14,9 @@ import Webhooks from './webhooks'
  * @param {VerificationOptions?} [config.verificationOptions] Optional. If provided, enables the usage of the verification module.
  */
 export = async function (config: PackageInitParams = {}) {
-  const { webhookSecretKey, verificationOptions, jwksUrl, mode } = config
+  const { webhookSecretKey, verificationOptions, jwks, mode } = config
   const { signingPublicKey, verificationPublicKey } = await getPublicKeys(
-    jwksUrl,
+    jwks,
     mode
   )
 

@@ -1,4 +1,4 @@
-import { PackageMode } from '../types'
+import { JwksConfig, PackageMode } from '../types'
 
 import {
   fetchJwks,
@@ -7,8 +7,8 @@ import {
 } from './jwks'
 import { getSigningPublicKey, getVerificationPublicKey } from './publicKey'
 
-export async function getPublicKeys(jwksUrl?: string, mode?: PackageMode) {
-  if (!jwksUrl) {
+export async function getPublicKeys(jwks?: JwksConfig, mode?: PackageMode) {
+  if (!jwks?.url) {
     return {
       signingPublicKey: getSigningPublicKey(mode),
       verificationPublicKey: getVerificationPublicKey(mode),
@@ -16,7 +16,7 @@ export async function getPublicKeys(jwksUrl?: string, mode?: PackageMode) {
   }
 
   try {
-    await fetchJwks(jwksUrl)
+    await fetchJwks(jwks)
     return {
       signingPublicKey: getSigningPublicKeyFromJwks(),
       verificationPublicKey: getVerificationPublicKeyFromJwks(),

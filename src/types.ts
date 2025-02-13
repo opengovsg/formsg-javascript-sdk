@@ -1,3 +1,12 @@
+export type JwksConfig = {
+  /** URL to fetch JWKS from */
+  url: string
+  /** Timeout in milliseconds for JWKS fetch request. Defaults to 5000ms */
+  timeoutMs?: number
+  /** Duration in milliseconds to cache JWKS. Defaults to 3600000ms (1 hour) */
+  cacheDurationMs?: number
+}
+
 export type PackageInitParams = {
   /** base64 secret key for signing webhooks. If provided, enables generating signature and headers to authenticate webhook data. */
   webhookSecretKey?: string
@@ -5,8 +14,8 @@ export type PackageInitParams = {
   verificationOptions?: VerificationOptions
   /** Initializes public key used for verifying and decrypting in this package. If not given, will default to "production". */
   mode?: PackageMode
-  /** URL to fetch JWKS from. */
-  jwksUrl?: string
+  /** JWKS configuration */
+  jwks?: JwksConfig
 }
 
 // A field type available in FormSG as a string

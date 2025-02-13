@@ -1,6 +1,13 @@
 import axios from 'axios'
 
 import mockJwks from '../resource/mock-jwks.json'
+import { JwksConfig } from '../types'
+
+import {
+  DEFAULT_JWKS_CACHE_DURATION_MS,
+  DEFAULT_JWKS_TIMEOUT_MS,
+  MAX_CACHE_DURATION_MS,
+} from './constants'
 
 // import { toBase64Url } from './base64'
 
@@ -18,11 +25,27 @@ export interface JwksKey {
 
 // TODO: use actual cached JWKS
 let cachedJwks = mockJwks
+let lastFetchTime = 0
 
-export const fetchJwks = async (jwksUrl: string): Promise<void> => {
+export const fetchJwks = async (config: JwksConfig): Promise<void> => {
+  const {
+    url,
+    timeoutMs = DEFAULT_JWKS_TIMEOUT_MS,
+    cacheDurationMs = DEFAULT_JWKS_CACHE_DURATION_MS,
+  } = config
+
+  // Enforce maximum cache duration to avoid potential issues
+  const safeCacheDuration = Math.min(cacheDurationMs, MAX_CACHE_DURATION_MS)
+
+  // Check cache validity
+  if (lastFetchTime && Date.now() - lastFetchTime < safeCacheDuration) {
+    return
+  }
+
   try {
-    const { data } = await axios.get(jwksUrl)
+    const { data } = await axios.get(url, { timeout: timeoutMs })
     cachedJwks = data
+    lastFetchTime = Date.now()
   } catch (error) {
     console.warn('Failed to fetch JWKS, falling back to mock JWKS:', error)
   }
