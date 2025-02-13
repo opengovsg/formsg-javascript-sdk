@@ -1,4 +1,7 @@
-import { getSigningPublicKey, getVerificationPublicKey } from './util/publicKey'
+import {
+  getSigningPublicKeyFromJwks,
+  getVerificationPublicKeyFromJwks,
+} from './util/jwks'
 import Crypto from './crypto'
 import CryptoV3 from './crypto-v3'
 import { PackageInitParams } from './types'
@@ -14,16 +17,16 @@ import Webhooks from './webhooks'
  * @param {VerificationOptions?} [config.verificationOptions] Optional. If provided, enables the usage of the verification module.
  */
 export = function (config: PackageInitParams = {}) {
-  const { webhookSecretKey, mode, verificationOptions } = config
+  const { webhookSecretKey, verificationOptions } = config
   /**
    * Public key is used for decrypting signed verified content in the `crypto` module, and
-   * also for verifying webhook signatures' authenticity in the `wehbooks` module.
+   * also for verifying webhook signatures' authenticity in the `webhooks` module.
    */
-  const signingPublicKey = getSigningPublicKey(mode || 'production')
+  const signingPublicKey = getSigningPublicKeyFromJwks()
   /**
    * Public key is used for verifying verified field signatures' authenticity in the `verification` module.
    */
-  const verificationPublicKey = getVerificationPublicKey(mode || 'production')
+  const verificationPublicKey = getVerificationPublicKeyFromJwks()
 
   return {
     webhooks: new Webhooks({
