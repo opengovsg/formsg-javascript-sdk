@@ -2,7 +2,7 @@
   "keys": [
     {
       "kty": "OKP",
-      "kid": "signing-webhook-d26b11d1-4a03-40df-9b88-2234eac30ef7",
+      "kid": "signing-webhook-key-staging",
       "use": "sig",
       "alg": "EdDSA",
       "crv": "Ed25519",
@@ -10,7 +10,7 @@
     },
     {
       "kty": "OKP",
-      "kid": "signing-otp-09305bf4-b4da-469b-b502-afe318ac2a18",
+      "kid": "signing-otp-key-staging",
       "use": "verify",
       "alg": "EdDSA",
       "crv": "Ed25519",
