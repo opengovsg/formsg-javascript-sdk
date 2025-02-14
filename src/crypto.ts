@@ -24,13 +24,13 @@ import {
 } from './types'
 
 export default class Crypto extends CryptoBase {
-  getSigningPublicKey: () => Promise<string>
+  getSigningPublicKey?: () => Promise<string>
 
   constructor({
     getSigningPublicKey,
   }: {
-    getSigningPublicKey: () => Promise<string>
-  }) {
+    getSigningPublicKey?: () => Promise<string>
+  } = {}) {
     super()
     this.getSigningPublicKey = getSigningPublicKey
   }
@@ -64,7 +64,7 @@ export default class Crypto extends CryptoBase {
    * @param decryptParams.version The version of the payload. Used to determine the decryption process to decrypt the content with.
    * @param decryptParams.verifiedContent Optional. The encrypted and signed verified content. If given, the signingPublicKey will be used to attempt to open the signed message.
    * @returns The decrypted content if successful. Else, null will be returned.
-   * @throws {MissingPublicKeyError} if a public key is not provided when instantiating this class and is needed for verifying signed content.
+   * @throws {MissingPublicKeyError} if a public key getter is not provided when instantiating this class and is needed for verifying signed content.
    */
   decrypt = async (
     formSecretKey: string,
@@ -91,6 +91,12 @@ export default class Crypto extends CryptoBase {
       }
 
       if (verifiedContent) {
+        if (!this.getSigningPublicKey) {
+          throw new MissingPublicKeyError(
+            'Public signing key getter must be provided when instantiating the Crypto class in order to verify verified content'
+          )
+        }
+
         // Get fresh public key when verifying
         const signingPublicKey = await this.getSigningPublicKey()
         if (!signingPublicKey) {
