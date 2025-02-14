@@ -15,6 +15,15 @@ import Webhooks from './webhooks'
  */
 export = async function (config: PackageInitParams = {}) {
   const { webhookSecretKey, verificationOptions, jwks, mode } = config
+
+  /**
+   * signingPublicKey is used for decrypting signed verified content in the `crypto` module, and
+   * also for verifying webhook signatures' authenticity in the `wehbooks` module.
+   *
+   * verificationPublicKey is used for verifying verified field signatures' authenticity in the `verification` module.
+   *
+   * Both keys are fetched from the JWKS endpoint if provided, else they are fetched from the static public keys.
+   */
   const keyGetters = await getPublicKeys(jwks, mode)
 
   return {
