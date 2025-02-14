@@ -15,20 +15,19 @@ import Webhooks from './webhooks'
  */
 export = async function (config: PackageInitParams = {}) {
   const { webhookSecretKey, verificationOptions, jwks, mode } = config
-  const { signingPublicKey, verificationPublicKey } = await getPublicKeys(
-    jwks,
-    mode
-  )
+  const keyGetters = await getPublicKeys(jwks, mode)
 
   return {
     webhooks: new Webhooks({
-      publicKey: signingPublicKey,
+      getPublicKey: keyGetters.signingPublicKey,
       secretKey: webhookSecretKey,
     }),
-    crypto: new Crypto({ signingPublicKey }),
+    crypto: new Crypto({
+      getSigningPublicKey: keyGetters.signingPublicKey,
+    }),
     cryptoV3: new CryptoV3(),
     verification: new Verification({
-      publicKey: verificationPublicKey,
+      getVerificationPublicKey: keyGetters.verificationPublicKey,
       secretKey: verificationOptions?.secretKey,
       transactionExpiry: verificationOptions?.transactionExpiry,
     }),

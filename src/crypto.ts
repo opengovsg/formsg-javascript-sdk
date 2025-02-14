@@ -24,11 +24,11 @@ import {
 } from './types'
 
 export default class Crypto extends CryptoBase {
-  signingPublicKey?: string
+  getSigningPublicKey: () => string
 
-  constructor({ signingPublicKey }: { signingPublicKey?: string } = {}) {
+  constructor({ getSigningPublicKey }: { getSigningPublicKey: () => string }) {
     super()
-    this.signingPublicKey = signingPublicKey
+    this.getSigningPublicKey = getSigningPublicKey
   }
 
   /**
@@ -87,7 +87,9 @@ export default class Crypto extends CryptoBase {
       }
 
       if (verifiedContent) {
-        if (!this.signingPublicKey) {
+        // Get fresh public key when verifying
+        const signingPublicKey = this.getSigningPublicKey()
+        if (!signingPublicKey) {
           throw new MissingPublicKeyError(
             'Public signing key must be provided when instantiating the Crypto class in order to verify verified content'
           )
@@ -105,7 +107,7 @@ export default class Crypto extends CryptoBase {
         }
         const decryptedVerifiedObject = verifySignedMessage(
           decryptedVerifiedContent,
-          this.signingPublicKey
+          signingPublicKey
         )
 
         returnedObject.verified = decryptedVerifiedObject
