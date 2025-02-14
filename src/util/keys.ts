@@ -9,7 +9,7 @@ import { getSigningPublicKey, getVerificationPublicKey } from './publicKey'
 
 export const getPublicKeys = async (jwks?: JwksConfig, mode?: PackageMode) => {
   if (jwks?.url) {
-    initJwks(jwks)
+    await initJwks(jwks)
   }
 
   return {

@@ -5,6 +5,8 @@ export type JwksConfig = {
   timeoutMs?: number
   /** Duration in milliseconds to cache JWKS. Defaults to 3600000ms (1 hour) */
   cacheDurationMs?: number
+  /** Whether to load JWKS during initialization. Defaults to true */
+  loadOnInit?: boolean
 }
 
 export type PackageInitParams = {

@@ -75,9 +75,20 @@ const getJwks = async (): Promise<JwksResponse> => {
   }
 }
 
-export const initJwks = (config: JwksConfig): void => {
+export const initJwks = async (config: JwksConfig): Promise<void> => {
   jwksConfig = config
   jwksCache = null
+
+  if (!jwksConfig) return
+
+  // Default to true if not specified
+  if (jwksConfig.loadOnInit !== false) {
+    try {
+      await getJwks()
+    } catch (error) {
+      console.warn('Failed to pre-fetch JWKS during initialization:', error)
+    }
+  }
 }
 
 export const getSigningPublicKeyFromJwks = async (): Promise<string> => {
