@@ -1,37 +1,37 @@
 import { JwksConfig, PackageMode } from '../types'
 
 import {
-  fetchJwks,
   getSigningPublicKeyFromJwks,
   getVerificationPublicKeyFromJwks,
+  initJwks,
 } from './jwks'
-import {
-  getSigningPublicKey,
-  getVerificationPublicKey,
-  initKeyCaches,
-} from './publicKey'
+import { getSigningPublicKey, getVerificationPublicKey } from './publicKey'
 
-export async function getPublicKeys(jwks?: JwksConfig, mode?: PackageMode) {
-  initKeyCaches(jwks)
-
-  if (!jwks?.url) {
-    return {
-      signingPublicKey: () => getSigningPublicKey(mode),
-      verificationPublicKey: () => getVerificationPublicKey(mode),
-    }
+export const getPublicKeys = async (jwks?: JwksConfig, mode?: PackageMode) => {
+  if (jwks?.url) {
+    initJwks(jwks)
   }
 
-  try {
-    await fetchJwks(jwks)
-    return {
-      signingPublicKey: () => getSigningPublicKeyFromJwks(),
-      verificationPublicKey: () => getVerificationPublicKeyFromJwks(),
-    }
-  } catch (error) {
-    console.warn('Falling back to static public keys:', error)
-    return {
-      signingPublicKey: () => getSigningPublicKey(mode),
-      verificationPublicKey: () => getVerificationPublicKey(mode),
-    }
+  return {
+    signingPublicKey: async () => {
+      if (jwks?.url) {
+        try {
+          return await getSigningPublicKeyFromJwks()
+        } catch (error) {
+          console.warn('Failed to get signing key from JWKS:', error)
+        }
+      }
+      return getSigningPublicKey(mode)
+    },
+    verificationPublicKey: async () => {
+      if (jwks?.url) {
+        try {
+          return await getVerificationPublicKeyFromJwks()
+        } catch (error) {
+          console.warn('Failed to get verification key from JWKS:', error)
+        }
+      }
+      return getVerificationPublicKey(mode)
+    },
   }
 }

@@ -24,9 +24,13 @@ import {
 } from './types'
 
 export default class Crypto extends CryptoBase {
-  getSigningPublicKey: () => string
+  getSigningPublicKey: () => Promise<string>
 
-  constructor({ getSigningPublicKey }: { getSigningPublicKey: () => string }) {
+  constructor({
+    getSigningPublicKey,
+  }: {
+    getSigningPublicKey: () => Promise<string>
+  }) {
     super()
     this.getSigningPublicKey = getSigningPublicKey
   }
@@ -62,10 +66,10 @@ export default class Crypto extends CryptoBase {
    * @returns The decrypted content if successful. Else, null will be returned.
    * @throws {MissingPublicKeyError} if a public key is not provided when instantiating this class and is needed for verifying signed content.
    */
-  decrypt = (
+  decrypt = async (
     formSecretKey: string,
     decryptParams: DecryptParams
-  ): DecryptedContent | null => {
+  ): Promise<DecryptedContent | null> => {
     try {
       const { encryptedContent, verifiedContent } = decryptParams
 
@@ -88,7 +92,7 @@ export default class Crypto extends CryptoBase {
 
       if (verifiedContent) {
         // Get fresh public key when verifying
-        const signingPublicKey = this.getSigningPublicKey()
+        const signingPublicKey = await this.getSigningPublicKey()
         if (!signingPublicKey) {
           throw new MissingPublicKeyError(
             'Public signing key must be provided when instantiating the Crypto class in order to verify verified content'
@@ -161,7 +165,7 @@ export default class Crypto extends CryptoBase {
 
     const attachmentRecords: EncryptedAttachmentRecords =
       decryptParams.attachmentDownloadUrls ?? {}
-    const decryptedContent = this.decrypt(formSecretKey, decryptParams)
+    const decryptedContent = await this.decrypt(formSecretKey, decryptParams)
     if (decryptedContent === null) return null
 
     // Retrieve all original filenames for attachments for easy lookup

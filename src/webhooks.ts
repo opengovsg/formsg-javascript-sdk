@@ -6,14 +6,14 @@ import { hasEpochExpired, isSignatureHeaderValid } from './util/webhooks'
 import { MissingSecretKeyError, WebhookAuthenticateError } from './errors'
 
 export default class Webhooks {
-  getPublicKey: () => string
+  getPublicKey: () => Promise<string>
   secretKey?: string
 
   constructor({
     getPublicKey,
     secretKey,
   }: {
-    getPublicKey: () => string
+    getPublicKey: () => Promise<string>
     secretKey?: string
   }) {
     this.getPublicKey = getPublicKey
@@ -27,7 +27,7 @@ export default class Webhooks {
    * @returns true if the header is verified
    * @throws {WebhookAuthenticateError} If the signature or uri cannot be verified
    */
-  authenticate = (header: string, uri: string) => {
+  authenticate = async (header: string, uri: string) => {
     // Parse the header
     const signatureHeader = parseSignatureHeader(header)
     const {
@@ -38,7 +38,8 @@ export default class Webhooks {
     } = signatureHeader
 
     // Get fresh public key on each signature verification
-    if (!isSignatureHeaderValid(uri, signatureHeader, this.getPublicKey())) {
+    const publicKey = await this.getPublicKey()
+    if (!isSignatureHeaderValid(uri, signatureHeader, publicKey)) {
       throw new WebhookAuthenticateError(
         `Signature could not be verified for uri=${uri} submissionId=${submissionId} formId=${formId} epoch=${epoch} signature=${signature}`
       )

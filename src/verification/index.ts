@@ -15,7 +15,7 @@ import { parseVerificationSignature } from '../util/parser'
 import { formatToBaseString, isSignatureTimeValid } from './utils'
 
 export default class Verification {
-  getVerificationPublicKey: () => string
+  getVerificationPublicKey: () => Promise<string>
   verificationSecretKey?: string
   transactionExpiry?: number
 
@@ -24,7 +24,7 @@ export default class Verification {
     secretKey,
     transactionExpiry,
   }: {
-    getVerificationPublicKey: () => string
+    getVerificationPublicKey: () => Promise<string>
     secretKey?: string
     transactionExpiry?: number
   }) {
@@ -42,7 +42,7 @@ export default class Verification {
    * @param {string} data.answer
    * @param {string} data.publicKey
    */
-  authenticate = ({
+  authenticate = async ({
     signatureString,
     submissionCreatedAt,
     fieldId,
@@ -54,7 +54,7 @@ export default class Verification {
       )
     }
 
-    const verificationPublicKey = this.getVerificationPublicKey()
+    const verificationPublicKey = await this.getVerificationPublicKey()
     if (!verificationPublicKey) {
       throw new MissingPublicKeyError()
     }

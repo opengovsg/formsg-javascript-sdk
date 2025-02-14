@@ -1,16 +1,8 @@
 {
   "keys": [
     {
-      "kty": "RSA",
-      "kid": "rsa-1234",
-      "use": "sig",
-      "alg": "RS256",
-      "n": "old-key-modulus",
-      "e": "AQAB"
-    },
-    {
       "kty": "OKP",
-      "kid": "signing-d26b11d1-4a03-40df-9b88-2234eac30ef7",
+      "kid": "signing-webhook-d26b11d1-4a03-40df-9b88-2234eac30ef7",
       "use": "sig",
       "alg": "EdDSA",
       "crv": "Ed25519",
@@ -18,8 +10,8 @@
     },
     {
       "kty": "OKP",
-      "kid": "verification-09305bf4-b4da-469b-b502-afe318ac2a18",
-      "use": "sig",
+      "kid": "signing-otp-09305bf4-b4da-469b-b502-afe318ac2a18",
+      "use": "verify",
       "alg": "EdDSA",
       "crv": "Ed25519",
       "x": "bDgK1223JbrDNePFIrj7b0z02Z5nSiBzkRYRqDdVPfA"
