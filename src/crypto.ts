@@ -133,20 +133,24 @@ export default class Crypto extends CryptoBase {
    * Returns true if a pair of public & secret keys are associated with each other
    * @param publicKey The public key to verify against.
    * @param secretKey The private key to verify against.
+   * @returns A promise that resolves to true if the keys are valid, false otherwise.
    */
-  valid = (publicKey: string, secretKey: string) => {
-    const testResponse: FormField[] = []
-    const internalValidationVersion = 1
+  valid = async (publicKey: string, secretKey: string): Promise<boolean> => {
+    try {
+      const testResponse: FormField[] = []
+      const internalValidationVersion = 1
 
-    const cipherResponse = this.encrypt(testResponse, publicKey)
-    // Use toString here since the return should be an empty array.
-    return (
-      testResponse.toString() ===
-      this.decrypt(secretKey, {
+      const cipherResponse = this.encrypt(testResponse, publicKey)
+      const decryptedResponse = await this.decrypt(secretKey, {
         encryptedContent: cipherResponse,
         version: internalValidationVersion,
-      })?.responses.toString()
-    )
+      })
+
+      // Use toString here since the return should be an empty array.
+      return decryptedResponse?.responses.toString() === testResponse.toString()
+    } catch {
+      return false
+    }
   }
 
   /**

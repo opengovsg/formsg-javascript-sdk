@@ -8,31 +8,29 @@ import {
 
 describe('FormSG SDK', () => {
   describe('Initialisation', () => {
-    it('should be able to initialise without arguments', () => {
-      const sdk = formsg()
-      // Should be autopopulated with production public keys.
-      expect(sdk.crypto.signingPublicKey).toEqual(
-        SIGNING_KEYS.production.publicKey
-      )
-      expect(sdk.verification.verificationPublicKey).toEqual(
-        VERIFICATION_KEYS.production.publicKey
-      )
-      expect(sdk.webhooks.publicKey).toEqual(SIGNING_KEYS.production.publicKey)
+    it('should be able to initialise without arguments', async () => {
+      const sdk = await formsg()
+      const signingKey = await sdk.crypto.getSigningPublicKey()
+      const verificationKey = await sdk.verification.getVerificationPublicKey()
+      const webhooksKey = await sdk.webhooks.getPublicKey()
+
+      expect(signingKey).toEqual(SIGNING_KEYS.production.publicKey)
+      expect(verificationKey).toEqual(VERIFICATION_KEYS.production.publicKey)
+      expect(webhooksKey).toEqual(SIGNING_KEYS.production.publicKey)
     })
 
     it('should correctly assign given webhook signing key', async () => {
       const mockSecretKey = 'mock secret key'
-      const sdk = formsg({
+      const sdk = await formsg({
         webhookSecretKey: mockSecretKey,
       })
 
       expect(sdk.webhooks.secretKey).toEqual(mockSecretKey)
     })
 
-    it('should be able to initialise with valid verification options', () => {
-      // Arrange
+    it('should be able to initialise with valid verification options', async () => {
       const TEST_TRANSACTION_EXPIRY = 10000
-      const sdk = formsg({
+      const sdk = await formsg({
         mode: 'test',
         verificationOptions: {
           secretKey: VERIFICATION_KEYS.test.secretKey,
@@ -40,9 +38,8 @@ describe('FormSG SDK', () => {
         },
       })
 
-      expect(sdk.verification.verificationPublicKey).toEqual(
-        VERIFICATION_KEYS.test.publicKey
-      )
+      const verificationKey = await sdk.verification.getVerificationPublicKey()
+      expect(verificationKey).toEqual(VERIFICATION_KEYS.test.publicKey)
       expect(sdk.verification.verificationSecretKey).toEqual(
         VERIFICATION_KEYS.test.secretKey
       )
