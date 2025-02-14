@@ -49,7 +49,7 @@ const findKeyByUse = (jwks: JwksResponse, use: 'sig' | 'verify'): string => {
 }
 
 const getJwks = async (): Promise<JwksResponse> => {
-  if (!jwksConfig) throw new Error('JWKS not initialized - call initJwks first')
+  if (!jwksConfig) throw new Error('JWKS not initialized')
 
   const cached = jwksCache?.get()
   if (cached) return cached
