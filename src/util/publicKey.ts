@@ -5,9 +5,11 @@ import { PackageMode } from '../types'
 import STAGE from './stage'
 
 /**
- * Gets the signing public key
+ * Retrieves the appropriate signing public key.
+ * Defaults to production.
+ * @param mode The package mode to retrieve the public key for.
  */
-export const getSigningPublicKey = (mode?: PackageMode): string => {
+function getSigningPublicKey(mode?: PackageMode) {
   switch (mode) {
     case STAGE.development:
       return SIGNING_KEYS.development.publicKey
@@ -21,9 +23,11 @@ export const getSigningPublicKey = (mode?: PackageMode): string => {
 }
 
 /**
- * Gets the verification public key
+ * Retrieves the appropriate verification public key.
+ * Defaults to production.
+ * @param mode The package mode to retrieve the public key for.
  */
-export const getVerificationPublicKey = (mode?: PackageMode): string => {
+function getVerificationPublicKey(mode?: PackageMode) {
   switch (mode) {
     case STAGE.development:
       return VERIFICATION_KEYS.development.publicKey
@@ -35,3 +39,5 @@ export const getVerificationPublicKey = (mode?: PackageMode): string => {
       return VERIFICATION_KEYS.production.publicKey
   }
 }
+
+export { getSigningPublicKey, getVerificationPublicKey }
