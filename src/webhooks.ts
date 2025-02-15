@@ -6,14 +6,14 @@ import { hasEpochExpired, isSignatureHeaderValid } from './util/webhooks'
 import { MissingSecretKeyError, WebhookAuthenticateError } from './errors'
 
 export default class Webhooks {
-  getPublicKey: () => Promise<string>
+  getPublicKey: () => Promise<string[]>
   secretKey?: string
 
   constructor({
     getPublicKey,
     secretKey,
   }: {
-    getPublicKey: () => Promise<string>
+    getPublicKey: () => Promise<string[]>
     secretKey?: string
   }) {
     this.getPublicKey = getPublicKey
@@ -37,23 +37,25 @@ export default class Webhooks {
       f: formId,
     } = signatureHeader
 
-    // Get fresh public key on each signature verification
-    const publicKey = await this.getPublicKey()
-    if (!isSignatureHeaderValid(uri, signatureHeader, publicKey)) {
-      throw new WebhookAuthenticateError(
-        `Signature could not be verified for uri=${uri} submissionId=${submissionId} formId=${formId} epoch=${epoch} signature=${signature}`
-      )
+    // Get fresh public keys on each signature verification
+    const publicKeys = await this.getPublicKey()
+
+    // Try each public key until one works or all fail
+    for (const publicKey of publicKeys) {
+      if (isSignatureHeaderValid(uri, signatureHeader, publicKey)) {
+        if (!hasEpochExpired(epoch)) {
+          return true
+        }
+        // If epoch expired, no need to try other keys
+        throw new WebhookAuthenticateError(
+          `Signature is not recent for uri=${uri} submissionId=${submissionId} formId=${formId} epoch=${epoch} signature=${signature}`
+        )
+      }
     }
 
-    // Verify epoch recency
-    if (hasEpochExpired(epoch)) {
-      throw new WebhookAuthenticateError(
-        `Signature is not recent for uri=${uri} submissionId=${submissionId} formId=${formId} epoch=${epoch} signature=${signature}`
-      )
-    }
-
-    // All checks pass.
-    return true
+    throw new WebhookAuthenticateError(
+      `Signature could not be verified for uri=${uri} submissionId=${submissionId} formId=${formId} epoch=${epoch} signature=${signature}`
+    )
   }
 
   /**

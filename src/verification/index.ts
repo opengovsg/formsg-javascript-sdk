@@ -16,7 +16,7 @@ import { parseVerificationSignature } from '../util/parser'
 import { formatToBaseString, isSignatureTimeValid } from './utils'
 
 export default class Verification {
-  getVerificationPublicKey?: () => Promise<string>
+  getVerificationPublicKey?: () => Promise<string[]>
   verificationSecretKey?: string
   transactionExpiry?: number
 
@@ -54,8 +54,8 @@ export default class Verification {
     if (!this.getVerificationPublicKey) {
       throw new MissingPublicKeyError()
     }
-    const verificationPublicKey = await this.getVerificationPublicKey()
-    if (!verificationPublicKey) {
+    const verificationPublicKeys = await this.getVerificationPublicKey()
+    if (!verificationPublicKeys.length) {
       throw new MissingPublicKeyError()
     }
 
@@ -82,11 +82,19 @@ export default class Verification {
           time,
         })
 
-        return nacl.sign.detached.verify(
-          decodeUTF8(data),
-          decodeBase64(signature),
-          decodeBase64(verificationPublicKey)
-        )
+        // Try each public key until one works
+        for (const publicKey of verificationPublicKeys) {
+          if (
+            nacl.sign.detached.verify(
+              decodeUTF8(data),
+              decodeBase64(signature),
+              decodeBase64(publicKey)
+            )
+          ) {
+            return true
+          }
+        }
+        return false
       } else {
         console.info(
           `Signature was expired for signatureString="${signatureString}" signatureDate="${time}" submissionCreatedAt="${submissionCreatedAt}"`

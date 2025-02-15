@@ -24,12 +24,12 @@ import {
 } from './types'
 
 export default class Crypto extends CryptoBase {
-  getSigningPublicKey?: () => Promise<string>
+  getSigningPublicKey?: () => Promise<string[]>
 
   constructor({
     getSigningPublicKey,
   }: {
-    getSigningPublicKey?: () => Promise<string>
+    getSigningPublicKey?: () => Promise<string[]>
   } = {}) {
     super()
     this.getSigningPublicKey = getSigningPublicKey
@@ -97,11 +97,11 @@ export default class Crypto extends CryptoBase {
           )
         }
 
-        // Get fresh public key when verifying
-        const signingPublicKey = await this.getSigningPublicKey()
-        if (!signingPublicKey) {
+        // Get fresh public keys when verifying
+        const signingPublicKeys = await this.getSigningPublicKey()
+        if (!signingPublicKeys || signingPublicKeys.length === 0) {
           throw new MissingPublicKeyError(
-            'Public signing key must be provided when instantiating the Crypto class in order to verify verified content'
+            'Public signing keys must be provided when instantiating the Crypto class in order to verify verified content'
           )
         }
         // Only care if it is the correct shape if verifiedContent exists, since
@@ -115,10 +115,27 @@ export default class Crypto extends CryptoBase {
           // Returns null if decrypting verified content failed.
           throw new Error('Failed to decrypt verified content')
         }
-        const decryptedVerifiedObject = verifySignedMessage(
-          decryptedVerifiedContent,
-          signingPublicKey
-        )
+
+        let decryptedVerifiedObject = null
+        for (const publicKey of signingPublicKeys) {
+          try {
+            decryptedVerifiedObject = verifySignedMessage(
+              decryptedVerifiedContent,
+              publicKey
+            )
+            if (decryptedVerifiedObject) {
+              break
+            }
+          } catch (err) {
+            continue
+          }
+        }
+
+        if (!decryptedVerifiedObject) {
+          throw new Error(
+            'Failed to verify signed content with provided public keys'
+          )
+        }
 
         returnedObject.verified = decryptedVerifiedObject
       }

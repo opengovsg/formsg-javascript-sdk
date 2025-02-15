@@ -40,12 +40,16 @@ const base64UrlToBase64 = (base64url: string): string => {
   return converted
 }
 
-const findKeyByUse = (jwks: JwksResponse, use: 'sig' | 'verify'): string => {
-  const key = jwks.keys.find((k) => k.use === use)
-  if (!key) {
-    throw new Error(`No key with use="${use}" found in JWKS`)
+const findKeyByUse = (jwks: JwksResponse, use: 'sig' | 'verify'): string[] => {
+  const keys = jwks.keys.filter((k) => k.use === use)
+
+  if (keys.length === 0) {
+    throw new Error(`No keys with use="${use}" found in JWKS`)
   }
-  return base64UrlToBase64(key.x)
+
+  // Keys should be used in the order they appear in the JWKS response
+  // Server should return keys in priority order
+  return keys.map((k) => base64UrlToBase64(k.x))
 }
 
 const getJwks = async (): Promise<JwksResponse> => {
@@ -91,12 +95,12 @@ export const initJwks = async (config: JwksConfig): Promise<void> => {
   }
 }
 
-export const getSigningPublicKeyFromJwks = async (): Promise<string> => {
+export const getSigningPublicKeyFromJwks = async (): Promise<string[]> => {
   const jwks = await getJwks()
   return findKeyByUse(jwks, 'sig')
 }
 
-export const getVerificationPublicKeyFromJwks = async (): Promise<string> => {
+export const getVerificationPublicKeyFromJwks = async (): Promise<string[]> => {
   const jwks = await getJwks()
   return findKeyByUse(jwks, 'verify')
 }

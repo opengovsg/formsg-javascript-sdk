@@ -143,7 +143,7 @@ export type Keypair = {
 export type PackageMode = 'staging' | 'production' | 'development' | 'test'
 
 export type VerificationOptions = {
-  getVerificationPublicKey?: () => Promise<string>
+  getVerificationPublicKey?: () => Promise<string[]>
   secretKey?: string
   transactionExpiry?: number
 }
