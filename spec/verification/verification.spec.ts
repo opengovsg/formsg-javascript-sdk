@@ -39,26 +39,28 @@ describe('Verification', () => {
       )
     })
 
-    it('should not authenticate if public key is not provided', () => {
+    it('should not authenticate if public key getter is not provided', async () => {
       const verification = new Verification({
-        // No public key provided.
+        // No public key getter provided.
         transactionExpiry: TEST_TRANSACTION_EXPIRY,
         secretKey: TEST_SECRET_KEY,
       })
 
-      expect(() => verification.authenticate(VALID_AUTH_PAYLOAD)).toThrow(
-        MissingPublicKeyError
-      )
+      await expect(
+        verification.authenticate(VALID_AUTH_PAYLOAD)
+      ).rejects.toThrow(MissingPublicKeyError)
     })
 
-    it('should not authenticate if transaction expiry is not provided', () => {
+    it('should not authenticate if transaction expiry is not provided', async () => {
       const verification = new Verification({
         // No transaction expiry provided.
-        publicKey: TEST_PUBLIC_KEY,
+        getVerificationPublicKey: () => Promise.resolve(TEST_PUBLIC_KEY),
         secretKey: TEST_SECRET_KEY,
       })
 
-      expect(() => verification.authenticate(VALID_AUTH_PAYLOAD)).toThrow(
+      await expect(
+        verification.authenticate(VALID_AUTH_PAYLOAD)
+      ).rejects.toThrow(
         'Provide a transaction expiry when when initializing the FormSG SDK to use this function.'
       )
     })
@@ -68,15 +70,13 @@ describe('Verification', () => {
     const verification = new Verification({
       transactionExpiry: TEST_TRANSACTION_EXPIRY,
       secretKey: TEST_SECRET_KEY,
-      publicKey: TEST_PUBLIC_KEY,
+      getVerificationPublicKey: () => Promise.resolve(TEST_PUBLIC_KEY),
     })
 
     let now: jest.MockInstance<number, any>
 
     beforeAll(() => {
-      now = jest.spyOn(Date, 'now').mockImplementation(() => {
-        return TIME
-      })
+      now = jest.spyOn(Date, 'now').mockImplementation(() => TIME)
     })
 
     afterAll(() => {
@@ -87,38 +87,38 @@ describe('Verification', () => {
       expect(verification.generateSignature(TEST_PARAMS)).toBe(VALID_SIGNATURE)
     })
 
-    it('should successfully authenticate a valid signature', () => {
-      expect(verification.authenticate(VALID_AUTH_PAYLOAD)).toBe(true)
+    it('should successfully authenticate a valid signature', async () => {
+      expect(await verification.authenticate(VALID_AUTH_PAYLOAD)).toBe(true)
     })
 
-    it('should fail to authenticate a valid signature if it is expired', () => {
+    it('should fail to authenticate a valid signature if it is expired', async () => {
       const payload = {
         signatureString: VALID_SIGNATURE,
         submissionCreatedAt: TIME + TEST_TRANSACTION_EXPIRY * 2000,
         fieldId: TEST_PARAMS.fieldId,
         answer: TEST_PARAMS.answer,
       }
-      expect(verification.authenticate(payload)).toBe(false)
+      expect(await verification.authenticate(payload)).toBe(false)
     })
 
-    it('should fail to authenticate an invalid signature', () => {
+    it('should fail to authenticate an invalid signature', async () => {
       const payload = {
         signatureString: INVALID_SIGNATURE,
         submissionCreatedAt: TIME + 1,
         fieldId: TEST_PARAMS.fieldId,
         answer: TEST_PARAMS.answer,
       }
-      expect(verification.authenticate(payload)).toBe(false)
+      expect(await verification.authenticate(payload)).toBe(false)
     })
 
-    it('should fail to authenticate a deformed signature', () => {
+    it('should fail to authenticate a deformed signature', async () => {
       const payload = {
         signatureString: DEFORMED_SIGNATURE,
         submissionCreatedAt: TIME + 1,
         fieldId: TEST_PARAMS.fieldId,
         answer: TEST_PARAMS.answer,
       }
-      expect(verification.authenticate(payload)).toBe(false)
+      expect(await verification.authenticate(payload)).toBe(false)
     })
   })
 })

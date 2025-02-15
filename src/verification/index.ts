@@ -8,6 +8,7 @@ import { decodeBase64, decodeUTF8, encodeBase64 } from 'tweetnacl-util'
 import { MissingPublicKeyError, MissingSecretKeyError } from '../errors'
 import {
   VerificationAuthenticateOptions,
+  VerificationOptions,
   VerificationSignatureOptions,
 } from '../types'
 import { parseVerificationSignature } from '../util/parser'
@@ -15,7 +16,7 @@ import { parseVerificationSignature } from '../util/parser'
 import { formatToBaseString, isSignatureTimeValid } from './utils'
 
 export default class Verification {
-  getVerificationPublicKey: () => Promise<string>
+  getVerificationPublicKey?: () => Promise<string>
   verificationSecretKey?: string
   transactionExpiry?: number
 
@@ -23,11 +24,7 @@ export default class Verification {
     getVerificationPublicKey,
     secretKey,
     transactionExpiry,
-  }: {
-    getVerificationPublicKey: () => Promise<string>
-    secretKey?: string
-    transactionExpiry?: number
-  }) {
+  }: VerificationOptions) {
     this.getVerificationPublicKey = getVerificationPublicKey
     this.verificationSecretKey = secretKey
     this.transactionExpiry = transactionExpiry
@@ -54,6 +51,9 @@ export default class Verification {
       )
     }
 
+    if (!this.getVerificationPublicKey) {
+      throw new MissingPublicKeyError()
+    }
     const verificationPublicKey = await this.getVerificationPublicKey()
     if (!verificationPublicKey) {
       throw new MissingPublicKeyError()

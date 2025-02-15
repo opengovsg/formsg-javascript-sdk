@@ -63,7 +63,7 @@ export default class Crypto extends CryptoBase {
    * @param decryptParams.encryptedContent The encrypted content encoded with base-64.
    * @param decryptParams.version The version of the payload. Used to determine the decryption process to decrypt the content with.
    * @param decryptParams.verifiedContent Optional. The encrypted and signed verified content. If given, the signingPublicKey will be used to attempt to open the signed message.
-   * @returns The decrypted content if successful. Else, null will be returned.
+   * @returns A promise that resolves to the decrypted content if successful. Otherwise, resolves to null.
    * @throws {MissingPublicKeyError} if a public key getter is not provided when instantiating this class and is needed for verifying signed content.
    */
   decrypt = async (

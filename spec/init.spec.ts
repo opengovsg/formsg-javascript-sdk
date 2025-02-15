@@ -19,7 +19,7 @@ describe('FormSG SDK', () => {
     it('should be able to initialise without arguments', async () => {
       const sdk = await formsg()
       const signingKey = await sdk.crypto.getSigningPublicKey!()
-      const verificationKey = await sdk.verification.getVerificationPublicKey()
+      const verificationKey = await sdk.verification.getVerificationPublicKey!()
       const webhooksKey = await sdk.webhooks.getPublicKey()
 
       expect(signingKey).toEqual(SIGNING_KEYS.production.publicKey)
@@ -46,7 +46,7 @@ describe('FormSG SDK', () => {
         },
       })
 
-      const verificationKey = await sdk.verification.getVerificationPublicKey()
+      const verificationKey = await sdk.verification.getVerificationPublicKey!()
       expect(verificationKey).toEqual(VERIFICATION_KEYS.test.publicKey)
       expect(sdk.verification.verificationSecretKey).toEqual(
         VERIFICATION_KEYS.test.secretKey
@@ -124,7 +124,7 @@ describe('FormSG SDK', () => {
       })
 
       const signingKey = await sdk.crypto.getSigningPublicKey!()
-      const verificationKey = await sdk.verification.getVerificationPublicKey()
+      const verificationKey = await sdk.verification.getVerificationPublicKey!()
 
       expect(mockedAxios.get).toHaveBeenCalledWith(
         MOCK_JWKS_URL,
@@ -145,7 +145,7 @@ describe('FormSG SDK', () => {
       })
 
       const signingKey = await sdk.crypto.getSigningPublicKey!()
-      const verificationKey = await sdk.verification.getVerificationPublicKey()
+      const verificationKey = await sdk.verification.getVerificationPublicKey!()
 
       expect(signingKey).toBe(SIGNING_KEYS.production.publicKey)
       expect(verificationKey).toBe(VERIFICATION_KEYS.production.publicKey)
