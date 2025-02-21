@@ -40,7 +40,7 @@ const base64UrlToBase64 = (base64url: string): string => {
   return converted
 }
 
-const findKeyByUse = (jwks: JwksResponse, use: 'sig' | 'verify'): string[] => {
+const findKeysByUse = (jwks: JwksResponse, use: 'sig' | 'verify'): string[] => {
   const keys = jwks.keys.filter((k) => k.use === use)
 
   if (keys.length === 0) {
@@ -95,12 +95,14 @@ export const initJwks = async (config: JwksConfig): Promise<void> => {
   }
 }
 
-export const getSigningPublicKeyFromJwks = async (): Promise<string[]> => {
+export const getSigningPublicKeysFromJwks = async (): Promise<string[]> => {
   const jwks = await getJwks()
-  return findKeyByUse(jwks, 'sig')
+  return findKeysByUse(jwks, 'sig')
 }
 
-export const getVerificationPublicKeyFromJwks = async (): Promise<string[]> => {
+export const getVerificationPublicKeysFromJwks = async (): Promise<
+  string[]
+> => {
   const jwks = await getJwks()
-  return findKeyByUse(jwks, 'verify')
+  return findKeysByUse(jwks, 'verify')
 }

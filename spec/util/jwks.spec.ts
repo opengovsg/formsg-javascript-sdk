@@ -1,8 +1,8 @@
 import axios from 'axios'
 import {
   initJwks,
-  getSigningPublicKeyFromJwks,
-  getVerificationPublicKeyFromJwks,
+  getSigningPublicKeysFromJwks,
+  getVerificationPublicKeysFromJwks,
 } from '../../src/util/jwks'
 import { DEFAULT_JWKS_TIMEOUT_MS } from '../../src/util/constants'
 
@@ -82,20 +82,20 @@ describe('jwks', () => {
   it('should fetch and return signing public key', async () => {
     mockedAxios.get.mockResolvedValueOnce({ data: MOCK_JWKS_RESPONSE })
     await initJwks({ url: MOCK_JWKS_URL })
-    const result = await getSigningPublicKeyFromJwks()
+    const result = await getSigningPublicKeysFromJwks()
 
     expect(mockedAxios.get).toHaveBeenCalledWith(MOCK_JWKS_URL, {
       timeout: DEFAULT_JWKS_TIMEOUT_MS,
     })
-    expect(result).toBe('abc+123/test') // converted from base64url to base64
+    expect(result).toStrictEqual(['abc+123/test']) // converted from base64url to base64
   })
 
   it('should fetch and return verification public key', async () => {
     mockedAxios.get.mockResolvedValueOnce({ data: MOCK_JWKS_RESPONSE })
     await initJwks({ url: MOCK_JWKS_URL })
 
-    const result = await getVerificationPublicKeyFromJwks()
-    expect(result).toBe('def+456/test') // converted from base64url to base64
+    const result = await getVerificationPublicKeysFromJwks()
+    expect(result).toStrictEqual(['def+456/test']) // converted from base64url to base64
   })
 
   it('should respect custom timeout', async () => {
@@ -114,11 +114,11 @@ describe('jwks', () => {
     await initJwks({ url: MOCK_JWKS_URL, cacheDurationMs: customDuration })
 
     // Should not call, as still cached
-    await getSigningPublicKeyFromJwks()
+    await getSigningPublicKeysFromJwks()
     jest.advanceTimersByTime(customDuration + 100)
 
     mockedAxios.get.mockResolvedValueOnce({ data: MOCK_JWKS_RESPONSE })
-    await getSigningPublicKeyFromJwks()
+    await getSigningPublicKeysFromJwks()
 
     expect(mockedAxios.get).toHaveBeenCalledTimes(2)
   })
@@ -128,16 +128,16 @@ describe('jwks', () => {
     await initJwks({ url: MOCK_JWKS_URL, cacheDurationMs: 20000 })
 
     // These should use the cache from initialization
-    await getSigningPublicKeyFromJwks()
-    await getSigningPublicKeyFromJwks()
-    await getSigningPublicKeyFromJwks()
+    await getSigningPublicKeysFromJwks()
+    await getSigningPublicKeysFromJwks()
+    await getSigningPublicKeysFromJwks()
 
     expect(mockedAxios.get).toHaveBeenCalledTimes(1)
   })
 
   it('should throw error if JWKS not initialized', async () => {
     await initJwks(null as any)
-    await expect(getSigningPublicKeyFromJwks()).rejects.toThrow(
+    await expect(getSigningPublicKeysFromJwks()).rejects.toThrow(
       'JWKS not initialized'
     )
   })
@@ -147,8 +147,8 @@ describe('jwks', () => {
       data: { keys: [{ use: 'other' }] },
     })
     await initJwks({ url: MOCK_JWKS_URL })
-    await expect(getSigningPublicKeyFromJwks()).rejects.toThrow(
-      'No key with use="sig" found in JWKS'
+    await expect(getSigningPublicKeysFromJwks()).rejects.toThrow(
+      'No keys with use="sig" found in JWKS'
     )
   })
 
@@ -158,7 +158,7 @@ describe('jwks', () => {
 
     // Should still fail on subsequent request
     mockedAxios.get.mockRejectedValueOnce(new Error('Network error'))
-    await expect(getSigningPublicKeyFromJwks()).rejects.toThrow(
+    await expect(getSigningPublicKeysFromJwks()).rejects.toThrow(
       'Failed to fetch JWKS: Network error'
     )
   })
@@ -173,7 +173,7 @@ describe('jwks', () => {
 
     // Should still fail on subsequent request
     mockedAxios.get.mockRejectedValueOnce(timeoutError)
-    await expect(getSigningPublicKeyFromJwks()).rejects.toThrow(
+    await expect(getSigningPublicKeysFromJwks()).rejects.toThrow(
       'Failed to fetch JWKS: timeout of 5000ms exceeded'
     )
   })
