@@ -77,7 +77,10 @@ describe('jwks', () => {
     const customTimeout = 5000
     mockAxios.get.mockResolvedValueOnce({ data: MOCK_JWKS_RESPONSE })
 
-    await initJwks({ url: MOCK_JWKS_URL, timeoutMs: customTimeout })
+    await initJwks({
+      url: MOCK_JWKS_URL,
+      requestConfig: { timeoutMs: customTimeout },
+    })
 
     expect(mockAxios.get).toHaveBeenCalledWith(MOCK_JWKS_URL, {
       timeout: customTimeout,

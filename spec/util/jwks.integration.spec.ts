@@ -2,8 +2,8 @@ import nock from 'nock'
 import { initJwks, getSigningPublicKeysFromJwks } from '../../src/util/jwks'
 import { MOCK_JWKS_URL, MOCK_JWKS_RESPONSE } from './testUtils'
 
-// mock http response instead of mocking axios, as mocked axios isn't aware of axios-retry
-describe('jwks integration', () => {
+// mock http response instead of mocking axios, as mocked axios wouldn't be aware of axios-retry
+describe('jwks retries', () => {
   beforeEach(() => {
     nock.cleanAll()
   })
@@ -11,8 +11,14 @@ describe('jwks integration', () => {
   it('should retry failed requests with exponential backoff and eventually succeed', async () => {
     await initJwks({
       url: MOCK_JWKS_URL,
-      timeoutMs: 50,
       loadOnInit: false, // don't populate cache
+      requestConfig: {
+        timeoutMs: 50,
+        retry: {
+          maxRetries: 3,
+          initialBackoffMs: 100,
+        },
+      },
     })
 
     // retry scenario
@@ -32,13 +38,19 @@ describe('jwks integration', () => {
 
     expect(result).toStrictEqual(['abc+123/test'])
     expect(nock.isDone()).toBe(true)
-  }, 10_000)
+  })
 
   it('should throw error when all retry attempts fail', async () => {
     await initJwks({
       url: MOCK_JWKS_URL,
-      timeoutMs: 50,
       loadOnInit: false,
+      requestConfig: {
+        timeoutMs: 50,
+        retry: {
+          maxRetries: 3,
+          initialBackoffMs: 100,
+        },
+      },
     })
 
     nock('https://test.example.com')
@@ -50,7 +62,7 @@ describe('jwks integration', () => {
       'Failed to fetch JWKS: Request failed with status code 500'
     )
     expect(nock.isDone()).toBe(true)
-  }, 20_000)
+  })
 
   afterEach(() => {
     jest.useRealTimers()

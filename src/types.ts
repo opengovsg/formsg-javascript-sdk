@@ -1,12 +1,36 @@
 export type JwksConfig = {
   /** URL to fetch JWKS from */
   url: string
-  /** Timeout in milliseconds for JWKS fetch request. Defaults to 5000ms */
-  timeoutMs?: number
-  /** Duration in milliseconds to cache JWKS. Defaults to 3600000ms (1 hour) */
+  /**
+   * Duration in milliseconds to cache JWKS.
+   * @default DEFAULT_JWKS_CACHE_DURATION_MS from constants.ts
+   */
   cacheDurationMs?: number
-  /** Whether to load JWKS during initialization. Defaults to true */
+  /**
+   * Whether to load JWKS during initialization.
+   * @default true
+   */
   loadOnInit?: boolean
+  /** HTTP request configuration for JWKS fetching */
+  requestConfig?: {
+    /**
+     * Timeout in milliseconds for JWKS fetch request.
+     * @default DEFAULT_JWKS_TIMEOUT_MS from constants.ts
+     */
+    timeoutMs?: number
+    retry?: {
+      /**
+       * Maximum number of retries for JWKS fetch request.
+       * @default JWKS_MAX_RETRIES from constants.ts
+       */
+      maxRetries?: number
+      /**
+       * Initial backoff duration in milliseconds for JWKS fetch request retries.
+       * @default JWKS_INITIAL_BACKOFF_MS from constants.ts
+       */
+      initialBackoffMs?: number
+    }
+  }
 }
 
 export type PackageInitParams = {

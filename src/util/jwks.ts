@@ -56,19 +56,6 @@ const findKeysByUse = (jwks: JwksResponse, use: 'sig' | 'verify'): string[] => {
   return keys.map((k) => base64UrlToBase64(k.x))
 }
 
-axiosRetry(axios, {
-  retries: JWKS_MAX_RETRIES,
-  retryDelay: (...arg) =>
-    axiosRetry.exponentialDelay(...arg, JWKS_INITIAL_BACKOFF_MS),
-  retryCondition: (error) => {
-    return (
-      axiosRetry.isNetworkOrIdempotentRequestError(error) ||
-      JWKS_RETRY_STATUS_CODES.includes(error.response?.status ?? 0)
-    )
-  },
-  shouldResetTimeout: true,
-})
-
 const getJwks = async (): Promise<JwksResponse> => {
   if (!jwksConfig) throw new Error('JWKS not initialized')
 
@@ -83,7 +70,7 @@ const getJwks = async (): Promise<JwksResponse> => {
 
   try {
     const { data } = await axios.get(jwksConfig.url, {
-      timeout: jwksConfig.timeoutMs ?? DEFAULT_JWKS_TIMEOUT_MS,
+      timeout: jwksConfig.requestConfig?.timeoutMs ?? DEFAULT_JWKS_TIMEOUT_MS,
     })
     jwksCache.set(data)
 
@@ -102,6 +89,22 @@ export const initJwks = async (config: JwksConfig): Promise<void> => {
   jwksCache = null
 
   if (!jwksConfig) return
+
+  axiosRetry(axios, {
+    retries: config.requestConfig?.retry?.maxRetries ?? JWKS_MAX_RETRIES,
+    retryDelay: (...arg) =>
+      axiosRetry.exponentialDelay(
+        ...arg,
+        config.requestConfig?.retry?.initialBackoffMs ?? JWKS_INITIAL_BACKOFF_MS
+      ),
+    retryCondition: (error) => {
+      return (
+        axiosRetry.isNetworkOrIdempotentRequestError(error) ||
+        JWKS_RETRY_STATUS_CODES.includes(error.response?.status ?? 0)
+      )
+    },
+    shouldResetTimeout: true, // each retry will wait for the full timeout duration
+  })
 
   // Default to true if not specified
   if (jwksConfig.loadOnInit !== false) {
