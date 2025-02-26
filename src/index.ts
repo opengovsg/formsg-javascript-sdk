@@ -13,7 +13,12 @@ import Webhooks from './webhooks'
  * @param {string?} [config.webhookSecretKey] Optional. base64 secret key for signing webhooks. If provided, enables generating signature and headers to authenticate webhook data.
  * @param {VerificationOptions?} [config.verificationOptions] Optional. If provided, enables the usage of the verification module.
  */
-export = async function (config: PackageInitParams = {}) {
+export = async function (config: PackageInitParams = {}): Promise<{
+  webhooks: Webhooks
+  crypto: Crypto
+  cryptoV3: CryptoV3
+  verification: Verification
+}> {
   const { webhookSecretKey, verificationOptions, jwks, mode } = config
 
   /**
@@ -28,15 +33,15 @@ export = async function (config: PackageInitParams = {}) {
 
   return {
     webhooks: new Webhooks({
-      getPublicKey: keyGetters.signingPublicKey,
+      getPublicKeys: keyGetters.signingPublicKeys,
       secretKey: webhookSecretKey,
     }),
     crypto: new Crypto({
-      getSigningPublicKey: keyGetters.signingPublicKey,
+      getSigningPublicKeys: keyGetters.signingPublicKeys,
     }),
     cryptoV3: new CryptoV3(),
     verification: new Verification({
-      getVerificationPublicKey: keyGetters.verificationPublicKey,
+      getVerificationPublicKeys: keyGetters.verificationPublicKeys,
       secretKey: verificationOptions?.secretKey,
       transactionExpiry: verificationOptions?.transactionExpiry,
     }),

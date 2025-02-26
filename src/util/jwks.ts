@@ -65,11 +65,30 @@ const getJwks = async (): Promise<JwksResponse> => {
   }
 
   try {
-    const { data } = await axios.get(jwksConfig.url, {
-      timeout: jwksConfig.timeoutMs ?? DEFAULT_JWKS_TIMEOUT_MS,
-    })
-    jwksCache.set(data)
-    return data
+    // FIXME: dummy values for now
+    const maxRetries = 3
+    let currentRetry = 0
+    let lastError
+
+    while (currentRetry <= maxRetries) {
+      try {
+        const { data } = await axios.get(jwksConfig.url, {
+          timeout: jwksConfig.timeoutMs ?? DEFAULT_JWKS_TIMEOUT_MS,
+        })
+        jwksCache.set(data)
+
+        return data
+      } catch (error) {
+        lastError = error
+        if (currentRetry === maxRetries) break
+
+        const backoffTime = Math.pow(2, currentRetry) * 100
+        await new Promise((resolve) => setTimeout(resolve, backoffTime))
+        currentRetry++
+      }
+    }
+
+    throw lastError
   } catch (error) {
     throw new Error(
       `Failed to fetch JWKS: ${

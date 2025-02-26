@@ -24,15 +24,15 @@ import {
 } from './types'
 
 export default class Crypto extends CryptoBase {
-  getSigningPublicKey?: () => Promise<string[]>
+  getSigningPublicKeys?: () => Promise<string[]>
 
   constructor({
-    getSigningPublicKey,
+    getSigningPublicKeys,
   }: {
-    getSigningPublicKey?: () => Promise<string[]>
+    getSigningPublicKeys?: () => Promise<string[]>
   } = {}) {
     super()
-    this.getSigningPublicKey = getSigningPublicKey
+    this.getSigningPublicKeys = getSigningPublicKeys
   }
 
   /**
@@ -91,14 +91,14 @@ export default class Crypto extends CryptoBase {
       }
 
       if (verifiedContent) {
-        if (!this.getSigningPublicKey) {
+        if (!this.getSigningPublicKeys) {
           throw new MissingPublicKeyError(
             'Public signing key getter must be provided when instantiating the Crypto class in order to verify verified content'
           )
         }
 
         // Get fresh public keys when verifying
-        const signingPublicKeys = await this.getSigningPublicKey()
+        const signingPublicKeys = await this.getSigningPublicKeys()
         if (!signingPublicKeys || signingPublicKeys.length === 0) {
           throw new MissingPublicKeyError(
             'Public signing keys must be provided when instantiating the Crypto class in order to verify verified content'

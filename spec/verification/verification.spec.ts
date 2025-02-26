@@ -54,7 +54,7 @@ describe('Verification', () => {
     it('should not authenticate if transaction expiry is not provided', async () => {
       const verification = new Verification({
         // No transaction expiry provided.
-        getVerificationPublicKey: () => Promise.resolve(TEST_PUBLIC_KEY),
+        getVerificationPublicKeys: () => Promise.resolve([TEST_PUBLIC_KEY]),
         secretKey: TEST_SECRET_KEY,
       })
 
@@ -70,7 +70,7 @@ describe('Verification', () => {
     const verification = new Verification({
       transactionExpiry: TEST_TRANSACTION_EXPIRY,
       secretKey: TEST_SECRET_KEY,
-      getVerificationPublicKey: () => Promise.resolve(TEST_PUBLIC_KEY),
+      getVerificationPublicKeys: () => Promise.resolve([TEST_PUBLIC_KEY]),
     })
 
     let now: jest.MockInstance<number, any>

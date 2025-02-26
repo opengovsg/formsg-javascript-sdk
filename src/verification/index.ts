@@ -16,16 +16,16 @@ import { parseVerificationSignature } from '../util/parser'
 import { formatToBaseString, isSignatureTimeValid } from './utils'
 
 export default class Verification {
-  getVerificationPublicKey?: () => Promise<string[]>
+  getVerificationPublicKeys?: () => Promise<string[]>
   verificationSecretKey?: string
   transactionExpiry?: number
 
   constructor({
-    getVerificationPublicKey,
+    getVerificationPublicKeys,
     secretKey,
     transactionExpiry,
   }: VerificationOptions) {
-    this.getVerificationPublicKey = getVerificationPublicKey
+    this.getVerificationPublicKeys = getVerificationPublicKeys
     this.verificationSecretKey = secretKey
     this.transactionExpiry = transactionExpiry
   }
@@ -51,10 +51,10 @@ export default class Verification {
       )
     }
 
-    if (!this.getVerificationPublicKey) {
+    if (!this.getVerificationPublicKeys) {
       throw new MissingPublicKeyError()
     }
-    const verificationPublicKeys = await this.getVerificationPublicKey()
+    const verificationPublicKeys = await this.getVerificationPublicKeys()
     if (!verificationPublicKeys.length) {
       throw new MissingPublicKeyError()
     }

@@ -11,12 +11,12 @@ describe('Webhooks', () => {
   const formId = 'someFormId'
 
   const webhooks = new Webhooks({
-    getPublicKey: () => Promise.resolve(webhooksPublicKey),
+    getPublicKeys: () => Promise.resolve([webhooksPublicKey]),
     secretKey: signingSecretKey,
   })
 
   const webhooksNoSecret = new Webhooks({
-    getPublicKey: () => Promise.resolve(webhooksPublicKey),
+    getPublicKeys: () => Promise.resolve([webhooksPublicKey]),
   })
 
   /**
@@ -91,8 +91,8 @@ describe('Webhooks', () => {
 
     // Create a new Webhook class with a different publicKey
     const webhooksAlt = new Webhooks({
-      getPublicKey: () =>
-        Promise.resolve('ReObXacwevg7CaNtg5QwvtW32S0V6md15up4szRdWUY='),
+      getPublicKeys: () =>
+        Promise.resolve(['ReObXacwevg7CaNtg5QwvtW32S0V6md15up4szRdWUY=']),
     })
 
     await expect(webhooksAlt.authenticate(header, uri)).rejects.toThrow(

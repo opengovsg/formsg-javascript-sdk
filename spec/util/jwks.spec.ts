@@ -34,7 +34,6 @@ describe('jwks', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
-    jest.useFakeTimers()
   })
 
   describe('initialization', () => {
@@ -62,7 +61,7 @@ describe('jwks', () => {
     })
 
     it('should not throw if pre-fetch fails during initialization', async () => {
-      mockedAxios.get.mockRejectedValueOnce(new Error('Network error'))
+      mockedAxios.get.mockRejectedValue(new Error('Network error'))
 
       await expect(initJwks({ url: MOCK_JWKS_URL })).resolves.not.toThrow()
     })
@@ -109,6 +108,8 @@ describe('jwks', () => {
   })
 
   it('should respect custom cache duration', async () => {
+    jest.useFakeTimers()
+
     const customDuration = 2000
     mockedAxios.get.mockResolvedValueOnce({ data: MOCK_JWKS_RESPONSE })
     await initJwks({ url: MOCK_JWKS_URL, cacheDurationMs: customDuration })
@@ -143,6 +144,7 @@ describe('jwks', () => {
   })
 
   it('should throw error if key not found', async () => {
+    jest.useFakeTimers()
     mockedAxios.get.mockResolvedValueOnce({
       data: { keys: [{ use: 'other' }] },
     })
@@ -167,12 +169,11 @@ describe('jwks', () => {
     const timeoutError = new Error('timeout of 5000ms exceeded')
     timeoutError.name = 'TimeoutError'
 
-    // Initialize with timeout error
-    mockedAxios.get.mockRejectedValueOnce(timeoutError)
-    await initJwks({ url: MOCK_JWKS_URL })
+    // Every get returns a timeout error, init shouldn't throw
+    mockedAxios.get.mockRejectedValue(timeoutError)
+    await expect(initJwks({ url: MOCK_JWKS_URL })).resolves.not.toThrow()
 
     // Should still fail on subsequent request
-    mockedAxios.get.mockRejectedValueOnce(timeoutError)
     await expect(getSigningPublicKeysFromJwks()).rejects.toThrow(
       'Failed to fetch JWKS: timeout of 5000ms exceeded'
     )

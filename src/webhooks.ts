@@ -6,17 +6,17 @@ import { hasEpochExpired, isSignatureHeaderValid } from './util/webhooks'
 import { MissingSecretKeyError, WebhookAuthenticateError } from './errors'
 
 export default class Webhooks {
-  getPublicKey: () => Promise<string[]>
+  getPublicKeys: () => Promise<string[]>
   secretKey?: string
 
   constructor({
-    getPublicKey,
+    getPublicKeys,
     secretKey,
   }: {
-    getPublicKey: () => Promise<string[]>
+    getPublicKeys: () => Promise<string[]>
     secretKey?: string
   }) {
-    this.getPublicKey = getPublicKey
+    this.getPublicKeys = getPublicKeys
     this.secretKey = secretKey
   }
 
@@ -38,7 +38,7 @@ export default class Webhooks {
     } = signatureHeader
 
     // Get fresh public keys on each signature verification
-    const publicKeys = await this.getPublicKey()
+    const publicKeys = await this.getPublicKeys()
 
     // Try each public key until one works or all fail
     for (const publicKey of publicKeys) {

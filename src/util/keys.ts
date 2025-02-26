@@ -1,37 +1,43 @@
 import { JwksConfig, PackageMode } from '../types'
 
 import {
-  getSigningPublicKeyFromJwks,
-  getVerificationPublicKeyFromJwks,
+  getSigningPublicKeysFromJwks,
+  getVerificationPublicKeysFromJwks,
   initJwks,
 } from './jwks'
 import { getSigningPublicKey, getVerificationPublicKey } from './publicKey'
 
-export const getPublicKeys = async (jwks?: JwksConfig, mode?: PackageMode) => {
+export const getPublicKeys = async (
+  jwks?: JwksConfig,
+  mode?: PackageMode
+): Promise<{
+  signingPublicKeys: () => Promise<string[]>
+  verificationPublicKeys: () => Promise<string[]>
+}> => {
   if (jwks?.url) {
     await initJwks(jwks)
   }
 
   return {
-    signingPublicKey: async () => {
+    signingPublicKeys: async () => {
       if (jwks?.url) {
         try {
-          return await getSigningPublicKeyFromJwks()
+          return await getSigningPublicKeysFromJwks()
         } catch (error) {
           console.warn('Failed to get signing key from JWKS:', error)
         }
       }
-      return getSigningPublicKey(mode)
+      return [getSigningPublicKey(mode)]
     },
-    verificationPublicKey: async () => {
+    verificationPublicKeys: async () => {
       if (jwks?.url) {
         try {
-          return await getVerificationPublicKeyFromJwks()
+          return await getVerificationPublicKeysFromJwks()
         } catch (error) {
           console.warn('Failed to get verification key from JWKS:', error)
         }
       }
-      return getVerificationPublicKey(mode)
+      return [getVerificationPublicKey(mode)]
     },
   }
 }

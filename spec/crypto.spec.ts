@@ -26,7 +26,7 @@ describe('Crypto', function () {
   afterEach(() => mockAxios.reset())
 
   const crypto = new Crypto({
-    getSigningPublicKey: () => Promise.resolve(encryptionPublicKey),
+    getSigningPublicKeys: () => Promise.resolve([encryptionPublicKey]),
   })
 
   const mockVerifiedContent = {
