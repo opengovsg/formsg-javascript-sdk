@@ -1,4 +1,5 @@
 import axios from 'axios'
+import axiosRetry from 'axios-retry'
 
 import { JwksConfig } from '../types'
 
@@ -6,6 +7,9 @@ import { Cache } from './cache'
 import {
   DEFAULT_JWKS_CACHE_DURATION_MS,
   DEFAULT_JWKS_TIMEOUT_MS,
+  JWKS_INITIAL_BACKOFF_MS,
+  JWKS_MAX_RETRIES,
+  JWKS_RETRY_STATUS_CODES,
 } from './constants'
 
 interface JwksKey {
@@ -52,6 +56,19 @@ const findKeysByUse = (jwks: JwksResponse, use: 'sig' | 'verify'): string[] => {
   return keys.map((k) => base64UrlToBase64(k.x))
 }
 
+axiosRetry(axios, {
+  retries: JWKS_MAX_RETRIES,
+  retryDelay: (...arg) =>
+    axiosRetry.exponentialDelay(...arg, JWKS_INITIAL_BACKOFF_MS),
+  retryCondition: (error) => {
+    return (
+      axiosRetry.isNetworkOrIdempotentRequestError(error) ||
+      JWKS_RETRY_STATUS_CODES.includes(error.response?.status ?? 0)
+    )
+  },
+  shouldResetTimeout: true,
+})
+
 const getJwks = async (): Promise<JwksResponse> => {
   if (!jwksConfig) throw new Error('JWKS not initialized')
 
@@ -65,30 +82,12 @@ const getJwks = async (): Promise<JwksResponse> => {
   }
 
   try {
-    // FIXME: dummy values for now
-    const maxRetries = 3
-    let currentRetry = 0
-    let lastError
+    const { data } = await axios.get(jwksConfig.url, {
+      timeout: jwksConfig.timeoutMs ?? DEFAULT_JWKS_TIMEOUT_MS,
+    })
+    jwksCache.set(data)
 
-    while (currentRetry <= maxRetries) {
-      try {
-        const { data } = await axios.get(jwksConfig.url, {
-          timeout: jwksConfig.timeoutMs ?? DEFAULT_JWKS_TIMEOUT_MS,
-        })
-        jwksCache.set(data)
-
-        return data
-      } catch (error) {
-        lastError = error
-        if (currentRetry === maxRetries) break
-
-        const backoffTime = Math.pow(2, currentRetry) * 100
-        await new Promise((resolve) => setTimeout(resolve, backoffTime))
-        currentRetry++
-      }
-    }
-
-    throw lastError
+    return data
   } catch (error) {
     throw new Error(
       `Failed to fetch JWKS: ${
