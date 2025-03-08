@@ -83,9 +83,12 @@ const getJwks = async (getJwksOptions?: {
   }
 
   try {
-    const { data } = await axios.get(jwksConfig.url, {
+    // NOTE: <JwksResponse> is compile-time type assertion, if the endpoint returns a malformed response, it will still throw an error
+    const { data } = await axios.get<JwksResponse>(jwksConfig.url, {
       timeout: jwksConfig.requestConfig?.timeoutMs ?? DEFAULT_JWKS_TIMEOUT_MS,
     })
+
+    // NOTE: better if we do runtime validation here using zod/ajv, but that would need to import a new dependency
     jwksCache.set(data)
 
     return data
