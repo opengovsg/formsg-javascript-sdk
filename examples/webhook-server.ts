@@ -1,6 +1,6 @@
 import express from 'express'
 import * as dotenv from 'dotenv'
-import formSgSDK from '../../src'
+import formSgSDK from '../src'
 
 dotenv.config()
 

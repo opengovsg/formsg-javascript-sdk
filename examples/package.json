@@ -5,7 +5,8 @@
   "main": "webhook-server.ts",
   "scripts": {
     "start": "nodemon webhook-server.ts",
-    "start:ngrok": "ngrok http 3000"
+    "start:ngrok": "ngrok http 3000",
+    "generate-keys": "ts-node generate-keys.ts"
   },
   "dependencies": {
     "express": "^4.18.2",
