@@ -34,12 +34,17 @@ describe('Webhooks', () => {
   /**
    * Helper method to construct a test header.
    */
-  const constructTestHeader = (epoch: number, signature: string) => {
+  const constructTestHeader = (
+    epoch: number,
+    signature: string,
+    keyId?: string
+  ) => {
     return webhooks.constructHeader({
       epoch,
       submissionId,
       formId,
       signature,
+      keyId,
     })
   }
 
@@ -54,6 +59,16 @@ describe('Webhooks', () => {
     const header = constructTestHeader(epoch, signature)
     expect(header).toBe(
       `t=1583136171649,s=someSubmissionId,f=someFormId,v1=KMirkrGJLPqu+Na+gdZLUxl9ZDgf2PnNGPnSoG1FuTMRUTiQ6o0jB/GTj1XFjn2s9JtsL5GiCmYROpjJhDyxCw==`
+    )
+  })
+
+  it('should include kid in X-FormSG-Signature header if keyId is given', () => {
+    const epoch = 1583136171649
+    const signature = 'some-signature'
+    const header = constructTestHeader(epoch, signature, 'some-new-key-id')
+
+    expect(header).toBe(
+      `t=1583136171649,s=someSubmissionId,f=someFormId,v1=some-signature,kid=some-new-key-id`
     )
   })
 

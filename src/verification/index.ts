@@ -16,7 +16,7 @@ import { parseVerificationSignature } from '../util/parser'
 import { formatToBaseString, isSignatureTimeValid } from './utils'
 
 export default class Verification {
-  getVerificationPublicKeys?: () => Promise<string[]>
+  getVerificationPublicKeys?: (keyId?: string) => Promise<string[]>
   verificationSecretKey?: string
   transactionExpiry?: number
 
@@ -54,10 +54,6 @@ export default class Verification {
     if (!this.getVerificationPublicKeys) {
       throw new MissingPublicKeyError()
     }
-    const verificationPublicKeys = await this.getVerificationPublicKeys()
-    if (!verificationPublicKeys.length) {
-      throw new MissingPublicKeyError()
-    }
 
     try {
       const {
@@ -65,10 +61,16 @@ export default class Verification {
         t: time,
         f: formId,
         s: signature,
+        kid: keyId,
       } = parseVerificationSignature(signatureString)
 
       if (!time) {
         throw new Error('Malformed signature string was passed into function')
+      }
+
+      const verificationPublicKeys = await this.getVerificationPublicKeys(keyId)
+      if (!verificationPublicKeys.length) {
+        throw new MissingPublicKeyError()
       }
 
       if (
@@ -117,6 +119,7 @@ export default class Verification {
     formId,
     fieldId,
     answer,
+    keyId,
   }: VerificationSignatureOptions): string => {
     if (!this.verificationSecretKey) {
       throw new MissingSecretKeyError(
@@ -136,8 +139,14 @@ export default class Verification {
       decodeUTF8(data),
       decodeBase64(this.verificationSecretKey)
     )
-    return `f=${formId},v=${transactionId},t=${time},s=${encodeBase64(
+
+    const result = `f=${formId},v=${transactionId},t=${time},s=${encodeBase64(
       signature
     )}`
+    if (keyId) {
+      return `${result},kid=${keyId}`
+    }
+
+    return result
   }
 }

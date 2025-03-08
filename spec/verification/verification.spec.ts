@@ -14,6 +14,7 @@ const TEST_PARAMS = {
 }
 const TIME = 1588658696255
 const VALID_SIGNATURE = `f=formId,v=transactionId,t=${TIME},s=XLF1V4RDu8dEJLq1yK3UN92TwiekVoif7PX4V8cXr5ERfIQXlOcO+ZOFAawawKWhFSqScg5z1Ro+Y+bMeNmRAg==`
+const VALID_SIGNATURE_WITH_KEY_ID = `f=formId,v=transactionId,t=${TIME},s=XLF1V4RDu8dEJLq1yK3UN92TwiekVoif7PX4V8cXr5ERfIQXlOcO+ZOFAawawKWhFSqScg5z1Ro+Y+bMeNmRAg==,kid=some-key-id`
 const INVALID_SIGNATURE = `f=formId,v=transactionId,t=${TIME},s=InvalidSignatureyK3UN92TwiekVoif7PX4V8cXr5ERfIQXlOcO+ZOFAawawKWhFSqScg5z1Ro+Y+bMeNmRAg==`
 const DEFORMED_SIGNATURE = `abcdefg`
 
@@ -85,6 +86,12 @@ describe('Verification', () => {
 
     it('should generate a signature', () => {
       expect(verification.generateSignature(TEST_PARAMS)).toBe(VALID_SIGNATURE)
+    })
+
+    it('should generate a signature with keyId in the header', () => {
+      expect(
+        verification.generateSignature({ ...TEST_PARAMS, keyId: 'some-key-id' })
+      ).toBe(VALID_SIGNATURE_WITH_KEY_ID)
     })
 
     it('should successfully authenticate a valid signature', async () => {

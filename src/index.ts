@@ -19,7 +19,7 @@ export = async function (config: PackageInitParams = {}): Promise<{
   cryptoV3: CryptoV3
   verification: Verification
 }> {
-  const { webhookSecretKey, verificationOptions, jwks, mode } = config
+  const { webhookOptions, verificationOptions, jwks, mode } = config
 
   /**
    * signingPublicKey is used for decrypting signed verified content in the `crypto` module, and
@@ -29,12 +29,17 @@ export = async function (config: PackageInitParams = {}): Promise<{
    *
    * Both keys are fetched from the JWKS endpoint if provided, else they are fetched from the static public keys.
    */
-  const keyGetters = await getPublicKeys(jwks, mode)
+  const keyGetters = await getPublicKeys(
+    jwks,
+    webhookOptions?.publicKey,
+    verificationOptions?.publicKey,
+    mode
+  )
 
   return {
     webhooks: new Webhooks({
       getPublicKeys: keyGetters.signingPublicKeys,
-      secretKey: webhookSecretKey,
+      secretKey: webhookOptions?.secretKey,
     }),
     crypto: new Crypto({
       getSigningPublicKeys: keyGetters.signingPublicKeys,

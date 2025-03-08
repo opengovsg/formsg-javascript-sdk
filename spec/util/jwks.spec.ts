@@ -57,12 +57,20 @@ describe('jwks', () => {
     })
   })
 
-  it('should fetch and return signing public key', async () => {
+  it('should fetch and return all signing public keys if keyId is not given', async () => {
     mockAxios.get.mockResolvedValueOnce({ data: MOCK_JWKS_RESPONSE })
     await initJwks({ url: MOCK_JWKS_URL })
     const result = await getSigningPublicKeysFromJwks()
 
-    expect(result).toStrictEqual(['abc+123/test']) // converted from base64url to base64
+    expect(result).toStrictEqual(['abc+123/test', 'abc+789/test']) // converted from base64url to base64
+  })
+
+  it('should fetch and return signing public key by keyId', async () => {
+    mockAxios.get.mockResolvedValueOnce({ data: MOCK_JWKS_RESPONSE })
+    await initJwks({ url: MOCK_JWKS_URL })
+    const result = await getSigningPublicKeysFromJwks('some-new-key-id')
+
+    expect(result).toStrictEqual(['abc+789/test'])
   })
 
   it('should fetch and return verification public key', async () => {
@@ -70,7 +78,7 @@ describe('jwks', () => {
     await initJwks({ url: MOCK_JWKS_URL })
 
     const result = await getVerificationPublicKeysFromJwks()
-    expect(result).toStrictEqual(['def+456/test']) // converted from base64url to base64
+    expect(result).toStrictEqual(['def+456/test'])
   })
 
   it('should respect custom timeout', async () => {
@@ -124,7 +132,6 @@ describe('jwks', () => {
   })
 
   it('should throw error if key not found', async () => {
-    jest.useFakeTimers()
     mockAxios.get.mockResolvedValueOnce({
       data: { keys: [{ use: 'other' }] },
     })
@@ -132,6 +139,23 @@ describe('jwks', () => {
     await expect(getSigningPublicKeysFromJwks()).rejects.toThrow(
       'No keys with use="sig" found in JWKS'
     )
+  })
+
+  it('should force refreshing cache and try refetch if keyId not found', async () => {
+    mockAxios.get.mockResolvedValueOnce({ data: { keys: [] } })
+    mockAxios.get.mockResolvedValueOnce({ data: MOCK_JWKS_RESPONSE })
+    await initJwks({ url: MOCK_JWKS_URL })
+    expect(await getSigningPublicKeysFromJwks('1-old-key')).toStrictEqual([
+      'abc+123/test',
+    ])
+  })
+
+  it('should throw error if keyId not found even after refreshing cache', async () => {
+    mockAxios.get.mockResolvedValue({ data: MOCK_JWKS_RESPONSE })
+    await initJwks({ url: MOCK_JWKS_URL })
+    await expect(
+      getSigningPublicKeysFromJwks('nonexistent-key-id')
+    ).rejects.toThrow('Key with kid="nonexistent-key-id" not found in JWKS')
   })
 
   it('should throw error on network failure', async () => {

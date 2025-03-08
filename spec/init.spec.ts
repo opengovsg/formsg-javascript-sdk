@@ -31,7 +31,9 @@ describe('FormSG SDK', () => {
     it('should correctly assign given webhook signing key', async () => {
       const mockSecretKey = 'mock secret key'
       const sdk = await formsg({
-        webhookSecretKey: mockSecretKey,
+        webhookOptions: {
+          secretKey: mockSecretKey,
+        },
       })
 
       expect(sdk.webhooks.secretKey).toEqual(mockSecretKey)

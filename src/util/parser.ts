@@ -8,6 +8,8 @@ export type HeaderSignature = {
   s: string
   // The form ID, usually the MongoDB form ObjectId
   f: string
+  // The public key ID used for signing, optional
+  kid?: string
 }
 
 // The constituents of the verification signature
@@ -22,6 +24,8 @@ export type VerificationSignature = {
   s: string
   // The form ID, usually the MongoDB form ObjectId
   f: string
+  // The public key ID used for signing, optional
+  kid?: string
 }
 
 /**

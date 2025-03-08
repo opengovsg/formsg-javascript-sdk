@@ -34,10 +34,17 @@ export type JwksConfig = {
 }
 
 export type PackageInitParams = {
-  /** base64 secret key for signing webhooks. If provided, enables generating signature and headers to authenticate webhook data. */
-  webhookSecretKey?: string
+  webhookOptions?: {
+    /** base64 secret key for signing webhooks. If provided, enables generating signature and headers to authenticate webhook data. */
+    secretKey?: string
+    publicKey?: string
+  }
   /** If provided, enables the usage of the verification module. */
-  verificationOptions?: VerificationOptions
+  verificationOptions?: {
+    publicKey?: string
+    secretKey?: string
+    transactionExpiry?: number
+  }
   /** Initializes public key used for verifying and decrypting in this package. If not given, will default to "production". */
   mode?: PackageMode
   /** JWKS configuration */
@@ -167,7 +174,7 @@ export type Keypair = {
 export type PackageMode = 'staging' | 'production' | 'development' | 'test'
 
 export type VerificationOptions = {
-  getVerificationPublicKeys?: () => Promise<string[]>
+  getVerificationPublicKeys?: (keyId?: string) => Promise<string[]>
   secretKey?: string
   transactionExpiry?: number
 }
@@ -182,6 +189,7 @@ export type VerifiedAnswer = {
 export type VerificationSignatureOptions = VerifiedAnswer & {
   transactionId: string
   formId: string
+  keyId?: string
 }
 
 // Creating a basestring requires the epoch in addition to signature requirements

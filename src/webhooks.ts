@@ -6,14 +6,14 @@ import { hasEpochExpired, isSignatureHeaderValid } from './util/webhooks'
 import { MissingSecretKeyError, WebhookAuthenticateError } from './errors'
 
 export default class Webhooks {
-  getPublicKeys: () => Promise<string[]>
+  getPublicKeys: (keyId?: string) => Promise<string[]>
   secretKey?: string
 
   constructor({
     getPublicKeys,
     secretKey,
   }: {
-    getPublicKeys: () => Promise<string[]>
+    getPublicKeys: (keyId?: string) => Promise<string[]>
     secretKey?: string
   }) {
     this.getPublicKeys = getPublicKeys
@@ -35,12 +35,13 @@ export default class Webhooks {
       t: epoch,
       s: submissionId,
       f: formId,
+      kid: keyId,
     } = signatureHeader
 
-    // Get fresh public keys on each signature verification
-    const publicKeys = await this.getPublicKeys()
+    // Get fresh public keys on each signature verification, and try to get keyId if provided
+    const publicKeys = await this.getPublicKeys(keyId)
 
-    // Try each public key until one works or all fail
+    // If keyId isn't provided. Try each public key until one works or all fail
     for (const publicKey of publicKeys) {
       if (isSignatureHeaderValid(uri, signatureHeader, publicKey)) {
         if (!hasEpochExpired(epoch)) {
@@ -110,16 +111,23 @@ export default class Webhooks {
     submissionId,
     formId,
     signature,
+    keyId,
   }: {
     epoch: number
     submissionId: string
     formId: string
     signature: string
+    keyId?: string
   }) => {
     if (!this.secretKey) {
       throw new MissingSecretKeyError()
     }
 
-    return `t=${epoch},s=${submissionId},f=${formId},v1=${signature}`
+    const header = `t=${epoch},s=${submissionId},f=${formId},v1=${signature}`
+    if (keyId) {
+      return `${header},kid=${keyId}`
+    }
+
+    return header
   }
 }

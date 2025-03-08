@@ -36,7 +36,7 @@ describe('jwks retries', () => {
 
     const result = await getSigningPublicKeysFromJwks()
 
-    expect(result).toStrictEqual(['abc+123/test'])
+    expect(result).toStrictEqual(['abc+123/test', 'abc+789/test'])
     expect(nock.isDone()).toBe(true)
   })
 

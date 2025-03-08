@@ -44,9 +44,20 @@ const base64UrlToBase64 = (base64url: string): string => {
   return converted
 }
 
-const findKeysByUse = (jwks: JwksResponse, use: 'sig' | 'verify'): string[] => {
-  const keys = jwks.keys.filter((k) => k.use === use)
+const findKeysByUse = (
+  jwks: JwksResponse,
+  use: 'sig' | 'verify',
+  keyId?: string
+): string[] => {
+  if (keyId) {
+    const key = jwks.keys.find((k) => k.kid === keyId)
+    if (!key) {
+      throw new Error(`Key with kid="${keyId}" not found in JWKS`)
+    }
+    return [base64UrlToBase64(key.x)]
+  }
 
+  const keys = jwks.keys.filter((k) => k.use === use)
   if (keys.length === 0) {
     throw new Error(`No keys with use="${use}" found in JWKS`)
   }
@@ -56,11 +67,14 @@ const findKeysByUse = (jwks: JwksResponse, use: 'sig' | 'verify'): string[] => {
   return keys.map((k) => base64UrlToBase64(k.x))
 }
 
-const getJwks = async (): Promise<JwksResponse> => {
+const getJwks = async (getJwksOptions?: {
+  forceCacheRefresh?: boolean
+}): Promise<JwksResponse> => {
   if (!jwksConfig) throw new Error('JWKS not initialized')
 
+  const forceCacheRefresh = getJwksOptions?.forceCacheRefresh ?? false
   const cached = jwksCache?.get()
-  if (cached) return cached
+  if (cached && !forceCacheRefresh) return cached
 
   if (!jwksCache) {
     jwksCache = new Cache(
@@ -116,14 +130,36 @@ export const initJwks = async (config: JwksConfig): Promise<void> => {
   }
 }
 
-export const getSigningPublicKeysFromJwks = async (): Promise<string[]> => {
-  const jwks = await getJwks()
-  return findKeysByUse(jwks, 'sig')
+export const getSigningPublicKeysFromJwks = async (
+  keyId?: string
+): Promise<string[]> => {
+  try {
+    const jwks = await getJwks()
+    return findKeysByUse(jwks, 'sig', keyId)
+  } catch (error) {
+    if (keyId) {
+      // force a cache refresh and try again in case of stale cache
+      const refreshedJwks = await getJwks({ forceCacheRefresh: true })
+      return findKeysByUse(refreshedJwks, 'sig', keyId)
+    }
+
+    throw error
+  }
 }
 
-export const getVerificationPublicKeysFromJwks = async (): Promise<
-  string[]
-> => {
-  const jwks = await getJwks()
-  return findKeysByUse(jwks, 'verify')
+export const getVerificationPublicKeysFromJwks = async (
+  keyId?: string
+): Promise<string[]> => {
+  try {
+    const jwks = await getJwks()
+    return findKeysByUse(jwks, 'verify', keyId)
+  } catch (error) {
+    if (keyId) {
+      // force a cache refresh and try again in case of stale cache
+      const refreshedJwks = await getJwks({ forceCacheRefresh: true })
+      return findKeysByUse(refreshedJwks, 'verify', keyId)
+    }
+
+    throw error
+  }
 }
