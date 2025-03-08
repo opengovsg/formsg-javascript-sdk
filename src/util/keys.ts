@@ -7,12 +7,17 @@ import {
 } from './jwks'
 import { getSigningPublicKey, getVerificationPublicKey } from './publicKey'
 
-export const getPublicKeys = async (
-  jwks?: JwksConfig,
-  webhookPublicKey?: string,
-  verificationPublicKey?: string,
+export const getPublicKeys = async ({
+  jwks,
+  webhookPublicKey,
+  verificationPublicKey,
+  mode,
+}: {
+  jwks?: JwksConfig
+  webhookPublicKey?: string
+  verificationPublicKey?: string
   mode?: PackageMode
-): Promise<{
+}): Promise<{
   signingPublicKeys: (keyId?: string) => Promise<string[]>
   verificationPublicKeys: (keyId?: string) => Promise<string[]>
 }> => {

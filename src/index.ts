@@ -29,12 +29,12 @@ export = async function (config: PackageInitParams = {}): Promise<{
    *
    * Both keys are fetched from the JWKS endpoint if provided, else they are fetched from the static public keys.
    */
-  const keyGetters = await getPublicKeys(
+  const keyGetters = await getPublicKeys({
     jwks,
-    webhookOptions?.publicKey,
-    verificationOptions?.publicKey,
-    mode
-  )
+    webhookPublicKey: webhookOptions?.publicKey,
+    verificationPublicKey: verificationOptions?.publicKey,
+    mode,
+  })
 
   return {
     webhooks: new Webhooks({
