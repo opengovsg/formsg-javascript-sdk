@@ -56,10 +56,19 @@ The key is encoded in base64url format as per the JWKS specification. This encod
 
 So a base64 key such as
 ```
+Tl5gfszlKcQj99/0uafLwVpT6JAu4C0dHGvLq1cHzFE=
 ```
 
 In base64url it would be
 ```
+Tl5gfszlKcQj99_0uafLwVpT6JAu4C0dHGvLq1cHzFE
+```
+
+Notice the difference
+```
+```diff
+- Tl5gfszlKcQj99/0uafLwVpT6JAu4C0dHGvLq1cHzFE=
++ Tl5gfszlKcQj99_0uafLwVpT6JAu4C0dHGvLq1cHzFE
 ```
 
 #### What happens during key rotation?
@@ -91,6 +100,7 @@ const formsg = new FormSgSdk({
   mode: 'production',
   ...
 })
+todo...
 ```
 
 #### What happens during a key rotation?
@@ -98,16 +108,31 @@ When using custom keys, the SDK instance does not automatically update when keys
 
 ### Hardcoded FormSG keys
 
-### Key Fetching Fallback Order
-Cache -> JWKS (if provided) -> Injected static custom keys (if provided) -> Hardcoded keys
-The hardcoded keys will slowly be phased out in the future, since 1.0.0 is not in pilot yet.
+### Key Resolution Strategy
+The SDK follows a hierarchical approach to resolving keys:
+
+1. **In-memory Cache**: First checks for cached keys to minimize network requests
+2. **JWKS Endpoint**: If cache misses or verification fails, fetches fresh keys from the JWKS endpoint (when configured)
+3. **Custom Injected Keys**: Falls back to keys provided during SDK initialization (if available)
+4. **Hardcoded Keys**: As a final fallback, uses built-in keys (these will be deprecated in future versions)
+
+This strategy ensures maximum reliability while transitioning to the new key management system. Note that hardcoded keys will be gradually phased out once version 1.0.0 is fully adopted.
 
 ## Method Changes
-### Sync
-table
 
-### Async
-table
+| 0.x.x | 1.0.0 | Notes |
+|-------|-------|-------|
+| `some.method.before (sync)` | `some.method.after (async)` | The method is now part of the webhook verifier class |
 
 ## Example Migrations
-some code
+```typescript
+// 0.x.x
+const { FormSgSdk } = require('@opengovsg/formsg-sdk')
+const formsg = FormSgSdk()
+todo...
+
+// 1.0.0
+const { FormSgSdk } = require('@opengovsg/formsg-sdk')
+const formsg = new FormSgSdk()
+todo...
+```
