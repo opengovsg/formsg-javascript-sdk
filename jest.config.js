@@ -10,4 +10,5 @@ module.exports = {
       functions: 80,
     },
   },
+  workerIdleMemoryLimit: '512MB',
 }

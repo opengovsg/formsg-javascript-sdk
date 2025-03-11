@@ -9,9 +9,9 @@
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "scripts": {
-    "test": "NODE_OPTIONS=\"--max-old-space-size=8192\" jest",
-    "test-ci": "jest --coverage",
-    "test-watch": "jest --watch",
+    "test": "jest --logHeapUsage",
+    "test-ci": "jest --coverage --logHeapUsage",
+    "test-watch": "jest --watch --logHeapUsage",
     "build": "tsc",
     "prepare": "npm run build",
     "version": "auto-changelog -p && git add CHANGELOG.md"
