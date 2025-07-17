@@ -32,6 +32,7 @@ export type FieldType =
   | 'uen'
   | 'children'
   | 'address'
+  | 'signature'
 
 // Represents form field responses in a form.
 export type FormField = {
