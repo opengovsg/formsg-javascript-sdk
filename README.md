@@ -1,6 +1,5 @@
 _Please note that this is an SDK for webhooks integration, and_ **_not_** _the FormSG system._
 
-[![Build Status](https://travis-ci.com/opengovsg/formsg-javascript-sdk.svg?branch=master)](https://travis-ci.com/opengovsg/formsg-javascript-sdk)
 [![Coverage Status](https://coveralls.io/repos/github/opengovsg/formsg-javascript-sdk/badge.svg?branch=master)](https://coveralls.io/github/opengovsg/formsg-javascript-sdk?branch=master)
 
 # FormSG Javascript SDK
