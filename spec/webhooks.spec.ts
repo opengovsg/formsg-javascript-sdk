@@ -11,12 +11,12 @@ describe('Webhooks', () => {
   const formId = 'someFormId'
 
   const webhooks = new Webhooks({
-    publicKey: webhooksPublicKey,
+    getPublicKeys: () => Promise.resolve([webhooksPublicKey]),
     secretKey: signingSecretKey,
   })
 
   const webhooksNoSecret = new Webhooks({
-    publicKey: webhooksPublicKey,
+    getPublicKeys: () => Promise.resolve([webhooksPublicKey]),
   })
 
   /**
@@ -34,12 +34,17 @@ describe('Webhooks', () => {
   /**
    * Helper method to construct a test header.
    */
-  const constructTestHeader = (epoch: number, signature: string) => {
+  const constructTestHeader = (
+    epoch: number,
+    signature: string,
+    keyId?: string
+  ) => {
     return webhooks.constructHeader({
       epoch,
       submissionId,
       formId,
       signature,
+      keyId,
     })
   }
 
@@ -57,33 +62,43 @@ describe('Webhooks', () => {
     )
   })
 
-  it('should authenticate a signature that was recently generated', () => {
+  it('should include kid in X-FormSG-Signature header if keyId is given', () => {
+    const epoch = 1583136171649
+    const signature = 'some-signature'
+    const header = constructTestHeader(epoch, signature, 'some-new-key-id')
+
+    expect(header).toBe(
+      `t=1583136171649,s=someSubmissionId,f=someFormId,v1=some-signature,kid=some-new-key-id`
+    )
+  })
+
+  it('should authenticate a signature that was recently generated', async () => {
     const epoch = Date.now()
     const signature = generateTestSignature(epoch)
     const header = constructTestHeader(epoch, signature)
 
-    const authentiateResult = webhooks.authenticate(header, uri)
-    expect(authentiateResult).toBe(true)
+    const authenticateResult = await webhooks.authenticate(header, uri)
+    expect(authenticateResult).toBe(true)
   })
 
-  it('should reject signatures generated more than 5 minutes ago', () => {
+  it('should reject signatures generated more than 5 minutes ago', async () => {
     const epoch = Date.now() - 5 * 60 * 1000 - 1
     const signature = generateTestSignature(epoch)
     const header = constructTestHeader(epoch, signature)
 
-    expect(() => webhooks.authenticate(header, uri)).toThrow(
+    await expect(webhooks.authenticate(header, uri)).rejects.toThrow(
       WebhookAuthenticateError
     )
   })
 
-  it('should reject invalid signature headers', () => {
+  it('should reject invalid signature headers', async () => {
     const invalidHeader = 'invalidHeader'
-    expect(() => webhooks.authenticate(invalidHeader, uri)).toThrow(
+    await expect(webhooks.authenticate(invalidHeader, uri)).rejects.toThrow(
       WebhookAuthenticateError
     )
   })
 
-  it('should reject if signature header cannot be verified', () => {
+  it('should reject if signature header cannot be verified', async () => {
     // Create valid header
     const epoch = Date.now()
     const signature = generateTestSignature(epoch)
@@ -91,10 +106,11 @@ describe('Webhooks', () => {
 
     // Create a new Webhook class with a different publicKey
     const webhooksAlt = new Webhooks({
-      publicKey: 'ReObXacwevg7CaNtg5QwvtW32S0V6md15up4szRdWUY=',
+      getPublicKeys: () =>
+        Promise.resolve(['ReObXacwevg7CaNtg5QwvtW32S0V6md15up4szRdWUY=']),
     })
 
-    expect(() => webhooksAlt.authenticate(header, uri)).toThrow(
+    await expect(webhooksAlt.authenticate(header, uri)).rejects.toThrow(
       WebhookAuthenticateError
     )
   })
@@ -176,7 +192,7 @@ describe('Webhooks', () => {
     ).toThrow(MissingSecretKeyError)
   })
 
-  it('should reject signatures generated more than 5 minutes ago', () => {
+  it('should reject signatures generated more than 5 minutes ago', async () => {
     const epoch = Date.now() - 5 * 60 * 1000 - 1 // 5min 1s into the past
     const signature = webhooks.generateSignature({
       uri,
@@ -191,10 +207,10 @@ describe('Webhooks', () => {
       signature,
     }) as string
 
-    expect(() => webhooks.authenticate(header, uri)).toThrow()
+    await expect(webhooks.authenticate(header, uri)).rejects.toThrow()
   })
 
-  it('should accept signatures generated within 5 minutes', () => {
+  it('should accept signatures generated within 5 minutes', async () => {
     const epoch = Date.now() - 5 * 60 * 1000 + 1000 // 4min 59s into the past
     const signature = webhooks.generateSignature({
       uri,
@@ -209,10 +225,10 @@ describe('Webhooks', () => {
       signature,
     }) as string
 
-    expect(() => webhooks.authenticate(header, uri)).not.toThrow()
+    await expect(webhooks.authenticate(header, uri)).resolves.not.toThrow()
   })
 
-  it('should authenticate signatures if Form server drifts 4m59s into the future', () => {
+  it('should authenticate signatures if Form server drifts 4m59s into the future', async () => {
     const epoch = Date.now() + 5 * 60 * 1000 - 1000 // 4min 59s into the future
     const signature = webhooks.generateSignature({
       uri,
@@ -227,10 +243,10 @@ describe('Webhooks', () => {
       signature,
     }) as string
 
-    expect(() => webhooks.authenticate(header, uri)).not.toThrow()
+    await expect(webhooks.authenticate(header, uri)).resolves.not.toThrow()
   })
 
-  it('should reject signatures if Form server drifts 5m1s into the future', () => {
+  it('should reject signatures if Form server drifts 5m1s into the future', async () => {
     const epoch = Date.now() + 5 * 60 * 1000 + 1000 // 5min 1s into the future
     const signature = webhooks.generateSignature({
       uri,
@@ -245,6 +261,6 @@ describe('Webhooks', () => {
       signature,
     }) as string
 
-    expect(() => webhooks.authenticate(header, uri)).toThrow()
+    await expect(webhooks.authenticate(header, uri)).rejects.toThrow()
   })
 })

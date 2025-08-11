@@ -1,4 +1,4 @@
-import { getSigningPublicKey, getVerificationPublicKey } from './util/publicKey'
+import { getPublicKeys } from './util/keys'
 import Crypto from './crypto'
 import CryptoV3 from './crypto-v3'
 import { PackageInitParams } from './types'
@@ -13,27 +13,40 @@ import Webhooks from './webhooks'
  * @param {string?} [config.webhookSecretKey] Optional. base64 secret key for signing webhooks. If provided, enables generating signature and headers to authenticate webhook data.
  * @param {VerificationOptions?} [config.verificationOptions] Optional. If provided, enables the usage of the verification module.
  */
-export = function (config: PackageInitParams = {}) {
-  const { webhookSecretKey, mode, verificationOptions } = config
+export = async function (config: PackageInitParams = {}): Promise<{
+  webhooks: Webhooks
+  crypto: Crypto
+  cryptoV3: CryptoV3
+  verification: Verification
+}> {
+  const { webhookOptions, verificationOptions, jwks, mode } = config
+
   /**
-   * Public key is used for decrypting signed verified content in the `crypto` module, and
+   * signingPublicKey is used for decrypting signed verified content in the `crypto` module, and
    * also for verifying webhook signatures' authenticity in the `wehbooks` module.
+   *
+   * verificationPublicKey is used for verifying verified field signatures' authenticity in the `verification` module.
+   *
+   * Both keys are fetched from the JWKS endpoint if provided, else they are fetched from the static public keys.
    */
-  const signingPublicKey = getSigningPublicKey(mode || 'production')
-  /**
-   * Public key is used for verifying verified field signatures' authenticity in the `verification` module.
-   */
-  const verificationPublicKey = getVerificationPublicKey(mode || 'production')
+  const keyGetters = await getPublicKeys({
+    jwks,
+    webhookPublicKey: webhookOptions?.publicKey,
+    verificationPublicKey: verificationOptions?.publicKey,
+    mode,
+  })
 
   return {
     webhooks: new Webhooks({
-      publicKey: signingPublicKey,
-      secretKey: webhookSecretKey,
+      getPublicKeys: keyGetters.signingPublicKeys,
+      secretKey: webhookOptions?.secretKey,
     }),
-    crypto: new Crypto({ signingPublicKey }),
+    crypto: new Crypto({
+      getSigningPublicKeys: keyGetters.signingPublicKeys,
+    }),
     cryptoV3: new CryptoV3(),
     verification: new Verification({
-      publicKey: verificationPublicKey,
+      getVerificationPublicKeys: keyGetters.verificationPublicKeys,
       secretKey: verificationOptions?.secretKey,
       transactionExpiry: verificationOptions?.transactionExpiry,
     }),

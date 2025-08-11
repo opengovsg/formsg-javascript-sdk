@@ -6,17 +6,17 @@ import { hasEpochExpired, isSignatureHeaderValid } from './util/webhooks'
 import { MissingSecretKeyError, WebhookAuthenticateError } from './errors'
 
 export default class Webhooks {
-  publicKey: string
+  getPublicKeys: (keyId?: string) => Promise<string[]>
   secretKey?: string
 
   constructor({
-    publicKey,
+    getPublicKeys,
     secretKey,
   }: {
-    publicKey: string
+    getPublicKeys: (keyId?: string) => Promise<string[]>
     secretKey?: string
   }) {
-    this.publicKey = publicKey
+    this.getPublicKeys = getPublicKeys
     this.secretKey = secretKey
   }
 
@@ -27,7 +27,7 @@ export default class Webhooks {
    * @returns true if the header is verified
    * @throws {WebhookAuthenticateError} If the signature or uri cannot be verified
    */
-  authenticate = (header: string, uri: string) => {
+  authenticate = async (header: string, uri: string) => {
     // Parse the header
     const signatureHeader = parseSignatureHeader(header)
     const {
@@ -35,24 +35,28 @@ export default class Webhooks {
       t: epoch,
       s: submissionId,
       f: formId,
+      kid: keyId,
     } = signatureHeader
 
-    // Verify signature authenticity
-    if (!isSignatureHeaderValid(uri, signatureHeader, this.publicKey)) {
-      throw new WebhookAuthenticateError(
-        `Signature could not be verified for uri=${uri} submissionId=${submissionId} formId=${formId} epoch=${epoch} signature=${signature}`
-      )
+    // Get fresh public keys on each signature verification, and try to get keyId if provided
+    const publicKeys = await this.getPublicKeys(keyId)
+
+    // If keyId isn't provided. Try each public key until one works or all fail
+    for (const publicKey of publicKeys) {
+      if (isSignatureHeaderValid(uri, signatureHeader, publicKey)) {
+        if (!hasEpochExpired(epoch)) {
+          return true
+        }
+        // If epoch expired, no need to try other keys
+        throw new WebhookAuthenticateError(
+          `Signature is not recent for uri=${uri} submissionId=${submissionId} formId=${formId} epoch=${epoch} signature=${signature}`
+        )
+      }
     }
 
-    // Verify epoch recency
-    if (hasEpochExpired(epoch)) {
-      throw new WebhookAuthenticateError(
-        `Signature is not recent for uri=${uri} submissionId=${submissionId} formId=${formId} epoch=${epoch} signature=${signature}`
-      )
-    }
-
-    // All checks pass.
-    return true
+    throw new WebhookAuthenticateError(
+      `Signature could not be verified for uri=${uri} submissionId=${submissionId} formId=${formId} epoch=${epoch} signature=${signature}`
+    )
   }
 
   /**
@@ -107,16 +111,23 @@ export default class Webhooks {
     submissionId,
     formId,
     signature,
+    keyId,
   }: {
     epoch: number
     submissionId: string
     formId: string
     signature: string
+    keyId?: string
   }) => {
     if (!this.secretKey) {
       throw new MissingSecretKeyError()
     }
 
-    return `t=${epoch},s=${submissionId},f=${formId},v1=${signature}`
+    const header = `t=${epoch},s=${submissionId},f=${formId},v1=${signature}`
+    if (keyId) {
+      return `${header},kid=${keyId}`
+    }
+
+    return header
   }
 }

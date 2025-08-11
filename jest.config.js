@@ -1,5 +1,5 @@
 module.exports = {
-  transform: { '^.+\\.ts?$': 'ts-jest' },
+  transform: { '^.+\\.ts?$': '@swc/jest' },
   testEnvironment: 'node',
   testRegex: '/spec/.*\\.(test|spec)?\\.(ts|tsx)$',
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
@@ -10,4 +10,5 @@ module.exports = {
       functions: 80,
     },
   },
+  workerIdleMemoryLimit: '512MB',
 }

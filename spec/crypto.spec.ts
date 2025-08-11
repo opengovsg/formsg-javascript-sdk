@@ -2,9 +2,7 @@ import mockAxios from 'jest-mock-axios'
 import Crypto from '../src/crypto'
 import { SIGNING_KEYS } from '../src/resource/signing-keys'
 
-import {
-  encodeBase64,
-} from 'tweetnacl-util'
+import { encodeBase64 } from 'tweetnacl-util'
 
 import {
   plaintext,
@@ -27,7 +25,9 @@ jest.mock('axios', () => mockAxios)
 describe('Crypto', function () {
   afterEach(() => mockAxios.reset())
 
-  const crypto = new Crypto({ signingPublicKey: encryptionPublicKey })
+  const crypto = new Crypto({
+    getSigningPublicKeys: () => Promise.resolve([encryptionPublicKey]),
+  })
 
   const mockVerifiedContent = {
     uinFin: 'S12345679Z',
@@ -40,27 +40,27 @@ describe('Crypto', function () {
     expect(keypair).toHaveProperty('publicKey')
   })
 
-  it('should generate a keypair that is valid', () => {
+  it('should generate a keypair that is valid', async () => {
     const { publicKey, secretKey } = crypto.generate()
-    expect(crypto.valid(publicKey, secretKey)).toBe(true)
+    expect(await crypto.valid(publicKey, secretKey)).toBe(true)
   })
 
-  it('should validate an existing keypair', () => {
-    expect(crypto.valid(formPublicKey, formSecretKey)).toBe(true)
+  it('should validate an existing keypair', async () => {
+    expect(await crypto.valid(formPublicKey, formSecretKey)).toBe(true)
   })
 
-  it('should invalidate unassociated keypairs', () => {
+  it('should invalidate unassociated keypairs', async () => {
     // Act
     const { secretKey } = crypto.generate()
     const { publicKey } = crypto.generate()
 
     // Assert
-    expect(crypto.valid(publicKey, secretKey)).toBe(false)
+    expect(await crypto.valid(publicKey, secretKey)).toBe(false)
   })
 
-  it('should decrypt the submission ciphertext from 2020-03-22 successfully', () => {
+  it('should decrypt the submission ciphertext from 2020-03-22 successfully', async () => {
     // Act
-    const decrypted = crypto.decrypt(formSecretKey, {
+    const decrypted = await crypto.decrypt(formSecretKey, {
       encryptedContent: ciphertext,
       version: INTERNAL_TEST_VERSION,
     })
@@ -69,16 +69,16 @@ describe('Crypto', function () {
     expect(decrypted).toHaveProperty('responses', plaintext)
   })
 
-  it('should return null on unsuccessful decryption', () => {
+  it('should return null on unsuccessful decryption', async () => {
     expect(
-      crypto.decrypt('random', {
+      await crypto.decrypt('random', {
         encryptedContent: ciphertext,
         version: INTERNAL_TEST_VERSION,
       })
     ).toBe(null)
   })
 
-  it('should return null when successfully decrypted content does not fit FormField type shape', () => {
+  it('should return null when successfully decrypted content does not fit FormField type shape', async () => {
     // Arrange
     const { publicKey, secretKey } = crypto.generate()
     const malformedContent = 'just a string, not an object with FormField shape'
@@ -88,20 +88,20 @@ describe('Crypto', function () {
     // Using correct secret key, but the decrypted object should not fit the
     // expected shape and thus return null.
     expect(
-      crypto.decrypt(secretKey, {
+      await crypto.decrypt(secretKey, {
         encryptedContent: malformedEncrypt,
         version: INTERNAL_TEST_VERSION,
       })
     ).toBe(null)
   })
 
-  it('should be able to encrypt and decrypt submissions from 2020-03-22 end-to-end successfully', () => {
+  it('should be able to encrypt and decrypt submissions from 2020-03-22 end-to-end successfully', async () => {
     // Arrange
     const { publicKey, secretKey } = crypto.generate()
 
     // Act
     const ciphertext = crypto.encrypt(plaintext, publicKey)
-    const decrypted = crypto.decrypt(secretKey, {
+    const decrypted = await crypto.decrypt(secretKey, {
       encryptedContent: ciphertext,
       version: INTERNAL_TEST_VERSION,
     })
@@ -109,13 +109,13 @@ describe('Crypto', function () {
     expect(decrypted).toHaveProperty('responses', plaintext)
   })
 
-  it('should be able to encrypt and decrypt multi-language submission from 2020-06-04 end-to-end successfully', () => {
+  it('should be able to encrypt and decrypt multi-language submission from 2020-06-04 end-to-end successfully', async () => {
     // Arrange
     const { publicKey, secretKey } = crypto.generate()
 
     // Act
     const ciphertext = crypto.encrypt(plaintextMultiLang, publicKey)
-    const decrypted = crypto.decrypt(secretKey, {
+    const decrypted = await crypto.decrypt(secretKey, {
       encryptedContent: ciphertext,
       version: INTERNAL_TEST_VERSION,
     })
@@ -123,29 +123,29 @@ describe('Crypto', function () {
     expect(decrypted).toHaveProperty('responses', plaintextMultiLang)
   })
 
-  it('should be able to encrypt and decrypt submissions with empty field titles from 2022-11-14 end-to-end successfully', () => {
+  it('should be able to encrypt and decrypt submissions with empty field titles from 2022-11-14 end-to-end successfully', async () => {
     // Arrange
     const { publicKey, secretKey } = crypto.generate()
 
     // Act
     const ciphertext = crypto.encrypt(plaintextEmptyTitles, publicKey)
-    const decrypted = crypto.decrypt(secretKey, {
+    const decrypted = await crypto.decrypt(secretKey, {
       encryptedContent: ciphertext,
       version: INTERNAL_TEST_VERSION,
     })
-    
+
     // Assert
     expect(decrypted).toHaveProperty('responses', plaintextEmptyTitles)
   })
 
-  it('should be able to encrypt submissions without signing if signingPrivateKey is missing', () => {
+  it('should be able to encrypt submissions without signing if signingPrivateKey is missing', async () => {
     // Arrange
     const { publicKey, secretKey } = crypto.generate()
 
     // Act
     // Signing key (last parameter) is omitted.
     const ciphertext = crypto.encrypt(plaintext, publicKey)
-    const decrypted = crypto.decrypt(secretKey, {
+    const decrypted = await crypto.decrypt(secretKey, {
       encryptedContent: ciphertext,
       version: INTERNAL_TEST_VERSION,
     })
@@ -154,7 +154,7 @@ describe('Crypto', function () {
     expect(decrypted).toHaveProperty('responses', plaintext)
   })
 
-  it('should be able to encrypt and sign submissions if signingPrivateKey is given', () => {
+  it('should be able to encrypt and sign submissions if signingPrivateKey is given', async () => {
     // Arrange
     const { publicKey, secretKey } = crypto.generate()
 
@@ -168,7 +168,7 @@ describe('Crypto', function () {
       signingSecretKey
     )
     // Decrypt encrypted content along with our signed+encrypted content.
-    const decrypted = crypto.decrypt(secretKey, {
+    const decrypted = await crypto.decrypt(secretKey, {
       encryptedContent: ciphertext,
       verifiedContent: signedAndEncryptedText,
       version: INTERNAL_TEST_VERSION,
@@ -213,7 +213,7 @@ describe('Crypto', function () {
     expect(decrypted).toBeNull()
   })
 
-  it('should throw error if class was not instantiated with a public signing key while verifying decrypted content ', () => {
+  it('should throw error if class was not instantiated with a public signing key while verifying decrypted content ', async () => {
     // Arrange
     const cryptoNoKey = new Crypto()
     const { publicKey, secretKey } = cryptoNoKey.generate()
@@ -231,16 +231,16 @@ describe('Crypto', function () {
     // Assert
     // Attempt to decrypt encrypted content along with our signed+encrypted
     // content should throw an error
-    expect(() =>
+    await expect(
       cryptoNoKey.decrypt(secretKey, {
         encryptedContent: ciphertext,
         verifiedContent: signedAndEncryptedText,
         version: INTERNAL_TEST_VERSION,
       })
-    ).toThrow(MissingPublicKeyError)
+    ).rejects.toThrow(MissingPublicKeyError)
   })
 
-  it('should return null if decrypting encrypted verified content failed', () => {
+  it('should return null if decrypting encrypted verified content failed', async () => {
     // Arrange
     const { publicKey, secretKey } = crypto.generate()
     // Encrypt content that is not signed.
@@ -249,7 +249,7 @@ describe('Crypto', function () {
     const rubbishVerifiedContent = 'abcdefg'
 
     // Act + Assert
-    const decryptResult = crypto.decrypt(secretKey, {
+    const decryptResult = await crypto.decrypt(secretKey, {
       encryptedContent: ciphertext,
       verifiedContent: rubbishVerifiedContent,
       version: INTERNAL_TEST_VERSION,
@@ -277,22 +277,31 @@ describe('Crypto', function () {
     const uploadedFile = {
       submissionPublicKey: encryptedFile.submissionPublicKey,
       nonce: encryptedFile.nonce,
-      binary: encodeBase64(encryptedFile.binary)
+      binary: encodeBase64(encryptedFile.binary),
     }
 
     // Act
     const decryptedFilesPromise = crypto.decryptWithAttachments(secretKey, {
       encryptedContent: ciphertext,
-      attachmentDownloadUrls: { '6e771c946b3c5100240368e5': 'https://some.s3.url/some/encrypted/file' },
+      attachmentDownloadUrls: {
+        '6e771c946b3c5100240368e5': 'https://some.s3.url/some/encrypted/file',
+      },
       version: INTERNAL_TEST_VERSION,
     })
-    mockAxios.mockResponse({ data: { encryptedFile: uploadedFile }})
+    await Promise.resolve() // Wait for the request to be initiated
+    mockAxios.mockResponse({ data: { encryptedFile: uploadedFile } })
     const decryptedContentWithAttachments = await decryptedFilesPromise
     const decryptedFiles = decryptedContentWithAttachments!.attachments
 
     // Assert
-    expect(mockAxios.get).toHaveBeenCalledWith('https://some.s3.url/some/encrypted/file', { responseType: 'json' })
-    expect(decryptedFiles).toHaveProperty('6e771c946b3c5100240368e5', { filename: 'my-random-file.txt', content: testFileBuffer })
+    expect(mockAxios.get).toHaveBeenCalledWith(
+      'https://some.s3.url/some/encrypted/file',
+      { responseType: 'json' }
+    )
+    expect(decryptedFiles).toHaveProperty('6e771c946b3c5100240368e5', {
+      filename: 'my-random-file.txt',
+      content: testFileBuffer,
+    })
   })
 
   it('should be able to handle fields without attachmentDownloadUrls', async () => {
@@ -303,10 +312,13 @@ describe('Crypto', function () {
     const ciphertext = crypto.encrypt(plaintext, publicKey)
 
     // Act
-    const decryptedContentWithAttachments = await crypto.decryptWithAttachments(secretKey, {
-      encryptedContent: ciphertext,
-      version: INTERNAL_TEST_VERSION,
-    })
+    const decryptedContentWithAttachments = await crypto.decryptWithAttachments(
+      secretKey,
+      {
+        encryptedContent: ciphertext,
+        version: INTERNAL_TEST_VERSION,
+      }
+    )
     const decryptedFiles = decryptedContentWithAttachments!.attachments
 
     // Assert
@@ -347,16 +359,19 @@ describe('Crypto', function () {
     const uploadedFile = {
       submissionPublicKey: encryptedFile.submissionPublicKey,
       nonce: encryptedFile.nonce,
-      binary: 'YmFkZW5jcnlwdGVkY29udGVudHM=',  // invalid data
+      binary: 'YmFkZW5jcnlwdGVkY29udGVudHM=', // invalid data
     }
 
     // Act
     const decryptedFilesPromise = crypto.decryptWithAttachments(secretKey, {
       encryptedContent: ciphertext,
-      attachmentDownloadUrls: { '6e771c946b3c5100240368e5': 'https://some.s3.url/some/encrypted/file' },
+      attachmentDownloadUrls: {
+        '6e771c946b3c5100240368e5': 'https://some.s3.url/some/encrypted/file',
+      },
       version: INTERNAL_TEST_VERSION,
     })
-    mockAxios.mockResponse({ data: { encryptedFile: uploadedFile }})
+    await Promise.resolve() // Let the request be initiated
+    mockAxios.mockResponse({ data: { encryptedFile: uploadedFile } })
     const decryptedContents = await decryptedFilesPromise
 
     // Assert
@@ -376,13 +391,15 @@ describe('Crypto', function () {
     const uploadedFile = {
       submissionPublicKey: encryptedFile.submissionPublicKey,
       nonce: encryptedFile.nonce,
-      binary: encodeBase64(encryptedFile.binary)
+      binary: encodeBase64(encryptedFile.binary),
     }
 
     // Act
     const decryptedFilesPromise = crypto.decryptWithAttachments(secretKey, {
       encryptedContent: ciphertext,
-      attachmentDownloadUrls: { '6e771c946b3c5100240368e5': 'https://some.s3.url/some/encrypted/file' },
+      attachmentDownloadUrls: {
+        '6e771c946b3c5100240368e5': 'https://some.s3.url/some/encrypted/file',
+      },
       version: INTERNAL_TEST_VERSION,
     })
     const decryptedContents = await decryptedFilesPromise
@@ -409,9 +426,12 @@ describe('Crypto', function () {
     // Act
     const decryptedFilesPromise = crypto.decryptWithAttachments(secretKey, {
       encryptedContent: ciphertext,
-      attachmentDownloadUrls: { '6e771c946b3c5100240368e5': 'https://some.s3.url/some/encrypted/file' },
+      attachmentDownloadUrls: {
+        '6e771c946b3c5100240368e5': 'https://some.s3.url/some/encrypted/file',
+      },
       version: INTERNAL_TEST_VERSION,
     })
+    await Promise.resolve() // Let the request be initiated
     mockAxios.mockResponse({
       data: {},
       status: 404,
@@ -420,7 +440,10 @@ describe('Crypto', function () {
     const decryptedContents = await decryptedFilesPromise
 
     // Assert
-    expect(mockAxios.get).toHaveBeenCalledWith('https://some.s3.url/some/encrypted/file', { responseType: 'json' })
+    expect(mockAxios.get).toHaveBeenCalledWith(
+      'https://some.s3.url/some/encrypted/file',
+      { responseType: 'json' }
+    )
     expect(decryptedContents).toBe(null)
   })
 })

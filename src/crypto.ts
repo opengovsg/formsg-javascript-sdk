@@ -24,11 +24,15 @@ import {
 } from './types'
 
 export default class Crypto extends CryptoBase {
-  signingPublicKey?: string
+  getSigningPublicKeys?: () => Promise<string[]>
 
-  constructor({ signingPublicKey }: { signingPublicKey?: string } = {}) {
+  constructor({
+    getSigningPublicKeys,
+  }: {
+    getSigningPublicKeys?: () => Promise<string[]>
+  } = {}) {
     super()
-    this.signingPublicKey = signingPublicKey
+    this.getSigningPublicKeys = getSigningPublicKeys
   }
 
   /**
@@ -59,13 +63,13 @@ export default class Crypto extends CryptoBase {
    * @param decryptParams.encryptedContent The encrypted content encoded with base-64.
    * @param decryptParams.version The version of the payload. Used to determine the decryption process to decrypt the content with.
    * @param decryptParams.verifiedContent Optional. The encrypted and signed verified content. If given, the signingPublicKey will be used to attempt to open the signed message.
-   * @returns The decrypted content if successful. Else, null will be returned.
-   * @throws {MissingPublicKeyError} if a public key is not provided when instantiating this class and is needed for verifying signed content.
+   * @returns A promise that resolves to the decrypted content if successful. Otherwise, resolves to null.
+   * @throws {MissingPublicKeyError} if a public key getter is not provided when instantiating this class and is needed for verifying signed content.
    */
-  decrypt = (
+  decrypt = async (
     formSecretKey: string,
     decryptParams: DecryptParams
-  ): DecryptedContent | null => {
+  ): Promise<DecryptedContent | null> => {
     try {
       const { encryptedContent, verifiedContent } = decryptParams
 
@@ -87,9 +91,17 @@ export default class Crypto extends CryptoBase {
       }
 
       if (verifiedContent) {
-        if (!this.signingPublicKey) {
+        if (!this.getSigningPublicKeys) {
           throw new MissingPublicKeyError(
-            'Public signing key must be provided when instantiating the Crypto class in order to verify verified content'
+            'Public signing key getter must be provided when instantiating the Crypto class in order to verify verified content'
+          )
+        }
+
+        // Get fresh public keys when verifying
+        const signingPublicKeys = await this.getSigningPublicKeys()
+        if (!signingPublicKeys || signingPublicKeys.length === 0) {
+          throw new MissingPublicKeyError(
+            'Public signing keys must be provided when instantiating the Crypto class in order to verify verified content'
           )
         }
         // Only care if it is the correct shape if verifiedContent exists, since
@@ -103,10 +115,27 @@ export default class Crypto extends CryptoBase {
           // Returns null if decrypting verified content failed.
           throw new Error('Failed to decrypt verified content')
         }
-        const decryptedVerifiedObject = verifySignedMessage(
-          decryptedVerifiedContent,
-          this.signingPublicKey
-        )
+
+        let decryptedVerifiedObject = null
+        for (const publicKey of signingPublicKeys) {
+          try {
+            decryptedVerifiedObject = verifySignedMessage(
+              decryptedVerifiedContent,
+              publicKey
+            )
+            if (decryptedVerifiedObject) {
+              break
+            }
+          } catch (err) {
+            continue
+          }
+        }
+
+        if (!decryptedVerifiedObject) {
+          throw new Error(
+            'Failed to verify signed content with provided public keys'
+          )
+        }
 
         returnedObject.verified = decryptedVerifiedObject
       }
@@ -127,20 +156,24 @@ export default class Crypto extends CryptoBase {
    * Returns true if a pair of public & secret keys are associated with each other
    * @param publicKey The public key to verify against.
    * @param secretKey The private key to verify against.
+   * @returns A promise that resolves to true if the keys are valid, false otherwise.
    */
-  valid = (publicKey: string, secretKey: string) => {
-    const testResponse: FormField[] = []
-    const internalValidationVersion = 1
+  valid = async (publicKey: string, secretKey: string): Promise<boolean> => {
+    try {
+      const testResponse: FormField[] = []
+      const internalValidationVersion = 1
 
-    const cipherResponse = this.encrypt(testResponse, publicKey)
-    // Use toString here since the return should be an empty array.
-    return (
-      testResponse.toString() ===
-      this.decrypt(secretKey, {
+      const cipherResponse = this.encrypt(testResponse, publicKey)
+      const decryptedResponse = await this.decrypt(secretKey, {
         encryptedContent: cipherResponse,
         version: internalValidationVersion,
-      })?.responses.toString()
-    )
+      })
+
+      // Use toString here since the return should be an empty array.
+      return decryptedResponse?.responses.toString() === testResponse.toString()
+    } catch {
+      return false
+    }
   }
 
   /**
@@ -159,7 +192,7 @@ export default class Crypto extends CryptoBase {
 
     const attachmentRecords: EncryptedAttachmentRecords =
       decryptParams.attachmentDownloadUrls ?? {}
-    const decryptedContent = this.decrypt(formSecretKey, decryptParams)
+    const decryptedContent = await this.decrypt(formSecretKey, decryptParams)
     if (decryptedContent === null) return null
 
     // Retrieve all original filenames for attachments for easy lookup

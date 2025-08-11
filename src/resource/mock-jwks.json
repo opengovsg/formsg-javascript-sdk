@@ -1,0 +1,36 @@
+{
+  "keys": [
+    {
+      "kty": "OKP",
+      "kid": "signing-webhook-key-staging-v2",
+      "use": "sig",
+      "alg": "EdDSA",
+      "crv": "Ed25519",
+      "x": "NEW_KEY_HERE_IN_BASE64"
+    },
+    {
+      "kty": "OKP",
+      "kid": "signing-webhook-key-staging-v1",
+      "use": "sig",
+      "alg": "EdDSA",
+      "crv": "Ed25519",
+      "x": "rjv41kYqZwcbe3r6ymMEEKQ-Vd-DPuogN-Gzq3lP2Og"
+    },
+    {
+      "kty": "OKP",
+      "kid": "signing-otp-key-staging-v2",
+      "use": "verify",
+      "alg": "EdDSA",
+      "crv": "Ed25519",
+      "x": "NEW_KEY_HERE_IN_BASE64"
+    },
+    {
+      "kty": "OKP",
+      "kid": "signing-otp-key-staging-v1",
+      "use": "verify",
+      "alg": "EdDSA",
+      "crv": "Ed25519",
+      "x": "bDgK1223JbrDNePFIrj7b0z02Z5nSiBzkRYRqDdVPfA"
+    }
+  ]
+}

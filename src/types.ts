@@ -1,10 +1,54 @@
+export type JwksConfig = {
+  /** URL to fetch JWKS from */
+  url: string
+  /**
+   * Duration in milliseconds to cache JWKS.
+   * @default DEFAULT_JWKS_CACHE_DURATION_MS from constants.ts
+   */
+  cacheDurationMs?: number
+  /**
+   * Whether to load JWKS during initialization.
+   * @default true
+   */
+  loadOnInit?: boolean
+  /** HTTP request configuration for JWKS fetching */
+  requestConfig?: {
+    /**
+     * Timeout in milliseconds for JWKS fetch request.
+     * @default DEFAULT_JWKS_TIMEOUT_MS from constants.ts
+     */
+    timeoutMs?: number
+    retry?: {
+      /**
+       * Maximum number of retries for JWKS fetch request.
+       * @default JWKS_MAX_RETRIES from constants.ts
+       */
+      maxRetries?: number
+      /**
+       * Initial backoff duration in milliseconds for JWKS fetch request retries.
+       * @default JWKS_INITIAL_BACKOFF_MS from constants.ts
+       */
+      initialBackoffMs?: number
+    }
+  }
+}
+
 export type PackageInitParams = {
-  /** base64 secret key for signing webhooks. If provided, enables generating signature and headers to authenticate webhook data. */
-  webhookSecretKey?: string
+  webhookOptions?: {
+    /** base64 secret key for signing webhooks. If provided, enables generating signature and headers to authenticate webhook data. */
+    secretKey?: string
+    publicKey?: string
+  }
   /** If provided, enables the usage of the verification module. */
-  verificationOptions?: VerificationOptions
+  verificationOptions?: {
+    publicKey?: string
+    secretKey?: string
+    transactionExpiry?: number
+  }
   /** Initializes public key used for verifying and decrypting in this package. If not given, will default to "production". */
   mode?: PackageMode
+  /** JWKS configuration */
+  jwks?: JwksConfig
 }
 
 // A field type available in FormSG as a string
@@ -131,7 +175,7 @@ export type Keypair = {
 export type PackageMode = 'staging' | 'production' | 'development' | 'test'
 
 export type VerificationOptions = {
-  publicKey?: string
+  getVerificationPublicKeys?: (keyId?: string) => Promise<string[]>
   secretKey?: string
   transactionExpiry?: number
 }
@@ -146,6 +190,7 @@ export type VerifiedAnswer = {
 export type VerificationSignatureOptions = VerifiedAnswer & {
   transactionId: string
   formId: string
+  keyId?: string
 }
 
 // Creating a basestring requires the epoch in addition to signature requirements

@@ -9,6 +9,7 @@
     "types": ["jest", "node"],
     "esModuleInterop": true,
     "rootDir": "src",
+    "resolveJsonModule": true,
     "lib": ["WebWorker"]
   },
   "include": ["src"],
