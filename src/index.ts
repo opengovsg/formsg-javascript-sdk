@@ -31,7 +31,7 @@ export = function (config: PackageInitParams = {}) {
       secretKey: webhookSecretKey,
     }),
     crypto: new Crypto({ signingPublicKey }),
-    cryptoV3: new CryptoV3(),
+    cryptoV3: new CryptoV3({ signingPublicKey }),
     verification: new Verification({
       publicKey: verificationPublicKey,
       secretKey: verificationOptions?.secretKey,

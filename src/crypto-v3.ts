@@ -5,9 +5,15 @@ import {
   encodeUTF8,
 } from 'tweetnacl-util'
 
-import { decryptContent, encryptMessage, generateKeypair } from './util/crypto'
+import {
+  decryptContent,
+  encryptMessage,
+  generateKeypair,
+  verifySignedMessage,
+} from './util/crypto'
 import { determineIsFormFieldsV3 } from './util/validate'
 import CryptoBase from './crypto-base'
+import { MissingPublicKeyError } from './errors'
 import {
   DecryptedContentV3,
   DecryptParams,
@@ -17,8 +23,11 @@ import {
 } from './types'
 
 export default class CryptoV3 extends CryptoBase {
-  constructor() {
+  signingPublicKey?: string
+
+  constructor({ signingPublicKey }: { signingPublicKey?: string } = {}) {
     super()
+    this.signingPublicKey = signingPublicKey
   }
 
   /**
@@ -104,7 +113,8 @@ export default class CryptoV3 extends CryptoBase {
     formSecretKey: string,
     decryptParams: DecryptParamsV3
   ): DecryptedContentV3 | null => {
-    const { encryptedSubmissionSecretKey, ...rest } = decryptParams
+    const { encryptedSubmissionSecretKey, verifiedContent, ...rest } =
+      decryptParams
 
     const submissionSecretKey = decryptContent(
       formSecretKey,
@@ -113,10 +123,45 @@ export default class CryptoV3 extends CryptoBase {
 
     if (submissionSecretKey === null) return null
 
-    return this.decryptFromSubmissionKey(
+    const decryptedContent = this.decryptFromSubmissionKey(
       encodeBase64(submissionSecretKey),
       rest
     )
+
+    if (!decryptedContent) {
+      throw new Error('Failed to decrypt content')
+    }
+
+    // testing
+    decryptedContent.verified = { something: 'random' }
+
+    if (verifiedContent) {
+      if (!this.signingPublicKey) {
+        throw new MissingPublicKeyError(
+          'Public signing key must be provided when instantiating the Crypto class in order to verify verified content'
+        )
+      }
+      // Only care if it is the correct shape if verifiedContent exists, since
+      // we need to append it to the end.
+      // Decrypted message must be able to be authenticated by the public key.
+      const decryptedVerifiedContent = decryptContent(
+        formSecretKey,
+        verifiedContent
+      )
+      if (!decryptedVerifiedContent) {
+        // Returns null if decrypting verified content failed.
+        throw new Error('Failed to decrypt verified content')
+      }
+
+      const decryptedVerifiedObject = verifySignedMessage(
+        decryptedVerifiedContent,
+        this.signingPublicKey
+      )
+
+      decryptedContent.verified = decryptedVerifiedObject
+    }
+
+    return decryptedContent
   }
 
   /**
