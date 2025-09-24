@@ -139,8 +139,7 @@ export default class CryptoV3 extends CryptoBase {
     formSecretKey: string,
     decryptParams: DecryptParamsV3
   ): DecryptedContentV3 | null => {
-    const { encryptedSubmissionSecretKey, verifiedContent, ...rest } =
-      decryptParams
+    const { encryptedSubmissionSecretKey, ...rest } = decryptParams
 
     const submissionSecretKey = decryptContent(
       formSecretKey,
