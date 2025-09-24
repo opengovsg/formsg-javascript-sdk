@@ -71,7 +71,7 @@ export default class CryptoV3 extends CryptoBase {
     decryptParams: DecryptParams
   ): DecryptedContentV3 | null => {
     try {
-      const { encryptedContent } = decryptParams
+      const { encryptedContent, verifiedContent } = decryptParams
 
       // Do not return the transformed object in `_decrypt` function as a signed
       // object is not encoded in UTF8 and is encoded in Base-64 instead.
@@ -92,6 +92,32 @@ export default class CryptoV3 extends CryptoBase {
       const returnedObject: DecryptedContentV3 = {
         submissionSecretKey,
         responses: decryptedObject as FormFieldsV3,
+      }
+
+      // decrypt verifiedContent if it exists
+      if (verifiedContent) {
+        if (!this.signingPublicKey) {
+          throw new MissingPublicKeyError(
+            'Public signing key must be provided when instantiating the Crypto class in order to verify verified content'
+          )
+        }
+
+        const decryptedVerifiedContent = decryptContent(
+          submissionSecretKey,
+          verifiedContent
+        )
+
+        if (!decryptedVerifiedContent) {
+          // Returns null if decrypting verified content failed.
+          throw new Error('Failed to decrypt verified content')
+        }
+
+        const decryptedVerifiedObject = verifySignedMessage(
+          decryptedVerifiedContent,
+          this.signingPublicKey
+        )
+
+        returnedObject.verified = decryptedVerifiedObject
       }
 
       return returnedObject
@@ -130,35 +156,6 @@ export default class CryptoV3 extends CryptoBase {
 
     if (!decryptedContent) {
       throw new Error('Failed to decrypt content')
-    }
-
-    // testing
-    decryptedContent.verified = { something: 'random' }
-
-    if (verifiedContent) {
-      if (!this.signingPublicKey) {
-        throw new MissingPublicKeyError(
-          'Public signing key must be provided when instantiating the Crypto class in order to verify verified content'
-        )
-      }
-      // Only care if it is the correct shape if verifiedContent exists, since
-      // we need to append it to the end.
-      // Decrypted message must be able to be authenticated by the public key.
-      const decryptedVerifiedContent = decryptContent(
-        formSecretKey,
-        verifiedContent
-      )
-      if (!decryptedVerifiedContent) {
-        // Returns null if decrypting verified content failed.
-        throw new Error('Failed to decrypt verified content')
-      }
-
-      const decryptedVerifiedObject = verifySignedMessage(
-        decryptedVerifiedContent,
-        this.signingPublicKey
-      )
-
-      decryptedContent.verified = decryptedVerifiedObject
     }
 
     return decryptedContent
