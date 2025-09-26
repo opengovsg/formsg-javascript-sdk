@@ -39,10 +39,6 @@ const ciphertext = {
     'ywWDxb29guAgVK4yhLmLK19UKzLrfLAl65JzPDCVNz8=;/Q3WNg7Dk/tWBmpdUcST39zG16/Nyn8V:p1YqpiwEtOssq3yZUhZC1SgIYJcfJDmVFmgNwKf8D+YEqDzLaq5GShR7hTtTixtp',
 }
 
-const cipherTextWithVerified = ciphertext && {
-  verifiedContent: 'Pb3Vsnlq4dxGOd6it4b2b3J2JPM5NDtmmxl3iCpy0Bc=;gURQt+HU9XpeCcS4tzlDjJGAgQOyzOpg:Ip4UavPqxT94DkUbTB6RdbXqZ2JlHQVn+e6SkH5Ec7lcTKAQ8I695F6eG6Zx8GY='
-}
-
 const formPublicKey = 'ySgusViv6xdSIXELuGOq2L3Obp8xorT0Qilv+G4nHnM='
 const formSecretKey = 'Ngx1Kwpe8JXZUof/DCkkVduVmPSN4paqaKj5971Gq5c='
 const submissionPublicKey = '8JCuSlyJZ5N684o9TNdZLijtuORTlD/pbXiFwNf7Fhc='
@@ -52,7 +48,6 @@ export {
   plaintext,
   plainVerifiedText,
   ciphertext,
-  cipherTextWithVerified,
   formPublicKey,
   formSecretKey,
   submissionPublicKey,

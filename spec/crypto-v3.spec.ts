@@ -9,18 +9,22 @@ import {
 } from './resources/crypto-v3-data-20231207'
 import CryptoV3 from '../src/crypto-v3'
 import Crypto from '../src/crypto'
+import { SIGNING_KEYS } from '../src/resource/signing-keys'
 
 const INTERNAL_TEST_VERSION = 3
 
 const testFileBuffer = new Uint8Array(Buffer.from('./resources/ogp.svg'))
+
+const encryptionPublicKey = SIGNING_KEYS.test.publicKey
+const signingSecretKey = SIGNING_KEYS.test.secretKey
 
 jest.mock('axios', () => mockAxios)
 
 describe('CryptoV3', function () {
   afterEach(() => mockAxios.reset())
 
-  const crypto = new CryptoV3()
-  const cryptoV1 = new Crypto()
+  const crypto = new CryptoV3({ signingPublicKey: encryptionPublicKey })
+  const cryptoV1 = new Crypto({ signingPublicKey: encryptionPublicKey })
 
   it('should generate a keypair', () => {
     const keypair = crypto.generate()
@@ -136,7 +140,7 @@ describe('CryptoV3', function () {
 
     // Act
     const ciphertext = crypto.encrypt(plaintext, publicKey)
-    const verifiedText = cryptoV1.encrypt(plainVerifiedText, publicKey)  
+    const verifiedText = cryptoV1.encrypt(plainVerifiedText, ciphertext.submissionPublicKey, signingSecretKey)  
     const decrypted = crypto.decrypt(secretKey, {
       ...ciphertext,
       verifiedContent: verifiedText,
