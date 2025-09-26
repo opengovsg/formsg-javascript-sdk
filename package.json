@@ -1,6 +1,6 @@
 {
   "name": "@opengovsg/formsg-sdk",
-  "version": "0.13.0",
+  "version": "0.14.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/opengovsg/formsg-javascript-sdk.git"
@@ -8,6 +8,9 @@
   "description": "Node.js SDK for integrating with FormSG",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
+    "exports": {
+    ".": "./dist/index.js"
+  },
   "scripts": {
     "test": "NODE_OPTIONS=\"--max-old-space-size=8192\" jest",
     "test-ci": "jest --coverage",
