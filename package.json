@@ -36,7 +36,7 @@
     "@types/node": "^18.18.9",
     "@typescript-eslint/eslint-plugin": "^4.25.0",
     "auto-changelog": "^2.4.0",
-    "coveralls": "^3.1.1",
+    "coveralls-next": "^5.0.0",
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-import": "^2.23.3",
     "eslint-plugin-jest": "^24.3.6",
