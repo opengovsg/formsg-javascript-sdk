@@ -148,16 +148,10 @@ export default class CryptoV3 extends CryptoBase {
 
     if (submissionSecretKey === null) return null
 
-    const decryptedContent = this.decryptFromSubmissionKey(
+    return this.decryptFromSubmissionKey(
       encodeBase64(submissionSecretKey),
       rest
     )
-
-    if (!decryptedContent) {
-      throw new Error('Failed to decrypt content')
-    }
-
-    return decryptedContent
   }
 
   /**

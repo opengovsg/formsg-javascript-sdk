@@ -8,9 +8,6 @@
   "description": "Node.js SDK for integrating with FormSG",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
-    "exports": {
-    ".": "./dist/index.js"
-  },
   "scripts": {
     "test": "NODE_OPTIONS=\"--max-old-space-size=8192\" jest",
     "test-ci": "jest --coverage",
