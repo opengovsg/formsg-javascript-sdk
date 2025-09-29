@@ -122,6 +122,12 @@ export default class CryptoV3 extends CryptoBase {
 
       return returnedObject
     } catch (err) {
+      // Should only throw if MissingPublicKeyError.
+      // This library should be able to be used to encrypt and decrypt content
+      // if the content does not contain verified fields.
+      if (err instanceof MissingPublicKeyError) {
+        throw err
+      }
       return null
     }
   }
@@ -134,25 +140,34 @@ export default class CryptoV3 extends CryptoBase {
    * @param decryptParams.encryptedSubmissionSecretKey The encrypted submission secret key encoded with base-64.
    * @param decryptParams.version The version of the payload. Used to determine the decryption process to decrypt the content with.
    * @returns The decrypted content if successful. Else, null will be returned.
+   * @throws {MissingPublicKeyError} if a public key is not provided when instantiating this class and is needed for verifying signed content.
    */
   decrypt = (
     formSecretKey: string,
     decryptParams: DecryptParamsV3
   ): DecryptedContentV3 | null => {
-    const { encryptedSubmissionSecretKey, ...rest } = decryptParams
+    try {
+      const { encryptedSubmissionSecretKey, ...rest } = decryptParams
 
-    const submissionSecretKey = decryptContent(
-      formSecretKey,
-      encryptedSubmissionSecretKey
-    )
+      const submissionSecretKey = decryptContent(
+        formSecretKey,
+        encryptedSubmissionSecretKey
+      )
 
-    if (submissionSecretKey === null) return null
+      if (submissionSecretKey === null) return null
 
-    return this.decryptFromSubmissionKey(
-      encodeBase64(submissionSecretKey),
-      rest
-    )
-  }
+      return this.decryptFromSubmissionKey(
+        encodeBase64(submissionSecretKey),
+        rest
+      )
+
+    } catch(err) {
+      if (err instanceof MissingPublicKeyError) {
+      // rethrow to let the caller decide how to handle missing signing key
+        throw err
+      }
+      return null
+    }
 
   /**
    * Returns true if a pair of public & secret keys are associated with each other
