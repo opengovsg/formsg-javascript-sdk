@@ -94,13 +94,12 @@ export default class CryptoV3 extends CryptoBase {
         responses: decryptedObject as FormFieldsV3,
       }
 
-      /**
+      /** 
        * Note on verifiedContent decryption for cryptoV3:
-       * Although decryption is supported, observe that verifiedContent encryption isn't supported
-       * in cryptoV3 encrypt. Rationale is for a decoupled encryption in the event that ndi data
-       * is not yet available at the time of encrypting response data. Future improvements of simulataneous
-       * encryption can be explored at a later date if deemed beneficial, but for current implementation
-       * encryption of verifiedContent is to use the submissionPublicKey
+       * Although decryption is supported, verifiedContent encryption is not supported
+       * in cryptoV3 encrypt.
+       * This is to keep the encryption of verifiedContent and encryptedContent similar to storage mode - where
+       * verifiedContent and encryptedContent are defined and encrypted separately. 
        */
       // decrypt verifiedContent if it exists
       if (verifiedContent) {
