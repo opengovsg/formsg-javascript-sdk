@@ -161,13 +161,14 @@ export default class CryptoV3 extends CryptoBase {
         rest
       )
 
-    } catch(err) {
+    } catch (err) {
       if (err instanceof MissingPublicKeyError) {
-      // rethrow to let the caller decide how to handle missing signing key
+        // rethrow to let the caller decide how to handle missing signing key
         throw err
       }
       return null
     }
+  }
 
   /**
    * Returns true if a pair of public & secret keys are associated with each other
