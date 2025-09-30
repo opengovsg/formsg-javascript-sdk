@@ -82,6 +82,7 @@ export interface DecryptParams {
 export interface DecryptParamsV3 {
   encryptedContent: EncryptedContent
   encryptedSubmissionSecretKey: EncryptedContent
+  verifiedContent?: EncryptedContent
   version: number
 }
 
@@ -93,6 +94,7 @@ export type DecryptedContent = {
 export type DecryptedContentV3 = {
   submissionSecretKey: string
   responses: FormFieldsV3
+  verified?: Record<string, any>
 }
 
 export type DecryptedFile = {

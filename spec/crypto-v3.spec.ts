@@ -4,20 +4,27 @@ import {
   ciphertext,
   formPublicKey,
   formSecretKey,
-  submissionSecretKey
+  submissionSecretKey,
+  plainVerifiedText
 } from './resources/crypto-v3-data-20231207'
 import CryptoV3 from '../src/crypto-v3'
+import Crypto from '../src/crypto'
+import { SIGNING_KEYS } from '../src/resource/signing-keys'
 
 const INTERNAL_TEST_VERSION = 3
 
 const testFileBuffer = new Uint8Array(Buffer.from('./resources/ogp.svg'))
+
+const encryptionPublicKey = SIGNING_KEYS.test.publicKey
+const signingSecretKey = SIGNING_KEYS.test.secretKey
 
 jest.mock('axios', () => mockAxios)
 
 describe('CryptoV3', function () {
   afterEach(() => mockAxios.reset())
 
-  const crypto = new CryptoV3()
+  const crypto = new CryptoV3({ signingPublicKey: encryptionPublicKey })
+  const cryptoV1 = new Crypto({ signingPublicKey: encryptionPublicKey })
 
   it('should generate a keypair', () => {
     const keypair = crypto.generate()
@@ -125,5 +132,23 @@ describe('CryptoV3', function () {
     const decrypted = await crypto.decryptFile(secretKey, encrypted)
 
     expect(decrypted).toBeNull()
+  })
+
+    it('should be able to encrypt and decrypt submissions with verifiedContent from 2023-12-07 end-to-end successfully from the form private key', () => {
+    // Arrange
+    const { publicKey, secretKey } = crypto.generate()
+
+    // Act
+    const ciphertext = crypto.encrypt(plaintext, publicKey)
+    const verifiedText = cryptoV1.encrypt(plainVerifiedText, ciphertext.submissionPublicKey, signingSecretKey)  
+    const decrypted = crypto.decrypt(secretKey, {
+      ...ciphertext,
+      verifiedContent: verifiedText,
+      version: INTERNAL_TEST_VERSION,
+    })
+    // Assert
+    expect(decrypted).toHaveProperty('responses', plaintext)
+    expect(decrypted).toHaveProperty('verified', plainVerifiedText)  
+      
   })
 })

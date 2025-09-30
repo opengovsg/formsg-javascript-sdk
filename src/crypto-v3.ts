@@ -5,9 +5,15 @@ import {
   encodeUTF8,
 } from 'tweetnacl-util'
 
-import { decryptContent, encryptMessage, generateKeypair } from './util/crypto'
+import {
+  decryptContent,
+  encryptMessage,
+  generateKeypair,
+  verifySignedMessage,
+} from './util/crypto'
 import { determineIsFormFieldsV3 } from './util/validate'
 import CryptoBase from './crypto-base'
+import { MissingPublicKeyError } from './errors'
 import {
   DecryptedContentV3,
   DecryptParams,
@@ -17,8 +23,11 @@ import {
 } from './types'
 
 export default class CryptoV3 extends CryptoBase {
-  constructor() {
+  signingPublicKey?: string
+
+  constructor({ signingPublicKey }: { signingPublicKey?: string } = {}) {
     super()
+    this.signingPublicKey = signingPublicKey
   }
 
   /**
@@ -62,7 +71,7 @@ export default class CryptoV3 extends CryptoBase {
     decryptParams: DecryptParams
   ): DecryptedContentV3 | null => {
     try {
-      const { encryptedContent } = decryptParams
+      const { encryptedContent, verifiedContent } = decryptParams
 
       // Do not return the transformed object in `_decrypt` function as a signed
       // object is not encoded in UTF8 and is encoded in Base-64 instead.
@@ -85,8 +94,47 @@ export default class CryptoV3 extends CryptoBase {
         responses: decryptedObject as FormFieldsV3,
       }
 
+      /** 
+       * Note on verifiedContent decryption for cryptoV3:
+       * Although decryption is supported, verifiedContent encryption is not supported
+       * in cryptoV3 encrypt.
+       * This is to keep the encryption of verifiedContent and encryptedContent similar to storage mode - where
+       * verifiedContent and encryptedContent are defined and encrypted separately. 
+       */
+      // decrypt verifiedContent if it exists
+      if (verifiedContent) {
+        if (!this.signingPublicKey) {
+          throw new MissingPublicKeyError(
+            'Public signing key must be provided when instantiating the Crypto class in order to verify verified content'
+          )
+        }
+
+        const decryptedVerifiedContent = decryptContent(
+          submissionSecretKey,
+          verifiedContent
+        )
+
+        if (!decryptedVerifiedContent) {
+          // Returns null if decrypting verified content failed.
+          throw new Error('Failed to decrypt verified content')
+        }
+
+        const decryptedVerifiedObject = verifySignedMessage(
+          decryptedVerifiedContent,
+          this.signingPublicKey
+        )
+
+        returnedObject.verified = decryptedVerifiedObject
+      }
+
       return returnedObject
     } catch (err) {
+      // Should only throw if MissingPublicKeyError.
+      // This library should be able to be used to encrypt and decrypt content
+      // if the content does not contain verified fields.
+      if (err instanceof MissingPublicKeyError) {
+        throw err
+      }
       return null
     }
   }
@@ -99,24 +147,34 @@ export default class CryptoV3 extends CryptoBase {
    * @param decryptParams.encryptedSubmissionSecretKey The encrypted submission secret key encoded with base-64.
    * @param decryptParams.version The version of the payload. Used to determine the decryption process to decrypt the content with.
    * @returns The decrypted content if successful. Else, null will be returned.
+   * @throws {MissingPublicKeyError} if a public key is not provided when instantiating this class and is needed for verifying signed content.
    */
   decrypt = (
     formSecretKey: string,
     decryptParams: DecryptParamsV3
   ): DecryptedContentV3 | null => {
-    const { encryptedSubmissionSecretKey, ...rest } = decryptParams
+    try {
+      const { encryptedSubmissionSecretKey, ...rest } = decryptParams
 
-    const submissionSecretKey = decryptContent(
-      formSecretKey,
-      encryptedSubmissionSecretKey
-    )
+      const submissionSecretKey = decryptContent(
+        formSecretKey,
+        encryptedSubmissionSecretKey
+      )
 
-    if (submissionSecretKey === null) return null
+      if (submissionSecretKey === null) return null
 
-    return this.decryptFromSubmissionKey(
-      encodeBase64(submissionSecretKey),
-      rest
-    )
+      return this.decryptFromSubmissionKey(
+        encodeBase64(submissionSecretKey),
+        rest
+      )
+
+    } catch (err) {
+      if (err instanceof MissingPublicKeyError) {
+        // rethrow to let the caller decide how to handle missing signing key
+        throw err
+      }
+      return null
+    }
   }
 
   /**

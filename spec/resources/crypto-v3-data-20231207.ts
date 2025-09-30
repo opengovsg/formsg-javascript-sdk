@@ -30,6 +30,8 @@ const plaintext = {
   }
 }
 
+const plainVerifiedText = { 'uinFin (Step 1)': 'S9912370B' }
+
 const ciphertext = {
   encryptedContent:
     'yUW5li4+IA9q2/n3ZS+5+wrXQ8mKGrFJ1KW9Kf/eRzc=;PgZE8+y8rBvssnqLnqjnnqHDW6PngYKK:eIEuOUQjf1YkQIulZ7bCKXIl6wByg644Ulk/LjhefmLzhkVmXbTxBJVKVG6YgV0ZMcG4JPUuQ+WOW+N1/AOyL/8DJqclX74kG6s0DNXIJixkqNZCnfZapulerR9XXKSfwBjpo1nK25KCg32F/ey2HypPcluGV19hWwgj80mlms7Ya7x1X5wcdttlGrzGEnNH2VEPXjzJZHqiV1TWoQGwxSZ753fpkHUkBeKFA1UkMHS5XYnWyYD48JpfpOAz0L2ti6RHQnQLSKUHscYVfAZt5OyUGqPFmhm2ulWdycNVp8HayQrpqeY8cdu8QsmZRdNCMfMFLahZCm6xKS+8GUrJWgJr64yaZpkxQS45uPb9zxC+G/u4FZhS/YsrjDTuIIwMGS0+qsNr4075yemFFAQHIpbhWZ9QlYrNq2TAolrVezeAw3AQ/nr4sz60dvqRahcse9x8oMxB7jA55OuxH5uk6PcCIAmEi+njr6Lgbcn2mtPMyk7kGcwjNzCL57b51RxJVi0ZqNXrS0FFepvzCK3IOEqKqrKGGK0qGqF4MFsH2wdq4RFkXjLMZk4u9ZWjIRjc',
@@ -44,6 +46,7 @@ const submissionSecretKey = 'bIyKphcx5hiuBaJ4q5cwnXaFNY9Ofe5NQBqTEzf3zYA='
 
 export {
   plaintext,
+  plainVerifiedText,
   ciphertext,
   formPublicKey,
   formSecretKey,

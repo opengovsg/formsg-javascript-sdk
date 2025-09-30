@@ -1,6 +1,6 @@
 {
   "name": "@opengovsg/formsg-sdk",
-  "version": "0.13.0",
+  "version": "0.14.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/opengovsg/formsg-javascript-sdk.git"
@@ -36,7 +36,6 @@
     "@types/node": "^18.18.9",
     "@typescript-eslint/eslint-plugin": "^4.25.0",
     "auto-changelog": "^2.4.0",
-    "coveralls": "^3.1.1",
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-import": "^2.23.3",
     "eslint-plugin-jest": "^24.3.6",
