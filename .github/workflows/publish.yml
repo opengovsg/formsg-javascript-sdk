@@ -10,7 +10,6 @@ jobs:
     name: Publish to NPM
     runs-on: ubuntu-latest
     permissions:
-      contents: write # for pushing tags
       id-token: write # Required for OIDC
     steps:
       - uses: actions/checkout@v4
@@ -23,10 +22,4 @@ jobs:
       - name: Update npm
         run: npm install -g npm@latest # Ensure npm 11.5.1 or later is installed for OIDC support
       - run: npm ci
-      - run: |
-          git config --global user.name 'github-actions[bot]'
-          git config --global user.email '41898282+github-actions[bot]@users.noreply.github.com'
-      - run: |
-          git tag "v$(jq -r .version package.json)"
-          git push origin "v$(jq -r .version package.json)"
       - run: npm publish
