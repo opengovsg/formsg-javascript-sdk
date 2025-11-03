@@ -8,6 +8,6 @@ module.exports = {
     global: {
       statements: 85,
       functions: 80,
-    }
-  }
+    },
+  },
 }

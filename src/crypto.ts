@@ -1,22 +1,17 @@
 import axios from 'axios'
 import nacl from 'tweetnacl'
-import {
-  decodeBase64,
-  decodeUTF8,
-  encodeBase64,
-  encodeUTF8,
-} from 'tweetnacl-util'
+import { decodeBase64, decodeUTF8, encodeUTF8 } from 'tweetnacl-util'
 
 import {
-  decryptContent,
-  encryptMessage,
-  generateKeypair,
-  verifySignedMessage,
   areAttachmentFieldIdsValid,
   convertEncryptedAttachmentToFileContent,
+  decryptContent,
+  encryptMessage,
+  verifySignedMessage,
 } from './util/crypto'
 import { determineIsFormFields } from './util/validate'
-import { MissingPublicKeyError, AttachmentDecryptionError } from './errors'
+import CryptoBase from './crypto-base'
+import { AttachmentDecryptionError, MissingPublicKeyError } from './errors'
 import {
   DecryptedAttachments,
   DecryptedContent,
@@ -25,14 +20,14 @@ import {
   EncryptedAttachmentContent,
   EncryptedAttachmentRecords,
   EncryptedContent,
-  EncryptedFileContent,
   FormField,
 } from './types'
 
-export default class Crypto {
+export default class Crypto extends CryptoBase {
   signingPublicKey?: string
 
   constructor({ signingPublicKey }: { signingPublicKey?: string } = {}) {
+    super()
     this.signingPublicKey = signingPublicKey
   }
 
@@ -129,12 +124,6 @@ export default class Crypto {
   }
 
   /**
-   * Generates a new keypair for encryption.
-   * @returns The generated keypair.
-   */
-  generate = generateKeypair
-
-  /**
    * Returns true if a pair of public & secret keys are associated with each other
    * @param publicKey The public key to verify against.
    * @param secretKey The private key to verify against.
@@ -151,55 +140,6 @@ export default class Crypto {
         encryptedContent: cipherResponse,
         version: internalValidationVersion,
       })?.responses.toString()
-    )
-  }
-
-  /**
-   * Encrypt given binary file with a unique keypair for each submission.
-   * @param binary The file to encrypt, should be a blob that is converted to Uint8Array binary
-   * @param formPublicKey The base-64 encoded public key
-   * @returns Promise holding the encrypted file
-   * @throws error if any of the encrypt methods fail
-   */
-  encryptFile = async (
-    binary: Uint8Array,
-    formPublicKey: string
-  ): Promise<EncryptedFileContent> => {
-    const submissionKeypair = this.generate()
-    const nonce = nacl.randomBytes(24)
-    return {
-      submissionPublicKey: submissionKeypair.publicKey,
-      nonce: encodeBase64(nonce),
-      binary: nacl.box(
-        binary,
-        nonce,
-        decodeBase64(formPublicKey),
-        decodeBase64(submissionKeypair.secretKey)
-      ),
-    }
-  }
-
-  /**
-   * Decrypt the given encrypted file content.
-   * @param formSecretKey Secret key as a base-64 string
-   * @param encrypted Object returned from encryptFile function
-   * @param encrypted.submissionPublicKey The submission public key as a base-64 string
-   * @param encrypted.nonce The nonce as a base-64 string
-   * @param encrypted.blob The encrypted file as a Blob object
-   */
-  decryptFile = async (
-    formSecretKey: string,
-    {
-      submissionPublicKey,
-      nonce,
-      binary: encryptedBinary,
-    }: EncryptedFileContent
-  ): Promise<Uint8Array | null> => {
-    return nacl.box.open(
-      encryptedBinary,
-      decodeBase64(nonce),
-      decodeBase64(submissionPublicKey),
-      decodeBase64(formSecretKey)
     )
   }
 

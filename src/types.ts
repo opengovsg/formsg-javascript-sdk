@@ -26,6 +26,13 @@ export type FieldType =
   | 'date'
   | 'mobile'
   | 'homeno'
+  | 'statement'
+  | 'image'
+  | 'country_region'
+  | 'uen'
+  | 'children'
+  | 'address'
+  | 'signature'
 
 // Represents form field responses in a form.
 export type FormField = {
@@ -39,11 +46,27 @@ export type FormField = {
   | { answer?: never; answerArray: string[] | string[][] }
 )
 
+// Represents form field responses in a form.
+export type FormFieldsV3 = Record<
+  string,
+  {
+    fieldType: FieldType
+    answer: any // too complex to represent here
+  }
+>
+
 // Encrypted basestring containing the submission public key,
 // nonce and encrypted data in base-64.
 // A string in the format of
 // <SubmissionPublicKey>;<Base64Nonce>:<Base64EncryptedData>
 export type EncryptedContent = string
+
+export type EncryptedContentV3 = {
+  submissionPublicKey: string
+  submissionSecretKey: string
+  encryptedContent: EncryptedContent
+  encryptedSubmissionSecretKey: EncryptedContent
+}
 
 // Records containing a map of field IDs to URLs where encrypted
 // attachments can be downloaded.
@@ -56,8 +79,21 @@ export interface DecryptParams {
   attachmentDownloadUrls?: EncryptedAttachmentRecords
 }
 
+export interface DecryptParamsV3 {
+  encryptedContent: EncryptedContent
+  encryptedSubmissionSecretKey: EncryptedContent
+  verifiedContent?: EncryptedContent
+  version: number
+}
+
 export type DecryptedContent = {
   responses: FormField[]
+  verified?: Record<string, any>
+}
+
+export type DecryptedContentV3 = {
+  submissionSecretKey: string
+  responses: FormFieldsV3
   verified?: Record<string, any>
 }
 
