@@ -178,7 +178,7 @@ Attachments are downloaded using S3 pre-signed URLs, with a expiry time of _one 
 
 Attachments are end-to-end encrypted in the same way as normal form submissions, so any eavesdropper will not be able to view form attachments without your secret key.
 
-_Warning:_ We do not have the ability to scan any attachments for malicious content (e.g. spyware or viruses), so careful handling is needed.
+_Warning:_ FormSG scans uploaded attachments for malicious content, but users should still handle downloaded files with care.
 
 ### Processing Local address fields
 
